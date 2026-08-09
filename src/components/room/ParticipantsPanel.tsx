@@ -5,19 +5,51 @@ import type { Participant } from '@/lib/types';
 import Avatar from '@/components/Avatar';
 import styles from './ParticipantsPanel.module.scss';
 
-const STATUS_TEXT: Record<string, string> = {
-  connected: 'Thinking',
-  voted: 'Voted',
-  disconnected: 'Disconnected',
-};
-
 interface ParticipantsPanelProps {
   onRemove: (participant: Participant) => void;
 }
 
+/** Presence labels — JOINED in the waiting room, THINKING while voting, VOTED once locked, DISCONNECTED when a tab closes. */
+function PresenceText({ p, phase }: { p: Participant; phase: string }) {
+  if (p.status === 'disconnected') {
+    return (
+      <span className={styles.presence}>
+        <span aria-hidden="true">⚠</span> Disconnected
+      </span>
+    );
+  }
+  if (phase === 'waiting') {
+    return (
+      <span className={styles.presence}>
+        <span aria-hidden="true">○</span> Joined
+      </span>
+    );
+  }
+  if (phase === 'voting' || phase === 'ended') {
+    if (p.status === 'voted' || p.hasVoted) {
+      return (
+        <span className={styles.presence}>
+          <span aria-hidden="true">✓</span> Voted
+        </span>
+      );
+    }
+    return (
+      <span className={styles.presence}>
+        <span aria-hidden="true">○</span> Thinking
+        <span className={styles.dots} aria-hidden="true">
+          <i>.</i>
+          <i>.</i>
+          <i>.</i>
+        </span>
+      </span>
+    );
+  }
+  return null;
+}
+
 /**
- * Live participant list. Before the reveal nobody sees actual values — only
- * who has voted (✓ Voted) and who is still thinking (○ Thinking). After the
+ * Live participant list with realtime presence. Before the reveal nobody sees
+ * actual values — only who has voted and who is still thinking. After the
  * reveal the values are public, so the list shows them too.
  */
 export default function ParticipantsPanel({ onRemove }: ParticipantsPanelProps) {
@@ -29,9 +61,6 @@ export default function ParticipantsPanel({ onRemove }: ParticipantsPanelProps) 
   const isHost = hostId === myId;
 
   const subText = (p: Participant) => {
-    // The host badge is rendered separately; everyone (host included) shows
-    // the same status here. Disconnected = no live status this round.
-    if (phase === 'waiting' || p.status === 'disconnected') return '';
     if (phase === 'revealed') {
       return votes[p.id] !== undefined ? (
         <>
@@ -41,12 +70,17 @@ export default function ParticipantsPanel({ onRemove }: ParticipantsPanelProps) 
         "Didn't vote"
       );
     }
-    return STATUS_TEXT[p.status];
+    return <PresenceText p={p} phase={phase} />;
   };
 
   return (
     <div className={styles.panel}>
-      <h3 className={styles.title}>Participants</h3>
+      <h3 className={styles.title}>
+        Participants
+        <span className={styles.count}>
+          {participants.length} {participants.length === 1 ? 'person' : 'people'}
+        </span>
+      </h3>
       <ul className={styles.list}>
         {participants.map((p) => {
           const me = p.id === myId;

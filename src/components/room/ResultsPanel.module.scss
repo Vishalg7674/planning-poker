@@ -18,6 +18,45 @@
 // Stats
 // ---------------------------------------------------------------------------
 
+.headline {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-4 $sp-5;
+  border-radius: $r-lg;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+
+  @include media($bp-sm) {
+    gap: $sp-3;
+    padding: $sp-3;
+  }
+}
+
+.consensusEmoji {
+  font-size: 34px;
+  line-height: 1;
+}
+
+.consensusTitle {
+  @include display;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.consensusBody {
+  color: var(--ink-dim);
+  font-size: 13.5px;
+  margin-top: 2px;
+}
+
+.nonVoters {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--warning);
+  text-align: center;
+}
+
 .statsRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -220,6 +259,73 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
+}
+
+.extreme {
+  .voteFace {
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.18);
+  }
+}
+
+.extremeTag {
+  position: absolute;
+  top: -8px;
+  right: 50%;
+  transform: translateX(50%);
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-ink);
+  background: var(--accent);
+  padding: 2px 8px;
+  border-radius: $r-pill;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.voteCard {
+  position: relative;
+}
+
+.extremes {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-1;
+  font-size: 13px;
+  color: var(--ink-dim);
+  text-align: center;
+
+  strong {
+    color: var(--accent-bright);
+    margin-right: 4px;
+  }
+}
+
+.discuss {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-3;
+  padding: $sp-4 $sp-5;
+  border-radius: $r-lg;
+  border: 1px solid rgba(var(--danger-rgb), 0.4);
+  background: rgba(var(--danger-rgb), 0.08);
+  color: var(--ink-dim);
+  font-size: 14px;
+
+  p {
+    line-height: 1.5;
+  }
+
+  strong {
+    color: var(--danger);
+  }
+}
+
+.discussEmoji {
+  font-size: 22px;
+  line-height: 1.2;
 }
 
 .roundNote {

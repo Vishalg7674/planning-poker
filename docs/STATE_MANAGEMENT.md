@@ -31,7 +31,18 @@ devtools enabled outside production.
 ### `roomSlice` — `state.room`
 
 - **Purpose**: the room's identity and host configuration.
-- **State**: `{ code, hostId, teamName, createdAt, settings: { deckId, timerSec } }`
+- **State**:
+  ```ts
+  {
+    code: string | null;
+    hostId: string | null;
+    teamName: string;
+    roomTitle: string;                       // optional, set at creation
+    createdAt: number;
+    settings: { deckId, timerSec, accent, revealMode };
+    locked: boolean;                         // host-only join gate
+  }
+  ```
 - **Actions**: `resetRoom` (internal); `snapshotReceived` hydrates everything.
 - **Socket events**: `snapshot`.
 
@@ -94,10 +105,12 @@ devtools enabled outside production.
     modals: { endSession: boolean; removeParticipant: boolean };
     toasts: Toast[];                 // capped at 4
     celebrationTick: number;         // replay key for the confetti burst
+    presentation: boolean;           // host-only big-screen presentation mode
   }
   ```
 - **Actions**: `setTheme`, `setMyIdentity`, `clearMyIdentity`, `openModal`,
-  `closeModal`, `pushToast`, `dismissToast`, `triggerCelebration`.
+  `closeModal`, `pushToast`, `dismissToast`, `triggerCelebration`,
+  `setPresentation`.
 - **Extra reducers (socket)**: `connectionChanged`, `timerUp` (adds a
   "Time's up!" toast), `roomGone` (stores message, unjoins), `roomEnded`
   (toast), `youRemoved` (clears identity), `snapshotReceived` (syncs my
@@ -122,11 +135,14 @@ devtools enabled outside production.
 | Room, participants, votes, timer, stats| **Server** | Rules (lock, privacy, host powers) must not be client-controllable |
 | `voting.myVote` (optimistic lock)      | Client     | Instant UI feedback; rolled back on server rejection    |
 | `timer.remaining`                      | Client     | Derived locally from the shared `endsAt` to avoid per-second push |
+| `ui.presentation`                      | Client     | A presentation *mode* over the same Redux state — not server state |
 | Theme, toasts, modals, identity        | Client     | Purely presentational / per-tab                          |
 
 ## Selectors
 
 There are no dedicated selector modules — components use inline
 `useAppSelector` lambdas (e.g. `s.room.hostId === s.ui.myParticipantId` for
-"am I the host"). With the slices above, most reads are one level deep and
-stable, so memoized selectors are not needed.
+"am I the host", `s.room.settings.accent` for the table skin). With the
+slices above, most reads are one level deep and stable, so memoized
+selectors are not needed. Timer ticks update only `timerSlice`, so the
+participant list does not re-render every second.

@@ -55,6 +55,9 @@ export default function JoinForm({ code, onGone }: JoinFormProps) {
         dispatch(pushToast({ kind: 'success', title: `Welcome, ${values.name.trim()}`, message: `You joined room ${code}.` }));
       } else if (res?.error === 'not_found') {
         onGone(`Room ${code} doesn’t exist anymore — rooms live in memory and vanish when they empty out.`);
+      } else if (res?.error === 'room_locked') {
+        setFormError('This room is locked. Ask the host for access.');
+        setBusy(false);
       } else {
         setFormError(res?.error || 'Could not join the room.');
         setBusy(false);

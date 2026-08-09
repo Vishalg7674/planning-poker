@@ -19,3 +19,9 @@
   font-size: 11.5px;
   color: var(--ink-faint);
 }
+
+.actions {
+  display: flex;
+  gap: $sp-2;
+  flex-wrap: wrap;
+}

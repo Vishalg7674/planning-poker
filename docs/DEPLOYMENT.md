@@ -7,7 +7,10 @@ Reveal is **two processes behind one origin**:
    in-memory Socket.io server that owns all room state.
 
 Both must run in production, and the browser must be able to reach the
-realtime server over WebSocket.
+realtime server over WebSocket. The QR code and invite sharing are pure
+client-side features (`qrcode.react` renders an SVG locally; the Web Share
+API and clipboard need no server support), so no extra image or share
+endpoints are required.
 
 ---
 
@@ -140,9 +143,10 @@ the URL you put in `NEXT_PUBLIC_SOCKET_URL` at build time.
   banner — usable as a readiness probe.
 - **Restarts lose rooms:** document this for your team. Participants simply
   create a new room; there is no recovery path and none is planned.
-- **Capacity:** room state is small (a code, a few participants, votes).
-  One process comfortably handles many concurrent rooms; memory grows with
-  active rooms only, since empty rooms are swept every 30 s.
+- **Capacity:** room state is small (a code, a few participants, votes, a
+  small configuration object). One process comfortably handles many
+  concurrent rooms; memory grows with active rooms only, since empty rooms
+  are swept every 30 s.
 - **TLS:** terminate TLS at the proxy. Socket.io works fine behind TLS as
   long as upgrades are forwarded and the page was loaded over `https://` (a
   secure page requires a secure WebSocket URL).

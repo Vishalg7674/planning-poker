@@ -10,8 +10,10 @@ describe('roomSlice', () => {
       code: null,
       hostId: null,
       teamName: '',
+      roomTitle: '',
       createdAt: 0,
-      settings: { deckId: 'fibonacci', timerSec: null },
+      settings: { deckId: 'fibonacci', timerSec: null, accent: 'gold', revealMode: 'staggered' },
+      locked: false,
     });
   });
 
@@ -20,15 +22,19 @@ describe('roomSlice', () => {
       code: 'XYZ12',
       hostId: 'host-9',
       teamName: 'Squad',
+      roomTitle: 'Sprint 24 Planning',
       createdAt: 12345,
-      settings: { deckId: 'tshirt', timerSec: 15 },
+      locked: true,
+      settings: { deckId: 'tshirt', timerSec: 15, accent: 'purple', revealMode: 'dramatic' },
     });
     const state = reducer(undefined, snapshotReceived(snapshot));
     expect(state.code).toBe('XYZ12');
     expect(state.hostId).toBe('host-9');
     expect(state.teamName).toBe('Squad');
+    expect(state.roomTitle).toBe('Sprint 24 Planning');
     expect(state.createdAt).toBe(12345);
-    expect(state.settings).toEqual({ deckId: 'tshirt', timerSec: 15 });
+    expect(state.locked).toBe(true);
+    expect(state.settings).toEqual({ deckId: 'tshirt', timerSec: 15, accent: 'purple', revealMode: 'dramatic' });
   });
 
   it('copies settings rather than aliasing the snapshot', () => {
@@ -39,10 +45,19 @@ describe('roomSlice', () => {
 
   it('resetRoom returns the initial state', () => {
     const state = reducer(
-      { code: 'X', hostId: 'h', teamName: 'T', createdAt: 1, settings: { deckId: 'standard', timerSec: 10 } },
+      {
+        code: 'X',
+        hostId: 'h',
+        teamName: 'T',
+        roomTitle: 'R',
+        createdAt: 1,
+        locked: true,
+        settings: { deckId: 'sequential', timerSec: 10, accent: 'blue', revealMode: 'normal' },
+      },
       resetRoom(),
     );
     expect(state.code).toBeNull();
     expect(state.settings.timerSec).toBeNull();
+    expect(state.locked).toBe(false);
   });
 });

@@ -49,6 +49,22 @@
   }
 }
 
+.lockBadge {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--warning);
+  background: rgba(var(--warning-rgb), 0.1);
+  border: 1px solid rgba(var(--warning-rgb), 0.4);
+  border-radius: $r-pill;
+  padding: 3px 10px;
+  white-space: nowrap;
+
+  @include media($bp-sm) {
+    display: none;
+  }
+}
+
 .codeWrap {
   display: inline-flex;
   align-items: center;

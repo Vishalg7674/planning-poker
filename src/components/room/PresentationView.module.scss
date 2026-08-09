@@ -1,0 +1,226 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.view {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: $sp-7;
+  gap: $sp-6;
+
+  @include media($bp-sm) {
+    padding: $sp-4;
+    gap: $sp-4;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $sp-4;
+}
+
+.title {
+  @include display;
+  font-size: clamp(28px, 4.5vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.meta {
+  @include mono;
+  margin-top: $sp-2;
+  font-size: 15px;
+  color: var(--ink-dim);
+  letter-spacing: 0.08em;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+}
+
+.clock {
+  @include mono;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  color: var(--accent-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+}
+
+.centerBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-5;
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--accent-bright);
+}
+
+.bigLine {
+  @include display;
+  font-size: clamp(26px, 4vw, 44px);
+  font-weight: 700;
+}
+
+// ---------------------------------------------------------------------------
+// Voting: big counter + avatar grid
+// ---------------------------------------------------------------------------
+
+.votingBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-7;
+}
+
+.deckBlock {
+  width: 100%;
+}
+
+.counter {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-1;
+}
+
+.counterBig {
+  @include mono;
+  font-size: clamp(56px, 10vw, 110px);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.counterLabel {
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--ink-faint);
+}
+
+.allVoted {
+  margin-top: $sp-2;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.avatarGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $sp-6;
+  max-width: 1100px;
+}
+
+.avatarCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-2;
+  opacity: 1;
+  @include motion(opacity, $dur-base);
+
+  &.offline {
+    opacity: 0.4;
+    filter: grayscale(1);
+  }
+}
+
+.avatarName {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.avatarStatus {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink-dim);
+}
+
+// ---------------------------------------------------------------------------
+// Revealed: big votes + stats
+// ---------------------------------------------------------------------------
+
+.resultsBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-7;
+  text-align: center;
+}
+
+.voteRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $sp-4;
+}
+
+.bigVote {
+  @include card-surface;
+  @include paper-grain;
+  @include mono;
+  font-size: clamp(30px, 5vw, 56px);
+  font-weight: 800;
+  color: var(--card-ink);
+  padding: $sp-5 $sp-6;
+  border-radius: $r-lg;
+  min-width: 90px;
+  text-align: center;
+  animation: card-flip 0.55s $ease-snap both;
+}
+
+.statRow {
+  display: flex;
+  gap: $sp-6;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.statValue {
+  @include mono;
+  font-size: clamp(24px, 4vw, 42px);
+  font-weight: 800;
+  color: var(--accent-bright);
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-faint);
+}
+
+.consensusLine {
+  font-size: clamp(20px, 3vw, 32px);
+  font-weight: 700;
+}

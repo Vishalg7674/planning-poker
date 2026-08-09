@@ -18,10 +18,11 @@ function preload(over: { phase?: 'waiting' | 'voting' | 'ended' | 'revealed'; vo
 }
 
 describe('ParticipantsPanel', () => {
-  it('labels the host and leaves statuses empty before the round', () => {
+  it('labels the host and shows Joined in the waiting room', () => {
     renderWithStore(<ParticipantsPanel onRemove={() => {}} />, { preloaded: preload({ phase: 'waiting' }) });
     expect(screen.getByText('Ada')).toBeInTheDocument();
     expect(screen.getByText('Host')).toBeInTheDocument();
+    expect(screen.getAllByText('Joined')).toHaveLength(2);
     expect(screen.queryByText('Voted')).not.toBeInTheDocument();
     expect(screen.queryByText('Thinking')).not.toBeInTheDocument();
   });
@@ -34,6 +35,22 @@ describe('ParticipantsPanel', () => {
     // Privacy: the actual estimate must not appear anywhere pre-reveal.
     expect(screen.queryByText('5')).not.toBeInTheDocument();
     expect(screen.getByText('Votes stay hidden until the host reveals the round.')).toBeInTheDocument();
+  });
+
+  it('marks a disconnected participant clearly', () => {
+    const disconnected = makeParticipant({ id: 'p3', name: 'Neha', status: 'disconnected', hasVoted: false, joinedAt: 2000, hue: 70 });
+    const grace = makeParticipant({ id: 'p2', name: 'Grace', status: 'connected', hasVoted: false, joinedAt: 1000, hue: 40 });
+    const host = makeParticipant({ id: 'p1', name: 'Ada', role: 'facilitator', status: 'connected', hasVoted: false, joinedAt: 0, hue: 10 });
+    renderWithStore(<ParticipantsPanel onRemove={() => {}} />, {
+      preloaded: {
+        room: { hostId: 'p1' },
+        voting: { phase: 'voting', votes: {}, votedIds: [], everyoneHasVoted: false, deckValues: [], stats: null },
+        participants: { list: [host, grace, disconnected] },
+        ui: { myParticipantId: 'p1' },
+      } as never,
+    });
+    expect(screen.getByText('Disconnected')).toBeInTheDocument();
+    expect(screen.getByText(/⚠/)).toBeInTheDocument();
   });
 
   it('reveals values and marks non-voters after the reveal', () => {

@@ -7,21 +7,29 @@ export interface RoomState {
   code: string | null;
   hostId: string | null;
   teamName: string;
+  /** Optional room title set by the host at creation. */
+  roomTitle: string;
   createdAt: number;
   settings: Settings;
+  /** Host-only: while locked, brand-new participants cannot join. */
+  locked: boolean;
 }
 
 const defaultSettings: Settings = {
   deckId: DEFAULT_DECK_ID,
   timerSec: null,
+  accent: 'gold',
+  revealMode: 'staggered',
 };
 
 const initialState: RoomState = {
   code: null,
   hostId: null,
   teamName: '',
+  roomTitle: '',
   createdAt: 0,
   settings: defaultSettings,
+  locked: false,
 };
 
 const roomSlice = createSlice({
@@ -37,8 +45,10 @@ const roomSlice = createSlice({
         code: s.code,
         hostId: s.hostId,
         teamName: s.teamName,
+        roomTitle: s.roomTitle ?? '',
         createdAt: s.createdAt,
         settings: { ...s.settings },
+        locked: !!s.locked,
       };
     });
   },

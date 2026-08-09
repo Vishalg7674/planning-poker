@@ -23,9 +23,9 @@ describe('votingSlice', () => {
   });
 
   it('hydrates deck values from the room settings', () => {
-    const snapshot = makeSnapshot({ settings: { deckId: 'tshirt', timerSec: null } });
+    const snapshot = makeSnapshot({ settings: { deckId: 'tshirt', timerSec: null, accent: 'gold', revealMode: 'staggered' } });
     const state = reducer(undefined, snapshotReceived(snapshot));
-    expect(state.deckValues).toEqual(['XS', 'S', 'M', 'L', 'XL', 'XXL', '?']);
+    expect(state.deckValues).toEqual(['XS', 'S', 'M', 'L', 'XL']);
   });
 
   it('keeps votes private until the reveal', () => {
@@ -47,7 +47,21 @@ describe('votingSlice', () => {
       votedIds: ['grace'],
       everyoneHasVoted: true,
       votes: { grace: '8' },
-      stats: { count: 1, mode: '8', modeShare: 1, unique: 1, avg: 8, median: 8, spread: 0, level: 'full', counts: [{ value: '8', count: 1 }] },
+      stats: {
+        count: 1,
+        mode: '8',
+        modeShare: 1,
+        unique: 1,
+        numeric: true,
+        avg: 8,
+        median: 8,
+        spread: 0,
+        highest: 8,
+        lowest: 8,
+        range: 0,
+        level: 'full',
+        counts: [{ value: '8', count: 1 }],
+      },
     });
     const state = reducer(undefined, snapshotReceived(snapshot));
     expect(state.votes).toEqual({ grace: '8' });

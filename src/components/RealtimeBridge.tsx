@@ -10,7 +10,7 @@ import { tick, resetTimer } from '@/store/slices/timerSlice';
 import { resetVoting } from '@/store/slices/votingSlice';
 import { resetParticipants } from '@/store/slices/participantsSlice';
 import { resetRoom } from '@/store/slices/roomSlice';
-import { clearMyIdentity, setMyIdentity } from '@/store/slices/uiSlice';
+import { clearMyIdentity, setMyIdentity, pushToast } from '@/store/slices/uiSlice';
 
 /**
  * Socket → Redux bridge. Subscribes to every realtime event and dispatches the
@@ -23,6 +23,7 @@ export default function RealtimeBridge() {
   const activeTimerKey = useRef<string | null>(null);
   const firedTimerKey = useRef<string | null>(null);
   const wasConnected = useRef(false);
+  const hasJoinedOnce = useRef(false);
 
   useEffect(() => {
     const socket = getSocket();
@@ -77,6 +78,11 @@ export default function RealtimeBridge() {
               setMyIdentity({ participantId: identity.participantId, name: me?.name || identity.name, role: me?.role || identity.role }),
             );
             dispatch(snapshotReceived(res.snapshot));
+            // A reconnection after a drop, not the first join — subtle toast.
+            if (wasConnected.current && hasJoinedOnce.current) {
+              dispatch(pushToast({ kind: 'success', title: 'Reconnected', message: 'You’re back at the table — your vote status was restored.' }));
+            }
+            hasJoinedOnce.current = true;
           } else if (res?.error === 'not_found') {
             dispatch(roomGone({ message: 'This room no longer exists — it lived only in memory and has expired.' }));
           } else if (res?.error === 'unknown_participant') {

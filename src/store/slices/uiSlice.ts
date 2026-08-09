@@ -28,6 +28,8 @@ export interface UiState {
   toasts: Toast[];
   /** Increment to replay the celebration animation. */
   celebrationTick: number;
+  /** Host-only big-screen view — a simplified, large layout of the same state. */
+  presentation: boolean;
 }
 
 const initialState: UiState = {
@@ -44,6 +46,7 @@ const initialState: UiState = {
   },
   toasts: [],
   celebrationTick: 0,
+  presentation: false,
 };
 
 let toastSeq = 0;
@@ -85,6 +88,9 @@ const uiSlice = createSlice({
     triggerCelebration: (state) => {
       state.celebrationTick += 1;
     },
+    setPresentation: (state, action: { payload: boolean }) => {
+      state.presentation = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(connectionChanged, (state, action) => {
@@ -125,6 +131,15 @@ const uiSlice = createSlice({
   },
 });
 
-export const { setTheme, setMyIdentity, clearMyIdentity, openModal, closeModal, pushToast, dismissToast, triggerCelebration } =
-  uiSlice.actions;
+export const {
+  setTheme,
+  setMyIdentity,
+  clearMyIdentity,
+  openModal,
+  closeModal,
+  pushToast,
+  dismissToast,
+  triggerCelebration,
+  setPresentation,
+} = uiSlice.actions;
 export default uiSlice.reducer;

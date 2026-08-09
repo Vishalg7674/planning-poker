@@ -9,7 +9,7 @@ test.describe('Permissions', () => {
       // No start button, no invite link, no timer picker for participants.
       await expect(rahul.page.getByText('Waiting for the host…')).toBeVisible();
       await expect(rahul.page.getByRole('button', { name: 'Start Voting' })).toHaveCount(0);
-      await expect(rahul.page.getByRole('button', { name: /Copy Invite Link/ })).toHaveCount(0);
+      await expect(rahul.page.getByRole('button', { name: /Copy Invite/ })).toHaveCount(0);
       await expect(rahul.page.getByRole('button', { name: '10s' })).toHaveCount(0);
 
       await startVoting(host.page);

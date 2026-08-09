@@ -32,6 +32,8 @@ import {
   castVote,
   reveal,
   setTimerSec,
+  setRevealMode,
+  setLocked,
   removeParticipant,
   disconnectParticipant,
 } from './room.mjs';
@@ -83,7 +85,10 @@ io.on('connection', (socket) => {
       const room = createRoom({
         hostName: payload?.hostName,
         teamName: payload?.teamName,
+        roomTitle: payload?.roomTitle,
         deckId: payload?.deckId,
+        accent: payload?.accent,
+        revealMode: payload?.revealMode,
         hasCode: (code) => rooms.has(code),
       });
       rooms.set(room.code, room);
@@ -115,6 +120,12 @@ io.on('connection', (socket) => {
       return;
     }
 
+    // Locked rooms refuse brand-new participants; existing ones (rejoin with
+    // their id) and projector screens are still welcome.
+    if (room.locked && !(id && room.participants.has(id))) {
+      return ack?.({ ok: false, error: 'room_locked' });
+    }
+
     let participant;
     if (id && room.participants.has(id)) {
       // Rejoin from the same tab — keep the "voted" status if a vote is locked.
@@ -137,6 +148,7 @@ io.on('connection', (socket) => {
     const { code, participantId, name } = payload || {};
     const room = rooms.get(String(code || '').toUpperCase());
     if (!room) return ack?.({ ok: false, error: 'not_found' });
+    // Locked rooms still admit their own participants — only strangers are refused (see room:join).
     const participant = room.participants.get(participantId);
     if (!participant) return ack?.({ ok: false, error: 'unknown_participant' });
     participant.name = (name || participant.name).slice(0, 32);
@@ -199,11 +211,36 @@ io.on('connection', (socket) => {
   // -------------------------------------------------------------------------
   // Host table settings & management
   // -------------------------------------------------------------------------
-  // Timer pick (waiting room only): Off (null) or one of 10 / 15 / 30 seconds.
+  // Timer + reveal-mode pick (waiting room only). Timer: Off or 10/15/30s.
   socket.on('room:settings', (payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_host' });
-    const res = setTimerSec(room, socket.data.participantId, payload?.timerSec);
+    if (payload?.timerSec !== undefined) {
+      const res = setTimerSec(room, socket.data.participantId, payload.timerSec);
+      if (!res.ok) return ack?.(res);
+    }
+    if (payload?.revealMode !== undefined) {
+      const res = setRevealMode(room, socket.data.participantId, payload.revealMode);
+      if (!res.ok) return ack?.(res);
+    }
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  // Host-only: lock / unlock the room against new joiners (any phase).
+  socket.on('room:lock', (payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_host' });
+    const res = setLocked(room, socket.data.participantId, true);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  socket.on('room:unlock', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_host' });
+    const res = setLocked(room, socket.data.participantId, false);
     if (!res.ok) return ack?.(res);
     ack?.({ ok: true });
     emitSnapshot(room);

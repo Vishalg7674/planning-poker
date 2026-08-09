@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   addParticipant,
   buildSnapshot,
+  calculateConsensus,
   castVote,
   computeStats,
   createRoom,
@@ -11,6 +12,8 @@ import {
   promoteHostIfNeeded,
   removeParticipant,
   reveal,
+  setLocked,
+  setRevealMode,
   setTimerSec,
   startVoting,
 } from '../../../server/room.mjs';
@@ -38,7 +41,7 @@ function addNamed(room: Room, name: string) {
 const hostId = (room: Room) => room.hostId!;
 
 // ---------------------------------------------------------------------------
-// Room creation
+// Room creation & customization
 // ---------------------------------------------------------------------------
 
 describe('createRoom', () => {
@@ -52,19 +55,45 @@ describe('createRoom', () => {
     expect(host.hasVoted).toBe(false);
   });
 
-  it('defaults host name and deck when omitted', () => {
+  it('defaults host name, deck, accent and reveal mode when omitted', () => {
     const room = createRoom({});
     expect(room.participants.get(room.hostId!)!.name).toBe('Host');
     expect(room.settings.deckId).toBe('fibonacci');
     expect(room.settings.timerSec).toBeNull();
+    expect(room.settings.accent).toBe('gold');
+    expect(room.settings.revealMode).toBe('staggered');
+    expect(room.locked).toBe(false);
   });
 
   it('falls back to fibonacci for an unknown deck', () => {
     expect(createRoom({ deckId: 'pokemon' }).settings.deckId).toBe('fibonacci');
   });
 
-  it('stores the team name', () => {
-    expect(createRoom({ teamName: 'Squad' }).teamName).toBe('Squad');
+  it('accepts a known deck and falls back for unknown ones', () => {
+    expect(createRoom({ deckId: 'tshirt' }).settings.deckId).toBe('tshirt');
+    expect(createRoom({ deckId: 'sequential' }).settings.deckId).toBe('sequential');
+    expect(createRoom({ deckId: 'powersOfTwo' }).settings.deckId).toBe('powersOfTwo');
+    expect(createRoom({ deckId: 'modifiedFibonacci' }).settings.deckId).toBe('modifiedFibonacci');
+  });
+
+  it('stores team name and room title (clamped)', () => {
+    const room = createRoom({ teamName: 'Squad', roomTitle: 'Sprint 24 Planning' });
+    expect(room.teamName).toBe('Squad');
+    expect(room.roomTitle).toBe('Sprint 24 Planning');
+    expect(createRoom({ roomTitle: 'x'.repeat(200) }).roomTitle).toHaveLength(60);
+  });
+
+  it('stores a valid accent and falls back for unknown ones', () => {
+    expect(createRoom({ accent: 'purple' }).settings.accent).toBe('purple');
+    expect(createRoom({ accent: 'blue' }).settings.accent).toBe('blue');
+    expect(createRoom({ accent: 'green' }).settings.accent).toBe('green');
+    expect(createRoom({ accent: 'neon' }).settings.accent).toBe('gold');
+  });
+
+  it('stores a valid reveal mode and falls back for unknown ones', () => {
+    expect(createRoom({ revealMode: 'normal' }).settings.revealMode).toBe('normal');
+    expect(createRoom({ revealMode: 'dramatic' }).settings.revealMode).toBe('dramatic');
+    expect(createRoom({ revealMode: 'slow-mo' }).settings.revealMode).toBe('staggered');
   });
 
   it('generates codes that never collide with existing rooms', () => {
@@ -97,19 +126,22 @@ describe('addParticipant', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Statistics
+// Statistics — deck-aware (numeric vs T-Shirt)
 // ---------------------------------------------------------------------------
 
 describe('computeStats', () => {
-  it('computes average, median and mode for a classic spread', () => {
-    const stats = computeStats(['5', '8', '8', '13'])!;
+  it('computes average, median, mode, highest, lowest and range', () => {
+    const stats = computeStats(['5', '8', '8', '13'], 'fibonacci')!;
     expect(stats.count).toBe(4);
+    expect(stats.numeric).toBe(true);
     expect(stats.avg).toBe(8.5);
     expect(stats.median).toBe(8);
     expect(stats.mode).toBe('8');
     expect(stats.modeShare).toBe(0.5);
     expect(stats.unique).toBe(3);
-    expect(stats.spread).toBe(8);
+    expect(stats.highest).toBe(13);
+    expect(stats.lowest).toBe(5);
+    expect(stats.range).toBe(8);
     expect(stats.counts).toEqual([
       { value: '8', count: 2 },
       { value: '5', count: 1 },
@@ -118,36 +150,80 @@ describe('computeStats', () => {
   });
 
   it('returns the middle value for an odd-sized set', () => {
-    expect(computeStats(['5', '8', '13'])!.median).toBe(8);
+    expect(computeStats(['5', '8', '13'], 'fibonacci')!.median).toBe(8);
   });
 
   it('averages the two middle values for an even-sized set', () => {
-    expect(computeStats(['5', '8', '13', '21'])!.median).toBe(10.5);
+    expect(computeStats(['5', '8', '13', '21'], 'fibonacci')!.median).toBe(10.5);
   });
 
   it('handles multiple modes by picking the lowest value', () => {
     // 5 and 13 both appear twice — entries sort by count desc, then value asc.
-    const stats = computeStats(['13', '5', '13', '5'])!;
+    const stats = computeStats(['13', '5', '13', '5'], 'fibonacci')!;
     expect(stats.mode).toBe('5');
     expect(stats.modeShare).toBe(0.5);
   });
 
   it('returns null for zero votes', () => {
-    expect(computeStats([])).toBeNull();
+    expect(computeStats([], 'fibonacci')).toBeNull();
   });
 
-  it('never lets non-numeric values corrupt average/median', () => {
-    const stats = computeStats(['8', '?'])!;
-    expect(stats.count).toBe(2); // ? is still counted as a vote
-    expect(stats.avg).toBe(8);
-    expect(stats.median).toBe(8);
+  it('treats the ½ card (modified Fibonacci) as 0.5', () => {
+    const stats = computeStats(['½', '21'], 'modifiedFibonacci')!;
+    expect(stats.numeric).toBe(true);
+    expect(stats.lowest).toBe(0.5);
+    expect(stats.highest).toBe(21);
+    expect(stats.range).toBe(20.5);
+    expect(stats.avg).toBe(10.75);
+  });
+
+  it('treats T-Shirt as non-numeric: no average/median/range', () => {
+    const stats = computeStats(['S', 'M', 'M', 'M'], 'tshirt')!;
+    expect(stats.numeric).toBe(false);
+    expect(stats.mode).toBe('M');
+    expect(stats.avg).toBeNull();
+    expect(stats.median).toBeNull();
+    expect(stats.highest).toBeNull();
+    expect(stats.lowest).toBeNull();
+    expect(stats.range).toBeNull();
+    expect(stats.count).toBe(4);
   });
 
   it('labels a single-value round as full consensus', () => {
-    const stats = computeStats(['8'])!;
+    const stats = computeStats(['8'], 'fibonacci')!;
     expect(stats.level).toBe('full');
     expect(stats.avg).toBe(8);
-    expect(stats.spread).toBe(0);
+    expect(stats.range).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// calculateConsensus — deterministic thresholds (documented in docs/TRD.md)
+// ---------------------------------------------------------------------------
+
+describe('calculateConsensus', () => {
+  it('returns null for no votes', () => {
+    expect(calculateConsensus([])).toBeNull();
+  });
+
+  it('full when every voter picked the same card', () => {
+    expect(calculateConsensus(['5', '5', '5'])).toBe('full');
+  });
+
+  it('strong when the dominant value holds ≥ 70%', () => {
+    expect(calculateConsensus(['5', '5', '5', '8', '5'])).toBe('strong'); // 4/5 = 0.8
+  });
+
+  it('moderate when the dominant value holds ≥ 45%', () => {
+    expect(calculateConsensus(['5', '5', '8', '8', '13'])).toBe('moderate'); // 2/5 = 0.4 → but unique ≤ 3
+  });
+
+  it('moderate when there are only a few unique values', () => {
+    expect(calculateConsensus(['5', '5', '8', '8', '13', '13'])).toBe('moderate'); // 3 unique
+  });
+
+  it('large when the distribution is wide with a weak dominant value', () => {
+    expect(calculateConsensus(['3', '5', '8', '13', '21'])).toBe('large'); // 1/5 = 0.2, 5 unique
   });
 });
 
@@ -205,6 +281,16 @@ describe('buildSnapshot', () => {
     expect(snap.status).toBe('revealed');
     expect(snap.votes[grace.id]).toBe('8');
     expect(snap.stats!.count).toBe(2);
+  });
+
+  it('carries the room customization into the snapshot', () => {
+    const room = createRoom({ teamName: 'T', roomTitle: 'R', accent: 'blue', revealMode: 'dramatic' });
+    const snap = buildSnapshot(room);
+    expect(snap.teamName).toBe('T');
+    expect(snap.roomTitle).toBe('R');
+    expect(snap.settings.accent).toBe('blue');
+    expect(snap.settings.revealMode).toBe('dramatic');
+    expect(snap.locked).toBe(false);
   });
 });
 
@@ -312,6 +398,38 @@ describe('castVote', () => {
     const grace = addNamed(room, 'Grace');
     expect(castVote(room, grace.id, '')).toEqual({ ok: false, error: 'no_value' });
   });
+
+  it('rejects a value that is not on the room deck (bad_value)', () => {
+    const room = votingRoom(); // fibonacci: 1 2 3 5 8 13 21
+    const grace = addNamed(room, 'Grace');
+    expect(castVote(room, grace.id, '99')).toEqual({ ok: false, error: 'bad_value' });
+    expect(castVote(room, grace.id, 'M')).toEqual({ ok: false, error: 'bad_value' });
+    expect(room.votes[grace.id]).toBeUndefined();
+  });
+
+  it('accepts every value of the room deck, including ½ on modified Fibonacci', () => {
+    const room = votingRoom();
+    room.settings.deckId = 'modifiedFibonacci';
+    const grace = addNamed(room, 'Grace');
+    expect(castVote(room, grace.id, '½')).toEqual({ ok: true });
+  });
+
+  it('rejects a ½ on a deck that does not contain it', () => {
+    const room = votingRoom(); // fibonacci
+    const grace = addNamed(room, 'Grace');
+    expect(castVote(room, grace.id, '½')).toEqual({ ok: false, error: 'bad_value' });
+  });
+
+  it('reports already_voted before the timer check for a returning voter', () => {
+    const room = votingRoom(10);
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, '8');
+    room.timer!.endsAt = Date.now() - 1000; // timer expired after they voted
+    const dup = castVote(room, grace.id, '13') as { ok: false; error: string; timerEnded?: boolean };
+    expect(dup.error).toBe('already_voted');
+    expect(dup.timerEnded).toBeUndefined();
+    expect(room.votes[grace.id]).toBe('8');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -360,6 +478,18 @@ describe('reveal', () => {
     expect(room.stats!.count).toBe(1); // non-voter excluded
   });
 
+  it('computes deck-aware stats on reveal (T-Shirt has no average)', () => {
+    const room = votingRoom();
+    room.settings.deckId = 'tshirt';
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, 'M');
+    castVote(room, hostId(room), 'M');
+    reveal(room, hostId(room));
+    expect(room.stats!.numeric).toBe(false);
+    expect(room.stats!.mode).toBe('M');
+    expect(room.stats!.avg).toBeNull();
+  });
+
   it('rejects a second reveal', () => {
     const room = votingRoom();
     const grace = addNamed(room, 'Grace');
@@ -399,6 +529,59 @@ describe('setTimerSec', () => {
   it('rejects changes once voting has started', () => {
     const room = votingRoom();
     expect(setTimerSec(room, hostId(room), 10)).toEqual({ ok: false, error: 'in_progress' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// setRevealMode — host-only, waiting-room-only, one of three modes
+// ---------------------------------------------------------------------------
+
+describe('setRevealMode', () => {
+  it('accepts the three modes and stores them', () => {
+    const room = createRoom({ hostName: 'Host' });
+    for (const mode of ['normal', 'staggered', 'dramatic']) {
+      expect(setRevealMode(room, hostId(room), mode)).toEqual({ ok: true });
+      expect(room.settings.revealMode).toBe(mode);
+    }
+  });
+
+  it('rejects unknown modes', () => {
+    const room = createRoom({ hostName: 'Host' });
+    expect(setRevealMode(room, hostId(room), 'slidey')).toEqual({ ok: false, error: 'bad_reveal_mode' });
+  });
+
+  it('rejects non-host and post-start changes', () => {
+    const room = createRoom({ hostName: 'Host' });
+    const grace = addNamed(room, 'Grace');
+    expect(setRevealMode(room, grace.id, 'normal')).toEqual({ ok: false, error: 'not_host' });
+    const started = votingRoom();
+    expect(setRevealMode(started, hostId(started), 'normal')).toEqual({ ok: false, error: 'in_progress' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// setLocked — host-only, any phase, guards new joiners
+// ---------------------------------------------------------------------------
+
+describe('setLocked', () => {
+  it('locks and unlocks the room for the host', () => {
+    const room = createRoom({ hostName: 'Host' });
+    expect(setLocked(room, hostId(room), true)).toEqual({ ok: true });
+    expect(room.locked).toBe(true);
+    expect(setLocked(room, hostId(room), false)).toEqual({ ok: true });
+    expect(room.locked).toBe(false);
+  });
+
+  it('rejects non-host changes', () => {
+    const room = createRoom({ hostName: 'Host' });
+    const grace = addNamed(room, 'Grace');
+    expect(setLocked(room, grace.id, true)).toEqual({ ok: false, error: 'not_host' });
+    expect(room.locked).toBe(false);
+  });
+
+  it('works in any phase (not just the waiting room)', () => {
+    const room = votingRoom();
+    expect(setLocked(room, hostId(room), true)).toEqual({ ok: true });
   });
 });
 

@@ -3,17 +3,20 @@
 ## Product vision
 
 A frictionless planning-poker room that takes less than ten seconds to
-understand: create a room, share a link, everyone votes in secret with cards
-that **lock permanently**, the host reveals, and everyone sees the estimates
-and the statistics together. No accounts, no database, no history — rooms
-exist in memory and vanish when they empty.
+understand: create a room, customize the table, share a link (or a QR code),
+everyone votes in secret with cards that **lock permanently**, the host
+reveals, and everyone sees the estimates and the statistics together. No
+accounts, no database, no history — rooms exist in memory and vanish when
+they empty.
 
 ## Problem statement
 
 Estimating sessions are interrupted by setup: signups, stories, dashboards,
 histories, and the temptation to change votes after seeing others'. Teams
 want a table, not a tool. Reveal removes everything except the round: one
-room, one vote each, private until the reveal, final the moment it lands.
+room, one vote each, private until the reveal, final the moment it lands —
+with just enough configuration (deck, timer, accent) to feel like *your*
+table.
 
 ## Target users
 
@@ -21,14 +24,16 @@ room, one vote each, private until the reveal, final the moment it lands.
   starts the round and controls the reveal.
 - **Participant** — opens the link, types a name, votes once, waits, sees the
   results.
-- **Projector / big screen** — a read-only view of the table for the room.
+- **Projector / big screen** — a read-only view of the table for the room,
+  either the `/r/<CODE>/screen` projection or the host's in-room
+  **presentation mode**.
 
 ## User personas
 
 ### Host — e.g. a team lead running estimation
-Wants to see *who* has voted without influencing anyone, keep the round on a
-timer if useful, and reveal only when it's fair. Values speed and clarity over
-configuration.
+Wants to set up the table in seconds (team name, deck, accent), see *who* has
+voted without influencing anyone, keep the round on a timer if useful, and
+reveal only when it's fair. Values speed and clarity over configuration.
 
 ### Participant — e.g. a developer
 Wants to join without an account, vote without being influenced, and never
@@ -37,45 +42,68 @@ worry that their estimate can be changed or "corrected" afterwards.
 ## User journey
 
 ```
-Host:  Create Room → Copy Invite Link → Wait for People → Pick timer (optional)
-       → Start Voting → See who voted / who's thinking → Everyone voted (or time's up)
-       → Reveal → See results & statistics
-Participant: Open link → Enter name → Join → Wait for host → Voting starts
-       → Pick one card → Vote locked → Wait → Reveal → See results
+Host:  Create Room (name, team, title, deck, accent) → Share link / QR
+       → Wait for People → Pick timer + reveal mode (optional) → Start Voting
+       → See who voted / who's thinking → Everyone voted (or time's up)
+       → Reveal → See results, statistics & consensus → Presentation mode if needed
+       → End room
+Participant: Open link → Enter name → Join → See the team → Wait for host
+       → Voting starts → Pick one card → Vote locked → Wait → Reveal → See results
 ```
 
 ## Functional requirements
 
-### Room creation
-- Host enters only a name; the server creates a unique room (`/r/<CODE>`).
+### Room creation & lobby customization
+- The host enters their name (required) plus an optional **team name** and
+  **room title**; the server creates a unique room (`/r/<CODE>`).
+- The host picks the **deck** (Fibonacci, Modified Fibonacci, Sequential,
+  T-Shirt, Powers of 2) and an **accent color** (gold / purple / blue /
+  green) that re-skins the whole table.
 - The host is seated immediately as the room's **host**.
-- The waiting room shows the room code, a **Copy Invite Link** button, the
-  participant list, and the timer picker.
+- The waiting room shows the room code, a **QR code** of the invite URL, a
+  **Copy Invite** button (friendly message + link), a native **Share Room**
+  button where the Web Share API is available, the participant list, the
+  table configuration summary, and the timer/reveal-mode pickers (host only).
 
 ### Room joining
 - Participants open the shared link and enter only a name — no login, no
   email, no account.
-- The participant list updates live for everyone.
+- The participant list updates live for everyone; every participant gets an
+  auto-generated initials **avatar** and the host is marked with a **Host**
+  badge.
+- If the host **locked** the room, brand-new joiners see *"This room is
+  locked."*; people already seated stay and can rejoin.
 
 ### Waiting room
 - Cards are visible but disabled until voting starts.
-- Participants see *"Waiting for the host…"*; only the host sees Start
-  Voting and the timer picker.
+- Participants see *"Waiting for the host…"* and the room configuration;
+  only the host sees Start Voting, the timer picker, the reveal-mode picker,
+  the lock/unlock control, and presentation mode.
 
 ### Voting
 - The host starts the round; everyone's cards unlock simultaneously.
 - Each participant can vote **exactly once**.
 - The vote is permanent: no change, no cancel, no revote.
 - The selected card visually locks with a checkmark; all other cards disable.
+- The host sees a live `N / M voted` counter and per-participant
+  *Voted / Thinking* presence (with animated thinking dots) — never values.
 
-### Vote lock
-- Enforced **server-side**: a second `vote:cast` from the same participant is
-  rejected (`already_voted`).
-- A refresh or reconnect preserves the locked vote.
+### Presence
+- Per-participant presence: **Joined** (waiting), **Thinking** (voting),
+  **Voted** (locked), **Disconnected** (tab closed), with a subtle
+  **Reconnected** toast after a reconnect.
+- Disconnecting and reconnecting must **not** bypass the vote lock — server
+  state is authoritative.
 
-### Host dashboard
-- During voting the host sees a live `N / M voted` counter and per-participant
-  *Voted / Thinking* status — never the values.
+### Host controls
+- **Remove participant** (with a confirmation dialog) — the removed person
+  loses access to the room and everyone sees the updated list.
+- **Lock / Unlock room** — while locked, new people cannot join; existing
+  members are unaffected.
+- **End room** (with confirmation) — everyone is disconnected and the room is
+  deleted from memory.
+- All controls are validated server-side: a participant can never remove
+  someone, lock a room, or reveal.
 
 ### Optional timer
 - Default **Off**: voting stays open until everyone has voted.
@@ -87,13 +115,29 @@ Participant: Open link → Enter name → Join → Wait for host → Voting star
 - Host-only. Unlocks when **everyone has voted**, or when the timer ended the
   round (even if some participants didn't vote).
 - Before reveal, nobody — including the host — can see vote values.
-- The reveal is synchronized: every client flips the cards together.
+- The reveal is synchronized: every client flips the cards together, using the
+  host-chosen animation mode (**Normal / Staggered / Dramatic**; Staggered is
+  the default). Full consensus triggers a tasteful celebration.
 
-### Statistics
+### Smart results & statistics
 - Computed from submitted votes only: **Average**, **Median**, **Most
-  selected**, **Votes (N / M)**, and a **vote distribution** bar chart.
+  selected**, **Highest**, **Lowest**, **Range**, a **vote distribution** bar
+  chart, and a **Votes (N / M)** count.
+- Numeric decks get the full set; **T-Shirt** rounds show mode, distinct
+  cards and distribution instead of a meaningless numeric average.
 - Participants who didn't vote are shown as *Didn't vote* and are never
   included in the math.
+- A deterministic **consensus verdict** is shown after reveal: 🎉 Full, 🟢
+  Strong, 🟡 Moderate, ⚡ Large. Large disagreements get a *"Worth
+  discussing?"* prompt (a visual suggestion only — no discussion workflow).
+- The **lowest and highest** votes are highlighted with the voters' names.
+
+### Presentation mode
+- The host can enter an in-room **presentation mode** (TV / projector /
+  screen share): a simplified, large-font layout showing the live vote
+  counter, presence avatars, the deck, the countdown, and — after reveal —
+  the votes, key statistics and the consensus verdict. Host controls are
+  hidden; an *Exit Presentation* button returns to the normal room.
 
 ### Realtime updates
 - All participants, statuses, the timer, the reveal, and the results update
@@ -103,15 +147,20 @@ Participant: Open link → Enter name → Join → Wait for host → Voting star
 ## Non-functional requirements
 
 - **Performance** — full-room snapshots are small (tens of participants);
-  the server sweeps the timer every 500 ms.
-- **Responsiveness** — the UI is a responsive table layout (deck + side
-  participant panel), with a dedicated big-screen projection page.
+  the server sweeps the timer every 500 ms; timer ticks are isolated to the
+  timer badge so the participant list doesn't re-render every second.
+- **Responsiveness** — responsive table layout; large decks scroll
+  horizontally on mobile with big tap targets; presentation mode scales to
+  big screens. No horizontal page overflow.
 - **Reliability** — the socket client auto-reconnects and re-joins the room,
   preserving votes; actions are acknowledged so the UI never guesses.
 - **Accessibility** — cards and controls are real buttons with
-  `aria-label`s, status regions use `aria-live`, dialogs are `role="dialog"`.
+  `aria-label`s; presence is text + icon, not color alone; status regions use
+  `aria-live`; dialogs are `role="dialog"`; animations respect
+  `prefers-reduced-motion`.
 - **Security** — all host actions and the vote lock are validated
-  server-side; vote values are never broadcast before the reveal.
+  server-side; vote values are never broadcast before the reveal; QR codes
+  are generated locally with no external service.
 - **Realtime synchronization** — the countdown is derived from a shared
   `endsAt`; the server, not the browser, ends the round.
 
@@ -119,6 +168,10 @@ Participant: Open link → Enter name → Join → Wait for host → Voting star
 
 - As a **host**, I want to create a room with one link so my team can join
   instantly.
+- As a **host**, I want to name my team and the room so the session feels
+  like ours.
+- As a **host**, I want to pick the deck and accent so the table fits how we
+  estimate.
 - As a **participant**, I want to join with only my name so nothing stands
   between me and voting.
 - As a **participant**, I want my vote to lock immediately so my estimate
@@ -127,26 +180,31 @@ Participant: Open link → Enter name → Join → Wait for host → Voting star
   nobody is influenced.
 - As a **host**, I want an optional short timer so the round can move along,
   while still choosing when to reveal.
-- As a **host**, I want to reveal only when everyone has voted (or time is
-  up) so the reveal is fair.
-- As a **participant**, I want to see the average, median and distribution so
-  we can discuss the estimates meaningfully.
+- As a **host**, I want to remove a participant or lock the room so a stray
+  link can't derail the session.
+- As a **host**, I want a big presentation view so the team can watch the
+  table on a projector.
+- As a **participant**, I want to see the average, median, range and
+  consensus so we can discuss the estimates meaningfully.
 - As a **host**, I want the room to vanish from memory when we're done so no
   session history lingers.
 
 ## Acceptance criteria
 
-- Host creates a room and gets a shareable `/r/<CODE>` link.
+- Host creates a customized room and gets a shareable `/r/<CODE>` link and QR
+  code.
 - Multiple participants join from separate tabs/devices with just a name and
-  appear live for everyone.
-- Only the host can start, change the timer, remove participants, end the
-  session, and reveal.
+  appear live for everyone with initials avatars and a host badge.
+- Only the host can start, change settings, remove participants, lock/unlock,
+  end the session, and reveal.
 - A participant votes exactly once; duplicates are rejected by the server.
 - No participant (including the host) sees vote values before the reveal.
 - With the timer off, reveal unlocks exactly when everyone has voted; with a
   timer, reveal unlocks when it expires (or earlier if everyone voted).
 - The reveal shows every vote, marks non-voters as *Didn't vote*, and shows
-  correct average/median/mode/distribution/count.
+  correct average/median/mode/highest/lowest/range/distribution/count plus a
+  consensus verdict (T-Shirt rounds omit numeric stats).
+- A locked room refuses new joiners; the host can unlock it.
 - Rooms are in-memory only: no database, no login, no stories, no revote, no
   history.
 
@@ -156,7 +214,9 @@ Participant: Open link → Enter name → Join → Wait for host → Voting star
 - Database persistence or session history of any kind.
 - Stories, story queues, next/previous story, story titles or URLs.
 - Revote, vote editing, vote cancellation or reset.
-- Consensus workflows, discussion threads, reactions.
+- Discussion/chat features, consensus workflows, reactions.
 - Anonymous voting, spectator modes (beyond the read-only projector screen).
 - Multiple voting rounds per room (one round per room by design).
+- Custom deck editors, arbitrary timer values, custom accent themes.
 - Analytics dashboards or export of results.
+- Horizontal scaling / shared server state (see [DEPLOYMENT.md](DEPLOYMENT.md)).

@@ -18,13 +18,17 @@ broadcasts a full `snapshot` to the room.
 
 ### `room:create`
 
-Create a room and seat the creator as host.
+Create a room and seat the creator as host. All configuration is fixed at
+creation.
 
-| Field     | Type     | Notes                          |
-| --------- | -------- | ------------------------------ |
-| `hostName`| string?  | Host display name              |
-| `teamName`| string?  | Optional, unused by the current UI |
-| `deckId`  | string?  | Optional; unknown values fall back to `fibonacci` |
+| Field       | Type     | Notes                                                       |
+| ----------- | -------- | ----------------------------------------------------------- |
+| `hostName`  | string?  | Host display name (falls back to `"Host"`)                  |
+| `teamName`  | string?  | Optional, ≤ 40 chars                                        |
+| `roomTitle` | string?  | Optional, ≤ 60 chars                                        |
+| `deckId`    | string?  | `fibonacci` \| `modifiedFibonacci` \| `sequential` \| `tshirt` \| `powersOfTwo`; unknown → `fibonacci` |
+| `accent`    | string?  | `gold` \| `purple` \| `blue` \| `green`; unknown → `gold`    |
+| `revealMode`| string?  | `normal` \| `staggered` \| `dramatic`; unknown → `staggered`|
 
 - **Response**: `{ ok: true, code, participantId }`
 - **Failure**: `{ ok: false, error }` (e.g. server error)
@@ -42,12 +46,17 @@ Join an existing room as a participant — or as a read-only projector.
 | `id`  | string? | Existing participant id (rejoin the same seat)             |
 
 - **Response**: `{ ok: true, participantId, snapshot, screen?: true }`
-- **Failure**: `{ ok: false, error: 'not_found' }` — room doesn't exist
+- **Failure**:
+  - `not_found` — room doesn't exist
+  - `room_locked` — the host locked the room and this is a **brand-new**
+    participant (no matching `id`); existing participants and projector
+    screens are still admitted
 - **Authorization**: none
 
 ### `room:rejoin`
 
-Reclaim a seat after a refresh or reconnect.
+Reclaim a seat after a refresh or reconnect. Locked rooms still admit their
+own participants — only strangers are refused (see `room:join`).
 
 | Field          | Type   | Notes                          |
 | -------------- | ------ | ------------------------------ |
@@ -63,16 +72,30 @@ Reclaim a seat after a refresh or reconnect.
 
 ### `room:settings`
 
-Host sets the voting timer. Waiting room only.
+Host sets the voting timer and/or the reveal animation mode. Waiting room
+only.
 
-| Field     | Type | Notes                                   |
-| --------- | ---- | --------------------------------------- |
-| `timerSec`| `10` \| `15` \| `30` \| `null` | `null` = Off |
+| Field        | Type | Notes                                                |
+| ------------ | ---- | ---------------------------------------------------- |
+| `timerSec`   | `10` \| `15` \| `30` \| `null` | `null` = Off |
+| `revealMode` | `normal` \| `staggered` \| `dramatic` | optional; omitted fields are left unchanged |
 
 - **Response**: `{ ok: true }`
 - **Failure**: `not_host` · `in_progress` (round already started) ·
-  `bad_timer` (anything outside Off/10/15/30)
+  `bad_timer` (anything outside Off/10/15/30) · `bad_reveal_mode` (unknown
+  mode)
 - **Authorization**: host only
+
+### `room:lock` / `room:unlock`
+
+Host locks or unlocks the room against new joiners. Allowed in any phase.
+
+- **Payload**: `{}`
+- **Response**: `{ ok: true }`
+- **Failure**: `not_host`
+- **Authorization**: host only
+- **Effect**: `room.locked` flips; while locked, brand-new `room:join` calls
+  are rejected (`room_locked`), existing participants can still rejoin.
 
 ### `voting:start`
 
@@ -90,7 +113,7 @@ Submit a vote. **Final and permanent.**
 
 | Field   | Type   | Notes                     |
 | ------- | ------ | ------------------------- |
-| `value` | string | Any deck value (e.g. `"8"`, `"?"`) |
+| `value` | string | Any deck value (e.g. `"8"`, `"½"`, `"M"`, `"?"`) |
 
 - **Response**: `{ ok: true }`
 - **Failure**:
@@ -99,6 +122,8 @@ Submit a vote. **Final and permanent.**
     a late vote also flips the room to `ended`)
   - `already_voted` — this participant already has a locked vote
   - `no_value` — empty value
+  - `bad_value` — the value is not on the room's deck (the server validates
+    against the same card list as the client)
   - `revealed` — round is over
 - **Authorization**: any seated participant, exactly once
 
@@ -113,7 +138,7 @@ Reveal the round. Host only.
   `already_revealed`
 - **Authorization**: host only
 - **Effect**: `VOTING|ENDED → REVEALED`; snapshot now includes `votes` and
-  `stats`.
+  `stats` (with the consensus verdict).
 
 ### `participant:remove`
 
@@ -150,18 +175,28 @@ Emitted after every mutation. The full privacy-aware room state.
 {
   "code": "ABCDE",
   "hostId": "…",
-  "teamName": "",
+  "teamName": "Frontend Team",
+  "roomTitle": "Sprint 24 Planning",
   "createdAt": 1720000000000,
-  "settings": { "deckId": "fibonacci", "timerSec": null },
+  "settings": {
+    "deckId": "modifiedFibonacci",
+    "timerSec": 15,
+    "accent": "purple",
+    "revealMode": "staggered"
+  },
+  "locked": false,
   "participants": [ { "id": "…", "name": "Ada", "role": "facilitator", "status": "connected", "hasVoted": false, "joinedAt": 1720000000000, "hue": 120 } ],
   "status": "voting",
   "votedIds": [ "…" ],
   "everyoneHasVoted": false,
   "votes": {},          // populated ONLY when status === "revealed"
   "stats": null,        // populated ONLY when status === "revealed"
-  "timer": null         // or { "durationSec": 10, "endsAt": 1720000001000 }
+  "timer": null         // or { "durationSec": 15, "endsAt": 1720000001000 }
 }
 ```
+
+The client's Redux slices hydrate themselves from this single event; the
+accent is applied as a `data-accent` attribute on the room root.
 
 ### `room:ended`
 

@@ -33,11 +33,40 @@ flowchart TD
 | File             | Responsibility                                                        |
 | ---------------- | --------------------------------------------------------------------- |
 | `server/index.mjs` | Socket.io wiring, CORS, the `rooms` Map, snapshot broadcasts, the server-side countdown sweep, room expiry sweep, `room:end` teardown |
-| `server/room.mjs`  | Pure, unit-tested room logic: `createRoom`, `addParticipant`, `castVote`, `startVoting`, `reveal`, `setTimerSec`, `computeStats`, `buildSnapshot`, `everyoneHasVoted`, disconnect/promotion helpers |
+| `server/room.mjs`  | Pure, unit-tested room logic: `createRoom`, `addParticipant`, `castVote`, `startVoting`, `reveal`, `setTimerSec`, `setRevealMode`, `setLocked`, `calculateConsensus`, `computeStats`, `buildSnapshot`, `everyoneHasVoted`, disconnect/promotion helpers |
 
 `server/room.mjs` has zero I/O — it is plain functions over plain data, which
 is why it can be unit-tested directly (see `tests/unit/server/room.test.ts`).
 `server/index.mjs` wires those functions to sockets and owns all timers.
+
+## Room configuration
+
+Room customization is **fixed at creation** (`room:create`): the host's name,
+an optional team name, an optional room title, the deck, the accent, and the
+reveal animation mode. The timer (Off / 10s / 15s / 30s) and the reveal mode
+can be changed later in the waiting room by the host. Everything is validated
+server-side against the known allow-lists (`KNOWN_DECKS`, `KNOWN_TIMERS`,
+`KNOWN_ACCENTS`, `KNOWN_REVEAL_MODES`); unknown values fall back to the
+defaults (Fibonacci deck, gold accent, staggered reveal, timer Off).
+
+### Decks
+
+The five decks live in `src/lib/decks.ts` — a single configuration array the
+voting UI reads through `deckValues(settings)`, so the UI never knows how
+decks are defined:
+
+| id                 | values                              | numeric |
+| ------------------ | ----------------------------------- | ------- |
+| `fibonacci`        | `1 2 3 5 8 13 21`                   | yes     |
+| `modifiedFibonacci`| `0 ½ 1 2 3 5 8 13 21`               | yes     |
+| `sequential`       | `1 2 3 4 5 6 7 8`                   | yes     |
+| `tshirt`           | `XS S M L XL`                       | no      |
+| `powersOfTwo`      | `1 2 4 8 16 32`                     | yes     |
+
+The `numeric` flag drives statistics: numeric decks get average/median/range,
+T-Shirt rounds get mode + distribution only (a numeric average would be
+meaningless). The server validates `deckId` against the same allow-list and
+treats `½` as `0.5` in statistics.
 
 ## Room lifecycle
 
@@ -54,13 +83,23 @@ stateDiagram-v2
 ```
 
 - **WAITING** — participants join with just a name; nobody can vote; the host
-  picks the timer (Off by default) and can start.
+  picks the timer (Off by default) and reveal mode, can lock the room, and can
+  start. The lobby shows the table configuration (deck, timer, accent) plus a
+  QR code of the room URL.
 - **VOTING** — cards unlock. A vote locks the moment it lands; a second vote
   from the same participant is rejected. Vote *values* never leave the server.
 - **ENDED** — the server-side countdown hit zero; voting is closed; only the
   host can reveal (values still hidden).
 - **REVEALED** — everyone sees every vote plus statistics; the round is closed
   for good.
+
+### Room lock
+
+The host can lock the room at any time (`room:lock` / `room:unlock`). While
+locked, **brand-new** participants are refused at join time
+(`room_locked`); participants already seated keep their seat, their status,
+and any locked vote, and can still rejoin after a refresh. Projector screens
+(`role: 'screen'`) are always welcome. Unlocking re-opens the door.
 
 ### Room expiry
 
@@ -79,9 +118,9 @@ sequenceDiagram
     participant S as Socket.io server
     participant P as Participant
 
-    H->>S: room:create { hostName }
+    H->>S: room:create { hostName, teamName, roomTitle, deckId, accent }
     S-->>H: ack { ok, code, participantId }
-    S-->>H: snapshot (waiting room)
+    S-->>H: snapshot (waiting room, configuration)
     P->>S: room:join { code, name }
     S-->>P: ack { ok, participantId, snapshot }
     S-->>H: snapshot (2 participants)
@@ -108,12 +147,16 @@ The full event reference lives in [API.md](API.md) and
 ## State ownership
 
 - **Server state** (`server/room.mjs`): the room object — participants,
-  status, votes, timer, stats. This is the source of truth for *rules*.
+  status, votes, timer, stats, lock flag, configuration. This is the source
+  of truth for *rules*.
 - **Client state** (Redux): a projection of the last snapshot plus a little
-  local UI state (`myVote` optimistic lock, toasts, theme, connection status).
+  local UI state (`myVote` optimistic lock, toasts, theme, presentation mode,
+  connection status).
 - **Derived state**: `everyoneHasVoted` is computed server-side (it must
   ignore disconnected participants) and shipped in the snapshot; the client
-  derives the countdown from the shared `endsAt` timestamp.
+  derives the countdown from the shared `endsAt` timestamp. The consensus
+  verdict and statistics are computed server-side at reveal
+  (`calculateConsensus` + `computeStats`) and shipped in the snapshot.
 
 ## Security & validation
 
@@ -122,13 +165,16 @@ Every important action is validated server-side:
 | Action           | Required condition                                        | Rejection      |
 | ---------------- | --------------------------------------------------------- | -------------- |
 | `voting:start`   | actor is the host **and** status is `WAITING`             | `not_host`, `in_progress` |
-| `vote:cast`      | status is `VOTING`, participant has not voted, timer alive | `not_voting`, `already_voted`, `no_value` |
+| `vote:cast`      | status is `VOTING`, participant has not voted, timer alive, value on the room deck | `not_voting`, `already_voted`, `no_value`, `bad_value` |
 | `votes:reveal`   | actor is the host **and** status is `ENDED`, or `VOTING` + everyone voted | `not_host`, `not_all_voted`, `already_revealed`, `not_started` |
-| `room:settings`  | actor is the host **and** status is `WAITING` **and** timer ∈ {null, 10, 15, 30} | `not_host`, `in_progress`, `bad_timer` |
+| `room:settings`  | actor is the host **and** status is `WAITING` **and** timer ∈ {null, 10, 15, 30} **and** reveal mode ∈ {normal, staggered, dramatic} | `not_host`, `in_progress`, `bad_timer`, `bad_reveal_mode` |
+| `room:lock` / `room:unlock` | actor is the host (any phase)               | `not_host` |
 | `participant:remove` | actor is the host, target exists and is not the host | `not_host`, `cannot_remove`, `no_participant` |
+| `room:join` (locked) | the joining id must already be seated          | `room_locked` |
 
 The server never trusts the client: the browser's card lock is just UX; the
-`Map`-held `hasVoted` flag is the actual lock.
+`Map`-held `hasVoted` flag is the actual lock. Host controls that are hidden
+from participants in the UI are still enforced server-side.
 
 ## Privacy
 
@@ -136,6 +182,16 @@ Vote **values** are stored server-side in `room.votes` but only included in a
 snapshot when `status === 'revealed'`. Before that, snapshots expose only
 `votedIds` — who has voted, never what. This is enforced in `buildSnapshot`
 and covered by both the unit tests and the Playwright `vote-privacy` spec.
+
+## Presence
+
+Each participant has a server-owned `status`:
+`connected` (at the table), `voted` (vote locked), or `disconnected` (tab
+closed). The UI renders these as *Joined* (waiting room), *Thinking* (voting,
+with animated dots), *Voted*, or *Disconnected*. Reconnects restore the seat
+and any locked vote via `room:rejoin`, and the client shows a subtle
+*Reconnected* toast — a disconnected participant can never bypass the vote
+lock because the server state is authoritative.
 
 ## Reconnection
 
@@ -156,5 +212,14 @@ and covered by both the unit tests and the Playwright `vote-privacy` spec.
   same `endsAt` so every browser hits zero together.
 - `everyoneHasVoted` counts only *connected* participants — someone who
   closed their tab without voting can't deadlock the reveal.
-- `scripts/e2e.mjs` is a socket-level E2E suite (89 checks) that exercises the
-  real server protocol without a browser; Playwright covers the UI on top.
+- The reveal animation is mode-aware (normal / staggered / dramatic) and
+  triggered entirely from the shared snapshot; the duration and per-card
+  delay are pure CSS.
+- Presentation mode is a **UI mode**, not a separate application: it renders
+  the same Redux state in a large-font layout. The `/r/<CODE>/screen` route
+  is a separate read-only projection that joins as `role: 'screen'`.
+- The QR code is generated **locally** with `qrcode.react` (SVG, no external
+  service) and encodes the room URL built from the room code.
+- `scripts/e2e.mjs` is a socket-level E2E suite (121 checks) that exercises
+  the real server protocol without a browser; Playwright covers the UI on
+  top.

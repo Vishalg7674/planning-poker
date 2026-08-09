@@ -88,6 +88,18 @@
   }
 }
 
+.deckDense {
+  gap: $sp-2;
+
+  @include media-min($bp-md) {
+    gap: $sp-2;
+  }
+}
+
+.cardDense {
+  width: clamp(58px, 6.4vw, 74px);
+}
+
 .value {
   @include mono;
   font-size: clamp(26px, 4vw, 34px);
@@ -95,6 +107,10 @@
   color: var(--card-ink);
   position: relative;
   z-index: 1;
+}
+
+.cardDense .value {
+  font-size: clamp(20px, 3vw, 26px);
 }
 
 .suit,

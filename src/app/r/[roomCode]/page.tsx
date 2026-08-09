@@ -20,6 +20,7 @@ import HostToolbar from '@/components/room/HostToolbar';
 import { useRoomShortcuts } from '@/components/room/useShortcuts';
 import EndSessionModal from '@/components/modals/EndSessionModal';
 import RemoveParticipantModal from '@/components/modals/RemoveParticipantModal';
+import PresentationView from '@/components/room/PresentationView';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setMyIdentity, pushToast, closeModal } from '@/store/slices/uiSlice';
 import { snapshotReceived, roomGone } from '@/store/actions';
@@ -37,9 +38,13 @@ export default function RoomPage() {
   const joined = useAppSelector((s) => s.ui.joined);
   const roomGoneMessage = useAppSelector((s) => s.ui.roomGoneMessage);
   const teamName = useAppSelector((s) => s.room.teamName);
+  const roomTitle = useAppSelector((s) => s.room.roomTitle);
+  const accent = useAppSelector((s) => s.room.settings.accent);
+  const locked = useAppSelector((s) => s.room.locked);
   const phase = useAppSelector((s) => s.voting.phase);
   const celebrationTick = useAppSelector((s) => s.ui.celebrationTick);
   const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
+  const presentation = useAppSelector((s) => s.ui.presentation);
   const modals = useAppSelector((s) => s.ui.modals);
 
   const wasJoined = useRef(false);
@@ -148,13 +153,27 @@ export default function RoomPage() {
   // ------------------------------------------------------------------
   // The room — one round: waiting → voting → ended → revealed
   // ------------------------------------------------------------------
+  if (presentation) {
+    return (
+      <div className={styles.room} data-accent={accent}>
+        <PresentationView />
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.room}>
+    <div className={styles.room} data-accent={accent}>
       <header className={styles.header}>
         <span className={styles.homeLink}>
           <Wordmark size="sm" />
         </span>
-        {teamName && <span className={styles.team}>{teamName}</span>}
+        {roomTitle && <span className={styles.team} title={roomTitle}>{roomTitle}</span>}
+        {!roomTitle && teamName && <span className={styles.team}>{teamName}</span>}
+        {locked && (
+          <span className={styles.lockBadge} title="Room is locked — new people can't join">
+            🔒 Locked
+          </span>
+        )}
         <div className={styles.codeWrap}>
           <span className={styles.code} title="Room code">
             {code}

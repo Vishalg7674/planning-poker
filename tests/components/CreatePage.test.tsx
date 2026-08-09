@@ -16,11 +16,24 @@ beforeEach(() => {
 });
 
 describe('CreatePage', () => {
-  it('renders the create form', () => {
+  it('renders the create form with all customization fields', () => {
     renderWithStore(<CreatePage />, {});
     expect(screen.getByRole('heading', { name: 'Create Room' })).toBeInTheDocument();
     expect(screen.getByLabelText('Your Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Team Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Room Title')).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: 'Voting deck' })).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: 'Accent color' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create Room' })).toBeInTheDocument();
+  });
+
+  it('lists all five decks', () => {
+    renderWithStore(<CreatePage />, {});
+    expect(screen.getByRole('radio', { name: /^Fibonacci/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /^Modified Fibonacci/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /^Sequential/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /^T-Shirt/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /^Powers of 2/ })).toBeInTheDocument();
   });
 
   it('requires a name', async () => {
@@ -31,15 +44,27 @@ describe('CreatePage', () => {
     expect(emitAckMock).not.toHaveBeenCalled();
   });
 
-  it('creates a room, stores identity and navigates to it', async () => {
+  it('creates a room with customization, stores identity and navigates', async () => {
     emitAckMock.mockResolvedValue({ ok: true, code: 'XYZ12', participantId: 'h1' });
     const user = userEvent.setup();
     const { store } = renderWithStore(<CreatePage />, {});
 
     await user.type(screen.getByLabelText('Your Name'), 'Ada');
+    await user.type(screen.getByLabelText('Team Name'), 'Squad');
+    await user.type(screen.getByLabelText('Room Title'), 'Sprint 24');
+    await user.click(screen.getByRole('radio', { name: /T-Shirt/ }));
+    await user.click(screen.getByRole('radio', { name: /Purple/ }));
     await user.click(screen.getByRole('button', { name: 'Create Room' }));
 
-    await waitFor(() => expect(emitAckMock).toHaveBeenCalledWith('room:create', { hostName: 'Ada' }));
+    await waitFor(() =>
+      expect(emitAckMock).toHaveBeenCalledWith('room:create', {
+        hostName: 'Ada',
+        teamName: 'Squad',
+        roomTitle: 'Sprint 24',
+        deckId: 'tshirt',
+        accent: 'purple',
+      }),
+    );
     await waitFor(() => expect(pushMock).toHaveBeenCalledWith('/r/XYZ12'));
     expect(store.getState().ui.myRole).toBe('facilitator');
     expect(window.sessionStorage.getItem('reveal:identity')).toContain('"role":"facilitator"');

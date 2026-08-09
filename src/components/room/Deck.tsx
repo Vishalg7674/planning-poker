@@ -29,6 +29,9 @@ export default function Deck() {
   const locked = myVote !== null || (myId != null && votedIds.includes(myId));
   // Cards are inert outside the live voting phase.
   const interactive = phase === 'voting' && !locked;
+  // Larger decks (modified Fibonacci, sequential) get a denser layout so the
+  // cards stay comfortably tappable on mobile without shrinking.
+  const dense = deckValues.length >= 8;
 
   const cast = (value: string) => {
     if (!interactive) return; // the server would reject this anyway
@@ -69,14 +72,14 @@ export default function Deck() {
           <h2 className={styles.choose}>Choose your estimate</h2>
         </div>
       )}
-      <div className={styles.deck} role="group" aria-label="Voting deck">
+      <div className={cx(styles.deck, dense && styles.deckDense)} role="group" aria-label="Voting deck">
         {deckValues.map((value) => {
           const isMine = myVote === value;
           return (
             <button
               key={value}
               type="button"
-              className={cx(styles.card, isMine && styles.cardLocked, locked && !isMine && styles.cardDim)}
+              className={cx(styles.card, dense && styles.cardDense, isMine && styles.cardLocked, locked && !isMine && styles.cardDim)}
               onClick={() => cast(value)}
               disabled={!interactive}
               aria-pressed={isMine}

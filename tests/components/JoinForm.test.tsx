@@ -79,4 +79,15 @@ describe('JoinForm', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('full');
   });
+
+  it('tells the user the room is locked when the host locked it', async () => {
+    emitAckMock.mockResolvedValue({ ok: false, error: 'room_locked' });
+    const user = userEvent.setup();
+    renderWithStore(<JoinForm code="ABCDE" onGone={() => {}} />, {});
+
+    await user.type(screen.getByLabelText('Enter your name'), 'Grace');
+    await user.click(screen.getByRole('button', { name: 'Join Room' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('This room is locked. Ask the host for access.');
+  });
 });

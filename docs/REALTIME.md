@@ -22,13 +22,25 @@ and why the rules live on the server.
    *Reconnecting*; the socket keeps trying. A room that still exists is
    reclaimed automatically on reconnect.
 
+## Room creation & customization
+
+- **Host** — `room:create { hostName, teamName?, roomTitle?, deckId?,
+  accent?, revealMode? }` creates the room, seats the host as `facilitator`,
+  sets `room.hostId`, and joins the socket to the room channel. The
+  configuration is validated against the server allow-lists and fixed at
+  creation (the timer and reveal mode remain tweakable in the waiting room).
+- Every client in the room sees the configuration in the waiting room's
+  config summary and as the accent applied to the room root — but only the
+  host can change anything.
+
 ## Room join
 
-- **Host** — `room:create { hostName }` creates the room, seats the host as
-  `facilitator`, sets `room.hostId`, and joins the socket to the room channel.
 - **Participant** — `room:join { code, name }` (normalised to uppercase) adds
   a `voter` and joins the channel. The ack carries the participant id and the
   current snapshot so the client can hydrate immediately.
+- **Locked rooms** — if the host locked the room, `room:join` refuses
+  **brand-new** participants with `room_locked`; existing participants
+  (passing their `id`) and projector screens are still admitted.
 - **Rejoin** — `room:rejoin { code, participantId, name }` keeps the existing
   participant object (so a locked vote survives a refresh). A stale identity
   (`unknown_participant`) is dropped client-side so the join form appears.
@@ -72,6 +84,8 @@ The lock is **server state**, not UI: `room.votes[p.id] = value;
 p.hasVoted = true; p.status = 'voted'`. There is no client-side path to
 unlock, no revote event, no reset. The browser only renders the lock
 optimistically (`voting.myVote`) and rolls it back if the ack says no.
+Disconnecting and reconnecting does **not** bypass the lock — the server
+restores `status: 'voted'` for a participant who already cast.
 
 ## Participant status
 
@@ -95,7 +109,7 @@ Two ways a round becomes revealable:
   participants, so a disconnected non-voter can't deadlock). The host gets the
   gold Reveal button immediately, even mid-voting.
 - **Timer expired** — the sweep moves the room to `ended`; the host's Reveal
-  button appears on the `EndedPanel`.
+  button appears on the `EndedPanel` (or the presentation view).
 
 ## Reveal
 
@@ -104,11 +118,20 @@ Two ways a round becomes revealable:
 - rejected if not host, already revealed, still `WAITING`, or
   (`VOTING` **and** not everyone voted);
 - accepted from `ENDED`, or from `VOTING` once everyone voted;
-- on success: `status` → `revealed`, `stats = computeStats(values)`,
-  `timer = null`, and the snapshot finally includes `votes` and `stats`.
+- on success: `status` → `revealed`, `stats = computeStats(values, deckId)`
+  (which includes the `calculateConsensus` verdict), `timer = null`, and the
+  snapshot finally includes `votes` and `stats`.
 
 Every client flips its cards from the same snapshot (`ResultsPanel` renders
-the values with a staggered flip animation).
+the values with a mode-aware staggered flip animation; full consensus
+triggers the celebration).
+
+## Host controls
+
+Host-only actions that broadcast a snapshot: `voting:start`, `votes:reveal`,
+`room:settings` (timer + reveal mode), `room:lock`, `room:unlock`,
+`participant:remove`, `room:end`. All check `actorId === room.hostId`
+server-side; the UI merely hides the buttons for non-hosts.
 
 ## Disconnect
 
@@ -122,20 +145,23 @@ host participant is gone entirely. When the last connected participant leaves,
 
 See [Architecture — Reconnection](ARCHITECTURE.md#reconnection). In short:
 the client reconnects automatically and re-joins via `room:rejoin`, keeping
-the same participant id and any locked vote.
+the same participant id and any locked vote; a subtle *Reconnected* toast
+announces the restore.
 
 ## Server authority
 
 Every rule that matters is enforced in `server/room.mjs`, which the socket
 handlers call and the unit tests target directly:
 
-- only the host may start, reveal, change the timer, or remove participants;
+- only the host may start, reveal, change the timer/reveal mode, lock/unlock,
+  remove participants, or end the room;
 - a participant votes exactly once, and only while voting is live;
 - values stay private until the reveal;
-- the timer, not the browser clock, ends the round.
+- the timer, not the browser clock, ends the round;
+- a locked room refuses strangers but keeps its own people.
 
 The client's job is presentation: it optimistically shows the lock, ticks the
 shared countdown, and renders snapshots. If a client misbehaves, the server
 rejects it — that is why the [socket E2E suite](../scripts/e2e.mjs) asserts
-rejections (`already_voted`, `not_host`, `not_all_voted`, …) straight from
-the ack payloads.
+rejections (`already_voted`, `not_host`, `not_all_voted`, `room_locked`, …)
+straight from the ack payloads.

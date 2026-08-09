@@ -14,6 +14,7 @@ import reducer, {
   closeModal,
   pushToast,
   setMyIdentity,
+  setPresentation,
   setTheme,
   triggerCelebration,
 } from '@/store/slices/uiSlice';
@@ -118,5 +119,14 @@ describe('uiSlice', () => {
 
   it('setTheme stores the theme', () => {
     expect(reducer(undefined, setTheme('light')).theme).toBe('light');
+  });
+
+  it('setPresentation toggles the big-screen mode', () => {
+    expect(reducer(undefined, setPresentation(true)).presentation).toBe(true);
+    expect(reducer(undefined, setPresentation(false)).presentation).toBe(false);
+  });
+
+  it('presentation defaults to off', () => {
+    expect(reducer(undefined, { type: '@@init' }).presentation).toBe(false);
   });
 });

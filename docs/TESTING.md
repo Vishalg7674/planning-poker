@@ -22,14 +22,16 @@ E2E Tests         → the real Next.js app + realtime server in Chrome
 
 - **Unit tests** target behavior, not implementation. They assert on the
   *rules* the product promises: vote lock, host permissions, timer expiry,
-  reveal gating, statistics, snapshot privacy.
+  reveal gating, statistics, deck handling, consensus levels, snapshot
+  privacy, room lock.
 - **Component tests** render components with React Testing Library in jsdom
   and assert on roles, text, and aria attributes — never on class names. SCSS
   modules are **not** processed by Vitest (`css: false`), so component tests
   are fast and independent of sass.
 - **Realtime tests** (`scripts/e2e.mjs`) connect several real
   `socket.io-client` sockets to a running `server/index.mjs` and exercise the
-  full protocol (89 checks) including privacy and the server-side vote lock.
+  full protocol (121 checks) including privacy, the server-side vote lock,
+  room lock/unlock, deck validation, and accent/reveal-mode settings.
 - **E2E tests** (Playwright) drive the real Next.js app in Chrome with
   separate browser contexts per user. They verify what a user actually sees,
   not internal state.
@@ -70,7 +72,8 @@ the wire by the realtime suite.
   renders a component inside a Redux `Provider`. This mirrors the wiring in
   `src/store/index.ts`.
 - `tests/helpers/fixtures.ts` — `makeParticipant()` and `makeSnapshot()`
-  builders for realistic, privacy-aware snapshots.
+  builders for realistic, privacy-aware snapshots (with the extended
+  settings shape and the new deck ids).
 - `tests/helpers/types.ts` — test-side type helpers.
 
 ### Running
@@ -85,10 +88,12 @@ npm run test:coverage    # single run + coverage report (html in coverage/)
 
 Coverage is a *guide*, not a gate. The project aims for strong coverage of:
 
-- `src/store/slices/*` — every reducer/action path (all five slices at 100%).
-- `server/room.mjs` — every server rule (vote lock, reveal gates, timer, stats).
+- `src/store/slices/*` — every reducer/action path (all five slices, including
+  the presentation flag in `uiSlice`).
+- `server/room.mjs` — every server rule (vote lock, reveal gates, timer,
+  stats, consensus, deck fallbacks, room lock).
 - `src/components/room/*` — Deck, StartPanel, RevealBar, EndedPanel,
-  ParticipantsPanel, ResultsPanel, JoinForm.
+  ParticipantsPanel, ResultsPanel, PresentationView, JoinForm.
 - `src/lib/*` — cx, decks, identity, theme, stats helpers.
 
 Don't chase 100% in presentational components or modal chrome; prioritize
@@ -106,7 +111,8 @@ tests/
 │   └── store/               # roomSlice, participantsSlice, votingSlice, timerSlice, uiSlice
 ├── components/              # Field, Button, DistributionChart, Deck, StartPanel,
 │                            # RevealBar, EndedPanel, ParticipantsPanel,
-│                            # ResultsPanel, JoinForm, CreatePage
+│                            # ResultsPanel, PresentationView, JoinForm,
+│                            # RoomQR, CreatePage
 └── e2e/                     # Playwright specs (see below; excluded from Vitest)
 ```
 
@@ -114,18 +120,26 @@ tests/
 
 ## 3. Realtime protocol tests (`npm run test:realtime`)
 
-`scripts/e2e.mjs` is a headless multi-client suite (89 checks) that connects
+`scripts/e2e.mjs` is a headless multi-client suite (121 checks) that connects
 host, voter, observer, and screen sockets to a **live** `server/index.mjs`
 and verifies the wire contract end to end:
 
-- Room creation, default deck/timer, code format.
-- Timer validation (only Off/10/15/30; non-host rejected).
+- Room creation with customization: team name, room title, deck, accent and
+  reveal mode validated against the allow-lists; unknown values fall back to
+  defaults.
+- Deck validation (5 decks, defaults to Fibonacci); timer validation (only
+  Off/10/15/30; non-host rejected); reveal-mode validation.
 - Voting closed before start; start flips `WAITING → VOTING`.
 - **Vote lock**: first vote accepted, second rejected (`already_voted`).
 - **Privacy**: `votedIds` visible pre-reveal, `votes` empty, `stats` null.
 - Reveal gating: `not_all_voted` while someone is thinking; reveal from
   `VOTING` once everyone voted; reveal rejected for non-host.
 - Timer expiry flips `VOTING → ENDED`; late votes rejected; reveal then allowed.
+- **Room lock**: `room:lock` then a brand-new join is rejected
+  (`room_locked`); the existing participant can still rejoin; `room:unlock`
+  re-opens the door.
+- Stats for non-numeric decks (T-Shirt: `numeric: false`, null numeric stats,
+  mode + counts) and consensus levels (full / strong / moderate / large).
 - `room:end` wipes memory; removed participants get `you:removed`; screen
   (`role: 'screen'`) sockets watch without seating and cannot vote.
 - Disconnected non-voters don't deadlock `everyoneHasVoted`.
@@ -183,17 +197,23 @@ await revealVotes(host);
 
 ### Specs
 
-| Spec                    | Verifies                                                                 |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `create-room.spec.ts`   | Create → invite screen: room code, copy-link, host listed                 |
-| `join-room.spec.ts`     | Second context joins by URL; both sides see each other                    |
-| `voting-flow.spec.ts`   | Full journey: start → vote → reveal → results + stats                     |
-| `vote-lock.spec.ts`     | Vote 8 → second pick 13 fails → still 8 (UI *and* server)                |
-| `vote-privacy.spec.ts`  | Host sees "Voted" but never the value before reveal                       |
-| `everyone-voted.spec.ts`| `1 / 2 voted` → reveal disabled → `2 / 2 voted` → reveal enabled          |
-| `timer.spec.ts`         | 10s / 15s / 30s: countdown runs, expiry stops voting, reveal unlocks      |
-| `results.spec.ts`       | Revealed values, "Didn't vote", average/median/mode/distribution          |
-| `permissions.spec.ts`   | Participants never see host controls; host-only start/reveal              |
+| Spec                          | Verifies                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------ |
+| `create-room.spec.ts`         | Create → invite screen: room code, copy-invite, host listed               |
+| `join-room.spec.ts`           | Second context joins by URL; both sides see each other                    |
+| `lobby-customization.spec.ts` | Host sets team name / room title / deck / accent; everyone sees the configuration |
+| `decks.spec.ts`               | Each of the five decks renders its cards correctly                        |
+| `presence.spec.ts`            | Joined / Thinking / Voted / Disconnected presence updates live for everyone |
+| `room-lock.spec.ts`           | Locked room rejects a new joiner; existing members stay; unlock lets joiners in |
+| `qr-invite.spec.ts`           | QR + copy-invite render and encode the actual room URL                    |
+| `voting-flow.spec.ts`         | Full journey: start → vote → reveal → results + stats                     |
+| `vote-lock.spec.ts`           | Vote 8 → second pick 13 fails → still 8 (UI *and* server)                |
+| `vote-privacy.spec.ts`        | Host sees "Voted" but never the value before reveal                       |
+| `everyone-voted.spec.ts`      | `1 / 2 voted` → reveal disabled → `2 / 2 voted` → reveal enabled          |
+| `timer.spec.ts`               | 10s / 15s / 30s: countdown runs, expiry stops voting, reveal unlocks      |
+| `results.spec.ts`             | Revealed values, "Didn't vote", average/median/mode/highest/lowest/range/distribution |
+| `presentation.spec.ts`        | Host enters presentation mode, drives the round from the big view, reveals |
+| `permissions.spec.ts`         | Participants never see host controls; host-only start/reveal              |
 
 ### Running
 
@@ -211,7 +231,9 @@ npx playwright test tests/e2e/timer.spec.ts   # one spec
 - Screenshots and an error-context snapshot land in `test-results/` on failure.
 - With `workers: 1` and sequential flows, flakiness is usually a selector
   matching too broadly — prefer `getByRole(..., { exact: true })` and
-  `getByText(..., { exact: true })` (e.g. `Vote 8` also matches `Vote 89`).
+  `getByText(..., { exact: true })` (e.g. `Vote 8` also matches `Vote 89`,
+  and a stat label like "Highest" can match both the stats row and the
+  highlight tag).
 
 ---
 
@@ -221,16 +243,23 @@ npx playwright test tests/e2e/timer.spec.ts   # one spec
    second `vote:cast`; the UI shows the locked card and disables the rest.
 2. **Vote privacy** — before reveal, `snapshot.votes` and `snapshot.stats`
    are empty; only `votedIds` reveals *who* voted.
-3. **Host permissions** — only the host can start, reveal, remove, end, or
-   change the timer. Every one of these is checked server-side.
+3. **Host permissions** — only the host can start, reveal, remove, lock,
+   unlock, end, or change settings. Every one of these is checked server-side.
 4. **Reveal gating** — timer off: all present participants must have voted;
    timer on: also allowed after the timer ends the round. Never before.
 5. **Timer** — Off / 10 / 15 / 30 only; the server owns `endsAt` and flips
    `VOTING → ENDED`; late votes are rejected.
-6. **Statistics** — computed from submitted votes only; non-voters excluded
+6. **Decks** — all five decks render; unknown deck ids fall back to
+   Fibonacci; `½` parses as `0.5`; T-Shirt rounds never show a numeric
+   average.
+7. **Consensus** — full / strong / moderate / large thresholds are
+   deterministic and unit-tested.
+8. **Room lock** — a locked room refuses brand-new joiners (`room_locked`)
+   while existing members keep their seats and votes; unlock re-opens it.
+9. **Statistics** — computed from submitted votes only; non-voters excluded
    from math but shown as "Didn't vote".
-7. **Disconnected non-voters** — never deadlock the room (`everyoneHasVoted`
-   counts only present participants).
+10. **Disconnected non-voters** — never deadlock the room (`everyoneHasVoted`
+    counts only present participants).
 
 ---
 

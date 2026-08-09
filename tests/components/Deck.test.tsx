@@ -8,11 +8,11 @@ import type { PartialDeep } from '../helpers/types';
 const { emitAckMock } = vi.hoisted(() => ({ emitAckMock: vi.fn() }));
 vi.mock('@/lib/socket', () => ({ emitAck: emitAckMock }));
 
-const DECK = ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?'];
+const DECK = ['1', '2', '3', '5', '8', '13', '21'];
 
 function preload(over: PartialDeep<Record<string, unknown>> = {}) {
   return {
-    room: { hostId: 'p1', settings: { deckId: 'fibonacci', timerSec: null } },
+    room: { hostId: 'p1', settings: { deckId: 'fibonacci', timerSec: null, accent: 'gold', revealMode: 'staggered' } },
     voting: { phase: 'waiting', deckValues: DECK, votedIds: [], everyoneHasVoted: false, votes: {}, stats: null, myVote: null, ...(over.voting as object) },
     ui: { myParticipantId: 'p2', ...(over.ui as object) },
   } as never;

@@ -11,7 +11,7 @@ test.describe('Create room', () => {
       await expect(host.page.getByTitle('Room code')).toHaveText(host.code);
       // Host sees the invite copy + copy-link button.
       await expect(host.page.getByText('Invite your team')).toBeVisible();
-      await expect(host.page.getByRole('button', { name: /Copy Invite Link/ })).toBeVisible();
+      await expect(host.page.getByRole('button', { name: /Copy Invite/ })).toBeVisible();
       // The host row appears in the participant list with the Host badge.
       await expect(host.page.getByText('Ada')).toBeVisible();
       await expect(host.page.getByText('Host').first()).toBeVisible();

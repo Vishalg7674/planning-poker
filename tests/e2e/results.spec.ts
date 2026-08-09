@@ -64,4 +64,40 @@ test.describe('Results & statistics', () => {
       await priya.context.close();
     }
   });
+
+  test('smart stats: highest, lowest, range, consensus and non-voter count', async ({ browser }) => {
+    const host = await createRoom(browser, 'Ada');
+    const rahul = await joinRoom(browser, host.page.url(), 'Rahul');
+    const priya = await joinRoom(browser, host.page.url(), 'Priya');
+    const amit = await joinRoom(browser, host.page.url(), 'Amit');
+    try {
+      // 10s timer so Amit can stay thinking and the round can still end.
+      await host.page.getByRole('button', { name: '10s' }).click();
+      await startVoting(host.page);
+      await vote(host.page, '5');
+      await vote(rahul.page, '8');
+      await vote(priya.page, '13');
+
+      await expect(host.page.getByText('Voting ended', { exact: true })).toBeVisible({ timeout: 15_000 });
+      await reveal(host.page);
+
+      // Smart stats over [5, 8, 13]: lowest 5, highest 13, range 8, votes 3/4.
+      await expectStat(host.page, 'Highest', '13');
+      await expectStat(host.page, 'Lowest', '5');
+      await expectStat(host.page, 'Range', '8');
+      await expectStat(host.page, 'Votes', '3 / 4');
+      // Non-voter count is surfaced.
+      await expect(host.page.getByText('1 person did not vote')).toBeVisible();
+      // Consensus verdict headline is shown.
+      await expect(host.page.getByText(/Disagreement/)).toBeVisible();
+      // Lowest/highest voter highlights list names.
+      await expect(host.page.getByText(/Lowest Ada · 5/)).toBeVisible();
+      await expect(host.page.getByText(/Highest Priya · 13/)).toBeVisible();
+    } finally {
+      await host.context.close();
+      await rahul.context.close();
+      await priya.context.close();
+      await amit.context.close();
+    }
+  });
 });
