@@ -27,6 +27,7 @@ const PIECE_COUNT = 46;
  * no canvas. Keyed on `tick` so every reveal replays the burst.
  */
 export default function Celebration({ tick, label }: CelebrationProps) {
+  /* eslint-disable react-hooks/purity -- random confetti is the whole point; the memo is keyed on `tick` so it recomputes per burst. */
   const pieces = useMemo(() => {
     if (!tick) return [];
     return Array.from({ length: PIECE_COUNT }, (_, i) => {
@@ -45,6 +46,7 @@ export default function Celebration({ tick, label }: CelebrationProps) {
       };
     });
   }, [tick]);
+  /* eslint-enable react-hooks/purity */
 
   if (!tick) return null;
 

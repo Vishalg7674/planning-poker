@@ -29,7 +29,6 @@ export default function RealtimeBridge() {
 
     const onSnapshot = (payload: any) => {
       dispatch(snapshotReceived(payload));
-      const state = storeRef.getState();
       if (!payload.timer) {
         activeTimerKey.current = null;
         firedTimerKey.current = null;

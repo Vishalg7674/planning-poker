@@ -101,7 +101,6 @@ const observer = await connect();
 const screen = await connect();
 const hostSnap = snapshotPump(host);
 const voterSnap = snapshotPump(voter);
-const observerSnap = snapshotPump(observer);
 const screenSnap = snapshotPump(screen);
 
 // ===========================================================================

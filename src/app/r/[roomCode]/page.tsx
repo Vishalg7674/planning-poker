@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -28,9 +28,9 @@ import { loadIdentity, clearIdentity } from '@/lib/identity';
 import type { Participant } from '@/lib/types';
 import styles from './room.module.scss';
 
+/* eslint-disable react-hooks/refs -- render-phase "did I ever join" flags are a deliberate legacy pattern; converting them to state would churn this screen for no user-visible gain. */
 export default function RoomPage() {
   const params = useParams<{ roomCode: string }>();
-  const router = useRouter();
   const dispatch = useAppDispatch();
   const code = String(params?.roomCode ?? '').toUpperCase();
 

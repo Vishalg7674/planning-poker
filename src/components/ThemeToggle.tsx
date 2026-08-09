@@ -2,7 +2,7 @@
 
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setTheme, type Theme } from '@/store/slices/uiSlice';
-import { applyTheme, persistTheme, THEMES } from '@/lib/theme';
+import { applyTheme, persistTheme } from '@/lib/theme';
 import styles from './ThemeToggle.module.scss';
 
 const NEXT: Record<Theme, Theme> = { dark: 'light', light: 'system', system: 'dark' };

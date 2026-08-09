@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Modal from '@/components/Modal';
 import Button from '@/components/Button';
 import { useAppDispatch } from '@/store';
-import { closeModal, pushToast } from '@/store/slices/uiSlice';
+import { pushToast } from '@/store/slices/uiSlice';
 import { emitAck } from '@/lib/socket';
 import styles from './modals.module.scss';
 

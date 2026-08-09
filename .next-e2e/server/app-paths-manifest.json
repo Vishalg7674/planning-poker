@@ -1,0 +1,4 @@
+{
+  "/create/page": "app/create/page.js",
+  "/r/[roomCode]/page": "app/r/[roomCode]/page.js"
+}

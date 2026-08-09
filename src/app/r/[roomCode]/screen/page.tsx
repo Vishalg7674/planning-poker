@@ -13,6 +13,7 @@ import type { Participant, RoomPhase } from '@/lib/types';
 import styles from './screen.module.scss';
 import { cx } from '@/lib/cx';
 
+/* eslint-disable react-hooks/refs -- render-phase "have we got the room" flags are a deliberate legacy pattern here (see the join effect below). */
 const PHASE_COPY: Record<RoomPhase, { title: string; sub: string }> = {
   waiting: { title: 'Waiting for the host…', sub: 'Voting hasn’t started yet.' },
   voting: { title: 'Voting in progress', sub: 'Pick a card — your vote locks in the moment you tap.' },

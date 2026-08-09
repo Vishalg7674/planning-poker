@@ -24,11 +24,16 @@ export default function DistributionChart({ data, title, highlightMode = true }:
   const [grown, setGrown] = useState(false);
   const dataSig = data.map((d) => `${d.label}:${d.count}`).join('|');
 
-  // Replay the grow animation whenever the underlying data changes.
+  // Replay the grow animation whenever the underlying data changes. The
+  // reset and re-grow both happen inside rAF callbacks (never synchronously
+  // in the effect body) so React can batch them cleanly.
   useEffect(() => {
-    setGrown(false);
-    const id = window.requestAnimationFrame(() => setGrown(true));
-    return () => window.cancelAnimationFrame(id);
+    const reset = window.requestAnimationFrame(() => setGrown(false));
+    const grow = window.requestAnimationFrame(() => setGrown(true));
+    return () => {
+      window.cancelAnimationFrame(reset);
+      window.cancelAnimationFrame(grow);
+    };
   }, [dataSig]);
 
   const total = data.reduce((sum, d) => sum + d.count, 0);
