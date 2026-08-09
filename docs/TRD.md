@@ -34,13 +34,19 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
 
 | Route                    | Purpose                                             |
 | ------------------------ | --------------------------------------------------- |
-| `/`                      | Marketing hero, "create a room" CTA, join-by-code   |
+| `/`                      | Games-platform homepage: hero, featured Planning Poker, full game catalog, roadmap podium, how-it-works, CTA |
+| `/games`                 | Full catalog page (reuses `GameCatalog`); optional `?cat=<category>` preselects a filter |
+| `/games/[gameId]`        | Dynamic game page — `live` games `redirect()` to their real route; `coming-soon` games render the shared placeholder; unknown ids 404 |
 | `/create`                | Room creation form: name (required), team name, room title, deck picker, accent picker → navigates to `/r/<CODE>` |
 | `/r/[roomCode]`          | The room: waiting → voting → ended → revealed, plus the participant side panel |
 | `/r/[roomCode]/screen`   | Read-only projector view (joins the socket as `role: 'screen'`) |
 
 ### Components (`src/components`)
 
+- Games (`src/components/games`): `GameCard` (one catalog card — the whole
+  card is the link; LIVE / COMING SOON badges), `GameCatalog` (search input
+  + category filter chips + per-category grids + empty state), `ComingSoonGame`
+  (the shared placeholder body for unimplemented games).
 - Primitives: `Button`, `Field`/`Input`/`Textarea`/`Select`, `Modal`, `Avatar`
   (auto initials), `Wordmark`, `ThemeToggle`, `ConnectionPill`, `Toasts`,
   `Celebration`, `DistributionChart`, `RoomQR` (local QR of the invite URL).
@@ -120,6 +126,39 @@ a future custom deck is a one-line change.
 
 The server's `computeStats` treats `½` as `0.5`; non-numeric decks get
 `numeric: false` and null numeric stats.
+
+## Game catalog
+
+The catalog is **one centralized registry**, `src/lib/games.ts` — 110 games
+across 9 categories (`CATEGORIES`), each game a plain data entry:
+
+```ts
+{
+  id: string;           // kebab-case slug, also the /games/<id> route
+  name: string;
+  category: CategoryId; // icebreakers | speed | guessing | estimation | funny | developer | creative | word | competitive
+  description: string;
+  icon: string;         // emoji
+  status: 'live' | 'coming-soon';
+  route: string;        // live → real route (/create for planning-poker); coming-soon → /games/<id>
+  players: string;      // display string, e.g. '3–20 players'
+  duration: string;     // display string, e.g. '5 min'
+}
+```
+
+- **Planning Poker** is the only `live` game and points at `/create` — the
+  existing room-creation flow. The `/games/planning-poker` URL `redirect()`s
+  there.
+- `GameCatalog` is the single rendering component (homepage + `/games`),
+  with instant search (name + description + category) and category filter
+  chips; both homepage and `/games?cat=<id>` preselects work.
+- Shipping a new game = implement it, then flip `status: 'coming-soon'` to
+  `'live'` and set `route` — the homepage, catalog and routes adapt with no
+  further changes.
+- Tests: `tests/unit/lib/games.test.ts` (registry integrity: 110 games, 9
+  categories, unique ids/names, per-category counts), `GameCard`,
+  `GameCatalog` (search / filter / empty state / View-all links), and the
+  `homepage.spec.ts` Playwright suite.
 
 ## Data models
 

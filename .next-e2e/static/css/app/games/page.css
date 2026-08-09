@@ -1,0 +1,622 @@
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/app/games/games.module.scss ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.games_page__cof3v {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.games_header__ZLqod {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 48px;
+  border-bottom: 1px solid var(--felt-line);
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+@media (max-width: 640px) {
+  .games_header__ZLqod {
+    padding: 16px;
+  }
+}
+
+.games_tag__RRiag {
+  font-size: 12px;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .games_tag__RRiag {
+    display: none;
+  }
+}
+
+.games_headerActions__KbQr5 {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.games_main__hNDq_ {
+  flex: 1 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+@media (max-width: 640px) {
+  .games_main__hNDq_ {
+    padding: 24px 16px;
+    gap: 24px;
+  }
+}
+
+.games_intro__wGio7 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.games_eyebrow__MuLVZ {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+}
+
+.games_h1__XSqqO {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.games_sub__Orxlm {
+  color: var(--ink-dim);
+  font-size: 16px;
+  max-width: 52ch;
+}
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/Button.module.scss ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.Button_btn__zmap9 {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+.Button_btn__zmap9:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.Button_btn__zmap9 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  border-radius: 10px;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  white-space: nowrap;
+  transition: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .Button_btn__zmap9 {
+    transition-property: transform, background-color, border-color, box-shadow, color, opacity;
+    transition-duration: 120ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+.Button_btn__zmap9:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+}
+.Button_btn__zmap9:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.Button_btn__zmap9.Button_sm__3TiG8 {
+  padding: 4px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+.Button_btn__zmap9.Button_md__bGZZO {
+  padding: 8px 24px;
+  font-size: 15px;
+}
+.Button_btn__zmap9.Button_lg__uDoL7 {
+  padding: 12px 48px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+.Button_btn__zmap9.Button_block__VgHA2 {
+  width: 100%;
+}
+.Button_btn__zmap9.Button_primary__VcoA9 {
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 6px 16px -6px rgba(var(--accent-rgb), 0.55);
+}
+.Button_btn__zmap9.Button_primary__VcoA9:hover:not(:disabled) {
+  background: var(--accent-bright);
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 10px 22px -8px rgba(var(--accent-rgb), 0.6);
+}
+.Button_btn__zmap9.Button_gold__gfomb {
+  background: linear-gradient(160deg, var(--accent-bright), var(--accent));
+  color: var(--accent-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 8px 20px -8px rgba(var(--accent-rgb), 0.65);
+}
+.Button_btn__zmap9.Button_gold__gfomb:hover:not(:disabled) {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+.Button_btn__zmap9.Button_ghost__dXsq1 {
+  background: transparent;
+  color: var(--ink-dim);
+}
+.Button_btn__zmap9.Button_ghost__dXsq1:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+}
+.Button_btn__zmap9.Button_outline__RGdxy {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+}
+.Button_btn__zmap9.Button_outline__RGdxy:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-bright);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+.Button_btn__zmap9.Button_danger__adp4v {
+  background: rgba(var(--danger-rgb), 0.12);
+  color: var(--danger);
+  border: 1px solid rgba(var(--danger-rgb), 0.35);
+}
+.Button_btn__zmap9.Button_danger__adp4v:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+}
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/games/GameCard.module.scss ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.GameCard_card__JJhub {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--surface-raised);
+  text-decoration: none;
+  color: var(--ink);
+  outline: none;
+}
+.GameCard_card__JJhub:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.GameCard_card__JJhub {
+  transition: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .GameCard_card__JJhub {
+    transition-property: transform, border-color, box-shadow, background-color;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+.GameCard_card__JJhub:hover {
+  text-decoration: none;
+  transform: translateY(-3px);
+  border-color: rgba(var(--accent-rgb), 0.55);
+  box-shadow: var(--shadow-raise);
+}
+.GameCard_card__JJhub:hover .GameCard_icon__dS20H {
+  transform: scale(1.08) rotate(-3deg);
+}
+
+.GameCard_icon__dS20H {
+  font-size: 34px;
+  line-height: 1;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+  transition: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .GameCard_icon__dS20H {
+    transition-property: transform;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+
+.GameCard_body__8PLW5 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1;
+}
+
+.GameCard_nameRow__qA34n {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.GameCard_name__y3UPU {
+  font-weight: 750;
+  font-size: 16.5px;
+  letter-spacing: -0.01em;
+}
+
+.GameCard_badgeLive__dCQwD,
+.GameCard_badgeSoon__n1QGO {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.GameCard_badgeLive__dCQwD {
+  color: var(--accent-ink);
+  background: linear-gradient(160deg, var(--accent-bright), var(--accent));
+  box-shadow: 0 4px 12px -4px rgba(var(--accent-rgb), 0.6);
+}
+
+.GameCard_badgeSoon__n1QGO {
+  color: var(--ink-dim);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+}
+
+.GameCard_desc__bIKGg {
+  font-size: 13.5px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+
+.GameCard_meta__OxUFo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.GameCard_metaItem__eaQBU {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.GameCard_cta__0sRo7 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-bright);
+  margin-top: 4px;
+}
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/games/GameCatalog.module.scss ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.GameCatalog_catalog__HFaAp {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.GameCatalog_controls__MB2tg {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.GameCatalog_searchWrap__46g8L {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.GameCatalog_searchIcon__PWuvr {
+  position: absolute;
+  left: 12px;
+  font-size: 15px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.GameCatalog_search__No0Eg {
+  outline: none;
+}
+.GameCatalog_search__No0Eg:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.GameCatalog_search__No0Eg {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--ink);
+  padding: 8px 16px 8px 42px;
+  font-size: 14.5px;
+  transition: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .GameCatalog_search__No0Eg {
+    transition-property: border-color;
+    transition-duration: 120ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+.GameCatalog_search__No0Eg::placeholder {
+  color: var(--ink-faint);
+}
+.GameCatalog_search__No0Eg:focus {
+  border-color: var(--accent);
+}
+
+.GameCatalog_filters__LEM5u {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.GameCatalog_chip__jTqX6 {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+.GameCatalog_chip__jTqX6:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.GameCatalog_chip__jTqX6 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  color: var(--ink-dim);
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .GameCatalog_chip__jTqX6 {
+    transition-property: background-color, border-color, color, transform;
+    transition-duration: 120ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+.GameCatalog_chip__jTqX6:hover {
+  border-color: rgba(var(--accent-rgb), 0.5);
+  color: var(--ink);
+}
+
+.GameCatalog_chipActive__i_drf {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: var(--accent);
+  color: var(--accent-bright);
+}
+
+.GameCatalog_count__wUN_0 {
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.GameCatalog_sections__Q4fA0 {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.GameCatalog_section__pULox {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.GameCatalog_sectionHead__AfXGJ {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.GameCatalog_sectionTitle__8XTGB {
+  font-size: 21px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.GameCatalog_sectionDesc__3K_7S {
+  color: var(--ink-dim);
+  font-size: 14px;
+  max-width: 60ch;
+}
+
+.GameCatalog_viewAll__Dfx9V {
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.GameCatalog_grid__Winj8 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+  grid-gap: 16px;
+  gap: 16px;
+}
+
+.GameCatalog_empty__FHxzB {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow-panel);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px;
+  text-align: center;
+  background: var(--surface-soft);
+}
+.GameCatalog_empty__FHxzB h3 {
+  font-size: 18px;
+}
+.GameCatalog_empty__FHxzB p {
+  color: var(--ink-dim);
+  font-size: 14px;
+}
+
+.GameCatalog_emptyIcon__pw9J_ {
+  font-size: 34px;
+}
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/ThemeToggle.module.scss ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.ThemeToggle_toggle__yg5wm {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+.ThemeToggle_toggle__yg5wm:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.ThemeToggle_toggle__yg5wm {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ThemeToggle_toggle__yg5wm {
+    transition-property: color, background-color, border-color, transform;
+    transition-duration: 220ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+.ThemeToggle_toggle__yg5wm:hover {
+  color: var(--accent-bright);
+  border-color: rgba(var(--accent-rgb), 0.5);
+  transform: rotate(12deg);
+}
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/Wordmark.module.scss ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.Wordmark_link__avnIs {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--ink);
+}
+.Wordmark_link__avnIs:hover {
+  text-decoration: none;
+}
+
+.Wordmark_mark__DQQu_ {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+  position: relative;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.18em;
+  background: linear-gradient(100deg, var(--ink) 30%, var(--accent-bright) 50%, var(--ink) 70%);
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.Wordmark_mark__DQQu_.Wordmark_sm__0L2ZM {
+  font-size: 20px;
+}
+.Wordmark_mark__DQQu_.Wordmark_md__LV7Ko {
+  font-size: 26px;
+}
+.Wordmark_mark__DQQu_.Wordmark_lg__sraGV {
+  font-size: 44px;
+}
+
+.Wordmark_suit__TkZHn {
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+  font-size: 0.72em;
+  transform: translateY(-0.08em);
+}
+
+.Wordmark_link__avnIs:hover .Wordmark_mark__DQQu_ {
+  animation: Wordmark_shimmer__QxBE6 2.4s ease-in-out infinite;
+}

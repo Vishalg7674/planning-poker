@@ -5,9 +5,15 @@ import Toasts from '@/components/Toasts';
 import '@/styles/globals.scss';
 
 export const metadata: Metadata = {
-  title: 'Reveal — planning poker with no database',
+  title: 'Reveal — Fun Multiplayer Games for Teams',
   description:
-    'A free, no-login, real-time planning poker table. Rooms live in server memory and vanish when everyone leaves. No accounts, no database, ever.',
+    'Play fun real-time multiplayer games with your team, friends, and coworkers. Perfect for retrospectives, icebreakers, team meetings, quizzes, and more. No login required.',
+  applicationName: 'Reveal',
+  openGraph: {
+    title: 'Reveal — Break the Ice. Play Together.',
+    description: 'Real-time multiplayer games for teams, retrospectives and icebreakers. No signup required.',
+    type: 'website',
+  },
 };
 
 export const viewport: Viewport = {

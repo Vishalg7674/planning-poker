@@ -1,0 +1,55 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-5 $sp-7;
+  border-bottom: 1px solid var(--felt-line);
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @include media($bp-sm) {
+    padding: $sp-4;
+  }
+}
+
+.headerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+}
+
+.gamesLink {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink-dim);
+  @include motion(color, $dur-fast);
+
+  &:hover {
+    color: var(--accent-bright);
+    text-decoration: none;
+  }
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.categoryNote {
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 12.5px;
+  padding-bottom: $sp-6;
+}

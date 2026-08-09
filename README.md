@@ -1,12 +1,15 @@
-# Reveal — planning poker with no database
+# Reveal — Fun Multiplayer Games for Teams
 
-A free, real-time planning poker table. One round per room: everyone votes in
-secret, votes **lock permanently**, and the host reveals the whole table at
-once — then everyone sees the votes and the statistics.
+**Break the ice. Play together. No login required.**
 
-Rooms live **only in server memory**. No database, no accounts, no signup, no
-history. When the room empties (or the server restarts), it vanishes — by
-design.
+Reveal is a real-time multiplayer games platform for teams, retrospectives,
+icebreakers and everything in between. One game is live today — **Planning
+Poker** — with a catalog of **110 games across 9 categories** queued up behind
+it. Every game follows the same philosophy: create a room, share the link,
+and play together with zero signup.
+
+Rooms live **only in server memory**. No database, no accounts, no history.
+When the room empties (or the server restarts), it vanishes — by design.
 
 ---
 
@@ -28,8 +31,26 @@ Reveal unlocks when everyone has voted (or the timer ends the round)
 Everyone sees every vote + average / median / mode / range / consensus
 ```
 
+## Game catalog
+
+- The homepage and `/games` render entirely from one centralized registry,
+  [`src/lib/games.ts`](src/lib/games.ts) — 110 games across 9 categories
+  (Icebreakers, Speed, Guessing, Estimation, Funny, Developer, Creative, Word,
+  Competitive).
+- Each game is a small data entry: icon, name, description, category, player
+  count, duration, status (`live` / `coming-soon`) and route. No hard-coded
+  cards in JSX.
+- **Planning Poker** is the only `live` game; its card links straight to the
+  real implementation (`/create`). Every other game opens a shared
+  `Coming Soon` placeholder at `/games/<id>`.
+- The catalog has instant **search** and **category filter chips**, plus
+  per-category "View all" links. A game becomes playable by flipping
+  `status: 'coming-soon'` to `'live'` — no homepage changes needed.
+
 ## Features
 
+- **Game catalog** — search + category filters over 110 games, grouped into
+  9 category sections, responsive grid (4 → 2 → 1 cards per row).
 - **Room customization** — host sets their name, an optional team name and
   room title, picks one of **five decks** (Fibonacci, Modified Fibonacci,
   Sequential, T-Shirt, Powers of 2) and an **accent color** (gold / purple /
@@ -85,14 +106,15 @@ Everyone sees every vote + average / median / mode / range / consensus
 
 ```
 ├── src/
-│   ├── app/                  # Next.js routes: /, /create, /r/[roomCode], /r/[roomCode]/screen
+│   ├── app/                  # Next.js routes: /, /games, /games/[gameId], /create, /r/[roomCode], /r/[roomCode]/screen
 │   ├── components/           # UI components (Button, Modal, Avatar, RoomQR, Toasts, …)
+│   │   ├── games/            # GameCard, GameCatalog, ComingSoonGame (homepage catalog)
 │   │   ├── room/             # Deck, StartPanel, RevealBar, EndedPanel, ResultsPanel,
 │   │   │                     # PresentationView, ParticipantsPanel, …
 │   │   ├── modals/           # EndSessionModal, RemoveParticipantModal
 │   │   ├── providers.tsx     # Redux provider + theme sync
 │   │   └── RealtimeBridge.tsx# socket → Redux bridge (the only socket consumer)
-│   ├── lib/                  # cx, decks, identity, socket, theme, types
+│   ├── lib/                  # cx, decks, games (registry), identity, socket, theme, types
 │   ├── store/                # Redux store + 5 slices (room, participants, voting, timer, ui)
 │   │   └── actions.ts        # realtime → redux actions
 │   └── styles/               # global SCSS, tokens, mixins, animations, accent presets

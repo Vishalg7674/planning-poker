@@ -1,0 +1,88 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-5 $sp-7;
+  border-bottom: 1px solid var(--felt-line);
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @include media($bp-sm) {
+    padding: $sp-4;
+  }
+}
+
+.tag {
+  font-size: 12px;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  border-radius: $r-pill;
+  padding: 3px 10px;
+  white-space: nowrap;
+
+  @include media($bp-sm) {
+    display: none;
+  }
+}
+
+.headerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: $sp-7;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-6;
+
+  @include media($bp-sm) {
+    padding: $sp-5 $sp-4;
+    gap: $sp-5;
+  }
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+}
+
+.h1 {
+  @include display;
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  color: var(--ink-dim);
+  font-size: 16px;
+  max-width: 52ch;
+}
