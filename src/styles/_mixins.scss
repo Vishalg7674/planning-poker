@@ -1,0 +1,137 @@
+@use 'styles/variables' as *;
+
+// ---------------------------------------------------------------------------
+// Surfaces
+// ---------------------------------------------------------------------------
+
+/// Physical playing-card surface: warm ivory paper with a subtle gradient
+/// and inner highlight. Used for voting cards and result panels.
+@mixin card-surface {
+  position: relative;
+  background:
+    radial-gradient(120% 140% at 20% 0%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(160deg, var(--card-hi), var(--card-lo));
+  border: 1px solid var(--card-edge);
+  border-radius: $r-lg;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+  color: var(--card-ink);
+}
+
+/// Subtle paper texture (grain) overlay used above card surfaces.
+@mixin paper-grain {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+}
+
+/// Dark panel used for sidebars and control areas.
+@mixin panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: $r-xl;
+  box-shadow: var(--shadow-panel);
+}
+
+/// Felt table background (body / big surfaces).
+@mixin felt-bg {
+  background-color: var(--felt);
+  background-image:
+    radial-gradient(120% 90% at 50% -10%, var(--felt-glow), transparent 60%),
+    radial-gradient(90% 70% at 50% 115%, rgba(0, 0, 0, 0.35), transparent 60%);
+}
+
+// ---------------------------------------------------------------------------
+// Typography helpers
+// ---------------------------------------------------------------------------
+
+@mixin mono {
+  font-family: $font-mono;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@mixin display {
+  font-family: $font-display;
+  font-optical-sizing: auto;
+}
+
+@mixin clamp($min, $max) {
+  font-size: clamp(#{$min}px, #{$min + 'px'} + 1.2vw, #{$max}px);
+}
+
+// ---------------------------------------------------------------------------
+// Focus & interaction
+// ---------------------------------------------------------------------------
+
+@mixin focus-ring($color: var(--accent)) {
+  outline: none;
+  &:focus-visible {
+    outline: 2px solid $color;
+    outline-offset: 2px;
+    border-radius: $r-sm;
+  }
+}
+
+@mixin button-reset {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// ---------------------------------------------------------------------------
+// Responsive
+// ---------------------------------------------------------------------------
+
+@mixin media($bp) {
+  @media (max-width: $bp) {
+    @content;
+  }
+}
+
+@mixin media-min($bp) {
+  @media (min-width: $bp) {
+    @content;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Motion
+// ---------------------------------------------------------------------------
+
+/// Wrap reduced-motion-aware transitions. `$props` = transition property list.
+@mixin motion($props: (transform, opacity), $dur: $dur-base, $ease: $ease-out) {
+  transition: none;
+  @media (prefers-reduced-motion: no-preference) {
+    transition-property: $props;
+    transition-duration: $dur;
+    transition-timing-function: $ease;
+  }
+}
+
+/// Visually hidden but accessible
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

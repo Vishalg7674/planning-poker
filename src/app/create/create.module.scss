@@ -1,0 +1,107 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-5 $sp-7;
+  border-bottom: 1px solid var(--felt-line);
+
+  @include media($bp-sm) {
+    padding: $sp-4;
+  }
+}
+
+.back {
+  color: var(--ink-dim);
+  font-size: 14px;
+  font-weight: 600;
+  &:hover {
+    color: var(--accent-bright);
+    text-decoration: none;
+  }
+}
+
+.step {
+  margin-left: auto;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-faint);
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: $sp-7 $sp-4;
+
+  @include media($bp-sm) {
+    padding: $sp-5 $sp-3;
+  }
+}
+
+.panel {
+  @include panel;
+  width: 100%;
+  max-width: 520px;
+  padding: $sp-7;
+  background: var(--surface-raised);
+
+  @include media($bp-sm) {
+    padding: $sp-5;
+  }
+}
+
+.h1 {
+  @include display;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  margin-top: $sp-3;
+  color: var(--ink-dim);
+  font-size: 15px;
+}
+
+.form {
+  margin-top: $sp-6;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-5;
+}
+
+.serverError {
+  color: var(--danger);
+  background: rgba(var(--danger-rgb), 0.1);
+  border: 1px solid rgba(var(--danger-rgb), 0.35);
+  padding: $sp-3 $sp-4;
+  border-radius: $r-md;
+  font-size: 14px;
+}
+
+.ephemeralNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-2;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: live-dot 2.2s ease-in-out infinite;
+}

@@ -1,0 +1,183 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.storyForm {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+}
+
+.storyActions {
+  display: flex;
+  gap: $sp-3;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+
+  @include media($bp-xs) {
+    flex-direction: column;
+    .btnPrimary {
+      order: -1;
+    }
+  }
+}
+
+.confirmBody {
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  line-height: 1.6;
+  strong {
+    color: var(--ink);
+  }
+}
+
+.confirmWarn {
+  margin-top: $sp-3;
+  padding: $sp-3 $sp-4;
+  border: 1px solid rgba(var(--danger-rgb), 0.4);
+  background: rgba(var(--danger-rgb), 0.08);
+  border-radius: $r-md;
+  color: var(--danger);
+  font-size: 13.5px;
+}
+
+// Summary modal
+.chartSection {
+  @include panel;
+  background: var(--surface-soft);
+  border-radius: $r-lg;
+  padding: $sp-4 $sp-5;
+}
+
+.summaryTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+
+  th,
+  td {
+    text-align: left;
+    padding: $sp-2 $sp-3;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+  }
+
+  td.monoCell {
+    font-family: $font-mono;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.totals {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $sp-2;
+
+  @include media($bp-xs) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.total {
+  @include panel;
+  background: var(--surface-soft);
+  border-radius: $r-md;
+  padding: $sp-3;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.totalLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.totalValue {
+  @include mono;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.downloadRow {
+  display: flex;
+  gap: $sp-3;
+  flex-wrap: wrap;
+}
+
+.ephemeral {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+// Custom deck
+.deckEditor {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+}
+
+.deckChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-2;
+  min-height: 44px;
+  align-content: flex-start;
+}
+
+.deckChip {
+  @include mono;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-1;
+  font-size: 14px;
+  font-weight: 700;
+  padding: $sp-2 $sp-3;
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  color: var(--accent-bright);
+  border-radius: $r-md;
+
+  button {
+    @include button-reset;
+    color: inherit;
+    opacity: 0.6;
+    font-size: 12px;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.addRow {
+  display: flex;
+  gap: $sp-2;
+  align-items: center;
+}
+
+.addInput {
+  @include focus-ring;
+  flex: 1;
+  min-width: 0;
+  font-family: $font-mono;
+  font-size: 15px;
+  padding: $sp-2 $sp-3;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: $r-md;
+  color: var(--ink);
+}

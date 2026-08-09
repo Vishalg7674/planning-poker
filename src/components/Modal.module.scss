@@ -1,0 +1,81 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $sp-5;
+  background: var(--backdrop);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: backdrop-in $dur-fast $ease-out both;
+
+  @include media($bp-sm) {
+    align-items: flex-end;
+    padding: $sp-3;
+  }
+}
+
+.modal {
+  @include panel;
+  position: relative;
+  width: 100%;
+  max-height: min(86vh, 760px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform-origin: var(--origin, center);
+  animation: modal-in $dur-slow $ease-snap both;
+  background: var(--surface-raised);
+
+  &.sm {
+    max-width: 420px;
+  }
+  &.md {
+    max-width: 560px;
+  }
+  &.lg {
+    max-width: 720px;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-4;
+  padding: $sp-5 $sp-6 $sp-4;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  @include display;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.close {
+  flex-shrink: 0;
+}
+
+.body {
+  padding: $sp-5 $sp-6;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-3;
+  padding: $sp-4 $sp-6 $sp-5;
+  border-top: 1px solid var(--border);
+  background: var(--surface-soft);
+}

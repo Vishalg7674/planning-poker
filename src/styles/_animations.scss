@@ -1,0 +1,214 @@
+@use 'styles/variables' as *;
+
+// ---------------------------------------------------------------------------
+// Keyframes — everything respects prefers-reduced-motion via globals.scss
+// ---------------------------------------------------------------------------
+
+/// Theatrical flip reveal for voting cards (rotateY, not a fade).
+@keyframes card-flip {
+  0% {
+    transform: rotateY(180deg) translateY(4px) scale(0.96);
+  }
+  60% {
+    transform: rotateY(-8deg) translateY(0) scale(1.02);
+  }
+  100% {
+    transform: rotateY(0deg) translateY(0) scale(1);
+  }
+}
+
+/// Card "locks" into place once you commit a vote.
+@keyframes vote-lock {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(-10px) scale(1.06);
+  }
+  100% {
+    transform: translateY(5px) scale(0.94);
+  }
+}
+
+/// Consensus celebration — warm gold flash across the result panel.
+@keyframes celebrate-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+    background-color: transparent;
+  }
+  35% {
+    box-shadow: 0 0 0 12px rgba(var(--accent-rgb), 0.16);
+    background-color: rgba(var(--accent-rgb), 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+    background-color: transparent;
+  }
+}
+
+/// Disagreement — distinct coral pulse, not celebratory.
+@keyframes disagreement-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--danger-rgb), 0);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(var(--danger-rgb), 0.14);
+  }
+}
+
+/// Confetti pieces flying up and out from the celebration origin.
+@keyframes confetti-burst {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--cx), var(--cy)) rotate(var(--cr)) scale(1);
+    opacity: 0;
+  }
+}
+
+/// Emoji reaction floats up and fades, physics-y ease.
+@keyframes reaction-float {
+  0% {
+    transform: translate(-50%, 12px) scale(0.5) rotate(var(--r1, 0deg));
+    opacity: 0;
+  }
+  18% {
+    transform: translate(-50%, -6px) scale(1.08) rotate(var(--r2, 0deg));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -92px) scale(0.94) rotate(var(--r3, 0deg));
+    opacity: 0;
+  }
+}
+
+/// Modal enter: scale+fade from the origin point (set via transform-origin).
+@keyframes modal-in {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/// Timer urgency
+@keyframes timer-urgent {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes timer-zero-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+/// Toast / pill entrance (connection status, toasts)
+@keyframes pill-in {
+  from {
+    transform: translateY(-14px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/// Avatar status: thinking → voted
+@keyframes status-think {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0.25);
+  }
+}
+
+/// "Walking up to a table" — room entry sweep
+@keyframes table-approach {
+  0% {
+    transform: scale(1.045);
+    filter: brightness(0.55) blur(6px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.01);
+    filter: brightness(0.9) blur(0px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+    opacity: 1;
+  }
+}
+
+/// Gentle card fan entrance on the landing page
+@keyframes fan-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) rotate(var(--fan-rot)) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--fan-rot)) scale(1);
+  }
+}
+
+/// Shimmer for the wordmark
+@keyframes shimmer {
+  0% {
+    background-position: -180% 0;
+  }
+  100% {
+    background-position: 180% 0;
+  }
+}
+
+/// Pulsing "live" dot
+@keyframes live-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
+  }
+}

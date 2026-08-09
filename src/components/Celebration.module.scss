@@ -1,0 +1,38 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.burst {
+  position: fixed;
+  inset: 0;
+  z-index: $z-overlay;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 50% at 50% 45%, rgba(var(--accent-rgb), 0.22), transparent 70%);
+  animation: celebrate-flash 1s $ease-out both;
+}
+
+.piece {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  animation: confetti-burst 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--delay);
+}
+
+.label {
+  @include display;
+  position: relative;
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 700;
+  color: var(--accent-bright);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
+  animation: modal-in $dur-slow $ease-snap both;
+  animation-delay: 120ms;
+}

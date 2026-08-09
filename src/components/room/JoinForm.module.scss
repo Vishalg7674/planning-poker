@@ -1,0 +1,77 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.wrap {
+  @include panel;
+  width: 100%;
+  max-width: 480px;
+  padding: $sp-7;
+  background: var(--surface-raised);
+  text-align: center;
+
+  @include media($bp-sm) {
+    padding: $sp-5;
+  }
+}
+
+.codeChip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  border: 1px solid rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.08);
+  border-radius: $r-pill;
+  padding: 4px 14px 4px 8px;
+  margin-bottom: $sp-5;
+}
+
+.codeLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  background: var(--surface-soft);
+  padding: 3px 8px;
+  border-radius: $r-pill;
+}
+
+.code {
+  @include mono;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--accent-bright);
+}
+
+.h1 {
+  @include display;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.sub {
+  margin-top: $sp-2;
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  max-width: 38ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.form {
+  margin-top: $sp-6;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-5;
+  text-align: left;
+}
+
+.error {
+  color: var(--danger);
+  background: rgba(var(--danger-rgb), 0.1);
+  border: 1px solid rgba(var(--danger-rgb), 0.35);
+  padding: $sp-3 $sp-4;
+  border-radius: $r-md;
+  font-size: 13.5px;
+}

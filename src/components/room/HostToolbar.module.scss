@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.toolbar {
+  @include panel;
+  padding: $sp-3 $sp-4;
+  background: var(--surface);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-3;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hint {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}

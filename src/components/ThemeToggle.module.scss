@@ -1,0 +1,22 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.toggle {
+  @include button-reset;
+  @include focus-ring;
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: $r-md;
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  @include motion((color, background-color, border-color, transform));
+
+  &:hover {
+    color: var(--accent-bright);
+    border-color: rgba(var(--accent-rgb), 0.5);
+    transform: rotate(12deg);
+  }
+}

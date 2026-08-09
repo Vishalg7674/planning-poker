@@ -1,0 +1,96 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.stack {
+  position: fixed;
+  top: $sp-5;
+  right: $sp-5;
+  z-index: $z-toast;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+  max-width: min(360px, calc(100vw - 32px));
+  pointer-events: none;
+
+  @include media($bp-sm) {
+    top: $sp-3;
+    right: $sp-3;
+  }
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-3;
+  padding: $sp-3 $sp-4;
+  border-radius: $r-md;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-panel);
+  animation: pill-in $dur-base $ease-out both;
+
+  &.celebrate {
+    border-color: rgba(var(--accent-rgb), 0.6);
+    background: linear-gradient(140deg, var(--surface-raised), rgba(var(--accent-rgb), 0.12));
+  }
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.info .icon {
+  background: rgba(120, 160, 220, 0.2);
+  color: #9cc0f0;
+}
+.success .icon {
+  background: rgba(var(--success-rgb), 0.2);
+  color: var(--success);
+}
+.warning .icon {
+  background: rgba(var(--warning-rgb), 0.2);
+  color: var(--warning);
+}
+.error .icon {
+  background: rgba(var(--danger-rgb), 0.2);
+  color: var(--danger);
+}
+.celebrate .icon {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.msg {
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-top: 1px;
+}
+
+.x {
+  @include button-reset;
+  color: var(--ink-faint);
+  font-size: 12px;
+  padding: 2px;
+  &:hover {
+    color: var(--ink);
+  }
+}

@@ -1,0 +1,208 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+@use 'styles/animations' as *;
+
+// ---------------------------------------------------------------------------
+// Theme tokens — CSS custom properties so light/dark/system is a token swap.
+// `data-theme` is set on <html> by the ThemeProvider. "system" resolves to
+// light/dark at runtime but keeps this token surface identical.
+// ---------------------------------------------------------------------------
+
+:root,
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  // Felt table
+  --felt: #0c1f18;
+  --felt-deep: #07130f;
+  --felt-glow: rgba(24, 94, 70, 0.55);
+  --felt-line: rgba(148, 207, 178, 0.08);
+
+  // Surfaces
+  --surface: #12281f;
+  --surface-raised: #173129;
+  --surface-soft: #0e221b;
+  --border: rgba(148, 207, 178, 0.14);
+  --border-strong: rgba(148, 207, 178, 0.28);
+
+  // Playing cards (warm ivory paper)
+  --card-hi: #f3ead6;
+  --card-lo: #ddcfae;
+  --card-edge: rgba(74, 52, 16, 0.35);
+  --card-ink: #1c2230;
+  --card-ink-dim: #4a4f5c;
+  --card-suit: #8a6d2f;
+
+  // Ink / text
+  --ink: #eef2ea;
+  --ink-dim: #a7b8ad;
+  --ink-faint: #6e8579;
+
+  // Accents
+  --accent: #e8b64c; // warm gold
+  --accent-bright: #f6cd6a;
+  --accent-ink: #241a04;
+  --accent-rgb: 232, 182, 76;
+
+  --success: #7fd6a8;
+  --success-rgb: 127, 214, 168;
+  --danger: #e5736f;
+  --danger-rgb: 229, 115, 111;
+  --warning: #e8b64c;
+  --warning-rgb: 232, 182, 76;
+
+  --shadow-panel: 0 18px 40px -18px rgba(0, 0, 0, 0.55);
+  --shadow-raise: 0 22px 44px -16px rgba(0, 0, 0, 0.6);
+
+  --backdrop: rgba(4, 12, 9, 0.66);
+
+  --header-bg: rgba(12, 31, 24, 0.82);
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  // Felt table (kept deep for contrast, but warmer/brighter)
+  --felt: #1d4636;
+  --felt-deep: #143325;
+  --felt-glow: rgba(107, 196, 156, 0.5);
+  --felt-line: rgba(10, 32, 24, 0.06);
+
+  --surface: #f4ecdb;
+  --surface-raised: #fbf6ea;
+  --surface-soft: #ece2cc;
+  --border: rgba(40, 58, 48, 0.14);
+  --border-strong: rgba(40, 58, 48, 0.26);
+
+  --card-hi: #fffaf0;
+  --card-lo: #e9dcbf;
+  --card-edge: rgba(96, 70, 28, 0.3);
+  --card-ink: #1d2332;
+  --card-ink-dim: #5c5f6b;
+  --card-suit: #8a6d2f;
+
+  --ink: #16241d;
+  --ink-dim: #4a5f53;
+  --ink-faint: #7a8d83;
+
+  --accent: #c88f1e;
+  --accent-bright: #e0a92f;
+  --accent-ink: #2a1c02;
+  --accent-rgb: 200, 143, 30;
+
+  --success: #2f9e63;
+  --success-rgb: 47, 158, 99;
+  --danger: #c94f4a;
+  --danger-rgb: 201, 79, 74;
+  --warning: #c88f1e;
+  --warning-rgb: 200, 143, 30;
+
+  --shadow-panel: 0 16px 36px -16px rgba(30, 50, 40, 0.3);
+  --shadow-raise: 0 24px 44px -16px rgba(30, 50, 40, 0.32);
+
+  --backdrop: rgba(20, 38, 30, 0.5);
+
+  --header-bg: rgba(244, 236, 219, 0.85);
+}
+
+// ---------------------------------------------------------------------------
+// Reset & base
+// ---------------------------------------------------------------------------
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  @include felt-bg;
+  color: var(--ink);
+  font-family: $font-sans;
+  font-size: 16px;
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(var(--accent-rgb), 0.35);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  line-height: 1.15;
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--accent-bright);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+// Scrollbars that match the felt
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--accent-rgb), 0.4) transparent;
+}
+
+// ---------------------------------------------------------------------------
+// Utility classes
+// ---------------------------------------------------------------------------
+
+.mono {
+  @include mono;
+}
+
+// ---------------------------------------------------------------------------
+// Reduced motion: degrade to simple fades/opacity
+// ---------------------------------------------------------------------------
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

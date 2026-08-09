@@ -1,0 +1,327 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+.room {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-3 $sp-6;
+  position: sticky;
+  top: 0;
+  z-index: $z-header;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--felt-line);
+
+  @include media($bp-sm) {
+    padding: $sp-2 $sp-3;
+    gap: $sp-2;
+  }
+}
+
+.homeLink {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.team {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+
+  @include media($bp-sm) {
+    display: none;
+  }
+}
+
+.codeWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--border-strong);
+  border-radius: $r-md;
+  background: var(--surface-soft);
+  padding: 4px 4px 4px 12px;
+  flex-shrink: 0;
+}
+
+.code {
+  @include mono;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--accent-bright);
+}
+
+.copyBtn {
+  @include button-reset;
+  @include focus-ring;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: $r-sm;
+  color: var(--ink-faint);
+  font-size: 14px;
+  @include motion((color, background-color));
+
+  &:hover {
+    color: var(--accent-bright);
+    background: rgba(var(--accent-rgb), 0.12);
+  }
+}
+
+.headerRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+
+  @include media($bp-sm) {
+    gap: $sp-2;
+  }
+}
+
+.projectBtn {
+  @include button-reset;
+  @include focus-ring;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: $r-md;
+  padding: 6px 12px;
+  white-space: nowrap;
+  @include motion((color, border-color, background-color, transform), $dur-fast);
+
+  &:hover {
+    color: var(--accent-bright);
+    border-color: rgba(var(--accent-rgb), 0.5);
+    background: rgba(var(--accent-rgb), 0.08);
+    transform: translateY(-1px);
+  }
+
+  @include media($bp-sm) {
+    font-size: 0;
+    padding: 6px 8px;
+    span {
+      font-size: 15px;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Grid
+// ---------------------------------------------------------------------------
+
+.grid {
+  flex: 1;
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: $sp-5 $sp-6;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: $sp-5;
+  align-items: start;
+  animation: table-approach 0.8s $ease-out both;
+
+  @include media($bp-lg) {
+    grid-template-columns: 1fr;
+    .columnParticipants {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @include media($bp-sm) {
+    grid-template-columns: 1fr;
+    padding: $sp-3 $sp-3 $sp-6;
+    .columnParticipants {
+      grid-column: auto;
+    }
+  }
+}
+
+.columnParticipants {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+
+  @include media-min($bp-lg) {
+    position: sticky;
+    top: 76px;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The table (center column)
+// ---------------------------------------------------------------------------
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+  min-width: 0;
+}
+
+.tableTop {
+  display: flex;
+  justify-content: center;
+}
+
+.tableSurface {
+  @include panel;
+  position: relative;
+  padding: $sp-6;
+  background:
+    radial-gradient(90% 80% at 50% 0%, rgba(var(--accent-rgb), 0.05), transparent 55%),
+    var(--surface);
+  min-height: 320px;
+
+  @include media($bp-sm) {
+    padding: $sp-4 $sp-2;
+  }
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-2;
+  padding: $sp-4;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--felt-line);
+}
+
+.footerDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: live-dot 2.4s ease-in-out infinite;
+}
+
+// ---------------------------------------------------------------------------
+// Join / approach screens
+// ---------------------------------------------------------------------------
+
+.enter {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-6;
+  padding: $sp-5;
+  animation: table-approach 0.9s $ease-out both;
+}
+
+.enterCard {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  justify-content: center;
+}
+
+.entering {
+  @include panel;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-5 $sp-7;
+  background: var(--surface-raised);
+  font-weight: 650;
+  color: var(--ink-dim);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+.enterNote {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+// ---------------------------------------------------------------------------
+// Gone screen
+// ---------------------------------------------------------------------------
+
+.gone {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: $sp-5;
+  animation: table-approach 0.7s $ease-out both;
+}
+
+.gonePanel {
+  @include panel;
+  max-width: 460px;
+  padding: $sp-7;
+  background: var(--surface-raised);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-4;
+}
+
+.goneSuit {
+  font-size: 44px;
+  filter: grayscale(0.4) opacity(0.85);
+}
+
+.goneTitle {
+  @include display;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.goneBody {
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.goneActions {
+  display: flex;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: $sp-2;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

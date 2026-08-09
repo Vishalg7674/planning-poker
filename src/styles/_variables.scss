@@ -1,0 +1,56 @@
+// ---------------------------------------------------------------------------
+// Reveal design tokens (SCSS layer)
+// Theme colors live as CSS custom properties in globals.scss so that
+// light/dark/system is a token swap, not a rewrite.
+// ---------------------------------------------------------------------------
+
+// Breakpoints
+$bp-xs: 420px;
+$bp-sm: 640px;
+$bp-md: 820px;
+$bp-lg: 1080px;
+$bp-xl: 1400px;
+
+// Fonts (loaded via <link> in layout; fallbacks matter if offline)
+$font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+$font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+$font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+
+// Spacing scale
+$sp-1: 4px;
+$sp-2: 8px;
+$sp-3: 12px;
+$sp-4: 16px;
+$sp-5: 24px;
+$sp-6: 32px;
+$sp-7: 48px;
+$sp-8: 64px;
+
+// Radius
+$r-sm: 6px;
+$r-md: 10px;
+$r-lg: 14px;
+$r-xl: 22px;
+$r-pill: 999px;
+
+// Motion
+$dur-fast: 120ms;
+$dur-base: 220ms;
+$dur-slow: 420ms;
+$dur-float: 640ms;
+
+// Easings
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1); // overshoot "snap" for card flips
+$ease-float: cubic-bezier(0.16, 1, 0.3, 1);
+
+// Z-layers
+$z-table: 1;
+$z-header: 30;
+$z-toast: 60;
+$z-reaction: 55;
+$z-modal: 80;
+$z-overlay: 90;
+
+// Card stagger (flip wave)
+$flip-stagger: 70ms;

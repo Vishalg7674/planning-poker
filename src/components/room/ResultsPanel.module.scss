@@ -1,0 +1,247 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.panel {
+  @include panel;
+  padding: $sp-6;
+  background: var(--surface-raised);
+  display: flex;
+  flex-direction: column;
+  gap: $sp-5;
+
+  @include media($bp-sm) {
+    padding: $sp-4;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Stats
+// ---------------------------------------------------------------------------
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $sp-2;
+
+  @include media($bp-sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat {
+  @include panel;
+  background: var(--surface-soft);
+  border-radius: $r-md;
+  padding: $sp-3;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.statLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+}
+
+.statValue {
+  @include mono;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+// ---------------------------------------------------------------------------
+// Revealed participant cards — staggered 3D flip
+// ---------------------------------------------------------------------------
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: $sp-4;
+  perspective: 1200px;
+
+  @include media($bp-sm) {
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: $sp-3;
+  }
+}
+
+.voteCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-2;
+  animation: card-flip 0.55s $ease-snap both;
+  transform-origin: center;
+}
+
+.voteFace {
+  @include card-surface;
+  @include paper-grain;
+  width: 100%;
+  max-width: 96px;
+  aspect-ratio: 0.72;
+  border-radius: $r-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.voteValue {
+  @include mono;
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 800;
+  color: var(--card-ink);
+  position: relative;
+  z-index: 1;
+}
+
+.voteSuit {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  color: var(--card-suit);
+  font-size: 12px;
+  z-index: 1;
+}
+
+// Non-voters: a dim, dashed "thinking" card instead of a value.
+.blank .blankFace {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  background: rgba(0, 0, 0, 0.14);
+  box-shadow: none;
+}
+
+.blankFace {
+  width: 100%;
+  max-width: 96px;
+  aspect-ratio: 0.72;
+  border-radius: $r-md;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blankMark {
+  @include mono;
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 800;
+  color: var(--ink-faint);
+}
+
+.noVote {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.voterMeta {
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+  max-width: 100%;
+}
+
+.voterName {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ---------------------------------------------------------------------------
+// Breakdown bars
+// ---------------------------------------------------------------------------
+
+.breakdownTitle {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  margin-bottom: $sp-3;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 44px 1fr 28px;
+  align-items: center;
+  gap: $sp-2;
+}
+
+.barValue {
+  @include mono;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--ink-dim);
+}
+
+.barTrack {
+  height: 12px;
+  border-radius: $r-pill;
+  background: var(--surface-soft);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.barFill {
+  height: 100%;
+  border-radius: $r-pill;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.55), var(--accent));
+  @include motion(width, $dur-slow, $ease-out);
+}
+
+.barMode {
+  background: linear-gradient(90deg, var(--accent), var(--accent-bright));
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
+}
+
+.barCount {
+  @include mono;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.roundNote {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  text-align: center;
+  border-top: 1px solid var(--border);
+  padding-top: $sp-4;
+  margin: 0;
+}
+
+.emptyTitle {
+  @include display;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.emptyBody {
+  color: var(--ink-dim);
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}

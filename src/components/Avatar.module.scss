@@ -1,0 +1,79 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: hsl(var(--hue) 48% 42%);
+  background-image: radial-gradient(120% 120% at 30% 20%, hsl(var(--hue) 60% 58%), hsl(var(--hue) 48% 36%));
+  color: #f6f1e4;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+
+  &.sm {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+  }
+  &.md {
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
+  }
+  &.lg {
+    width: 52px;
+    height: 52px;
+    font-size: 16px;
+  }
+
+  &.host {
+    border-color: rgba(var(--accent-rgb), 0.85);
+    box-shadow:
+      0 0 0 2px rgba(var(--accent-rgb), 0.25),
+      0 2px 6px rgba(0, 0, 0, 0.35);
+  }
+
+  &.status-voted {
+    animation: status-think 1.6s ease-in-out infinite;
+    border-color: rgba(var(--success-rgb), 0.9);
+  }
+
+  &.status-disconnected {
+    opacity: 0.45;
+    filter: grayscale(1);
+  }
+}
+
+.face {
+  line-height: 1;
+}
+
+.crown {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  font-size: 13px;
+  color: var(--accent-bright);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.me {
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0 5px;
+  border-radius: $r-pill;
+  white-space: nowrap;
+}

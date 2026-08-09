@@ -1,0 +1,73 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+
+  &.invalid .control {
+    border-color: rgba(var(--danger-rgb), 0.6);
+    box-shadow: 0 0 0 3px rgba(var(--danger-rgb), 0.12);
+  }
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+}
+
+.control {
+  @include focus-ring;
+  width: 100%;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: $r-md;
+  padding: $sp-3 $sp-4;
+  color: var(--ink);
+  font-size: 15px;
+  @include motion((border-color, box-shadow, background-color), $dur-fast);
+
+  &::placeholder {
+    color: var(--ink-faint);
+  }
+
+  &:hover:not(:focus) {
+    border-color: var(--border-strong);
+  }
+
+  &:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.18);
+  }
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 84px;
+  line-height: 1.5;
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a7b8ad' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right $sp-4 center;
+  padding-right: $sp-7;
+  cursor: pointer;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: $sp-1;
+}
+
+.hint {
+  color: var(--ink-faint);
+  font-size: 13px;
+  margin-top: $sp-1;
+}

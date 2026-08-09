@@ -1,0 +1,44 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-4;
+  text-align: center;
+  padding: $sp-6 $sp-4;
+  animation: modal-in $dur-base $ease-out both;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--warning);
+}
+
+.title {
+  @include display;
+  font-size: clamp(26px, 3.4vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.note {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.waiting {
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  font-weight: 650;
+}

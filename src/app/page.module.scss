@@ -1,0 +1,346 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-5 $sp-7;
+  position: sticky;
+  top: 0;
+  z-index: $z-header;
+  background: var(--header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--felt-line);
+
+  @include media($bp-sm) {
+    padding: $sp-4;
+  }
+}
+
+.tag {
+  font-size: 12px;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  border-radius: $r-pill;
+  padding: 3px 10px;
+  white-space: nowrap;
+
+  @include media($bp-sm) {
+    display: none;
+  }
+}
+
+.headerActions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: $sp-7 $sp-7 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-8;
+
+  @include media($bp-sm) {
+    padding: $sp-5 $sp-4 0;
+    gap: $sp-6;
+  }
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: $sp-8;
+  align-items: center;
+  padding: $sp-7 0;
+
+  @include media($bp-lg) {
+    grid-template-columns: 1fr;
+    padding: $sp-5 0 0;
+  }
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-bright);
+  margin-bottom: $sp-4;
+}
+
+.h1 {
+  @include display;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+
+  em {
+    font-style: italic;
+    font-weight: 700;
+    color: var(--accent-bright);
+  }
+}
+
+.pitch {
+  margin-top: $sp-5;
+  font-size: 17px;
+  color: var(--ink-dim);
+  max-width: 52ch;
+
+  strong {
+    color: var(--ink);
+  }
+}
+
+.ctaRow {
+  margin-top: $sp-7;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-6;
+  max-width: 460px;
+}
+
+.ctaLink {
+  display: inline-block;
+  width: fit-content;
+}
+
+.ctaPrimary {
+  width: 100%;
+}
+
+.joinForm {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+}
+
+.joinWrap {
+  display: flex;
+  align-items: stretch;
+  gap: $sp-2;
+}
+
+.joinLabel {
+  position: absolute;
+  @include sr-only;
+}
+
+.codeInput {
+  @include focus-ring;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-family: $font-mono;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: $r-md;
+  color: var(--ink);
+  padding: 0 $sp-3;
+
+  &::placeholder {
+    letter-spacing: 0.18em;
+    color: var(--ink-faint);
+  }
+
+  &.codeError {
+    border-color: var(--danger);
+  }
+}
+
+.joinError {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.trust {
+  margin-top: $sp-6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-2;
+
+  span {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-dim);
+    border: 1px solid var(--border);
+    border-radius: $r-pill;
+    padding: 4px 12px;
+    background: var(--surface-soft);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The felt table + card fan
+// ---------------------------------------------------------------------------
+
+.table {
+  display: grid;
+  place-items: center;
+}
+
+.felt {
+  position: relative;
+  width: min(420px, 90vw);
+  aspect-ratio: 1.25;
+  border-radius: 46% 46% 40% 40%;
+  background:
+    radial-gradient(80% 70% at 50% 20%, rgba(var(--accent-rgb), 0.12), transparent 55%),
+    radial-gradient(120% 100% at 50% 0%, var(--felt-glow), transparent 65%),
+    linear-gradient(165deg, var(--surface-raised), var(--felt-deep));
+  border: 1px solid var(--border);
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.06),
+    0 30px 70px -30px rgba(0, 0, 0, 0.7);
+  display: grid;
+  place-items: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 7%;
+    border-radius: 50% 50% 42% 42%;
+    border: 2px dashed rgba(var(--accent-rgb), 0.25);
+  }
+
+  @include media($bp-sm) {
+    display: none;
+  }
+}
+
+.fan {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  perspective: 900px;
+}
+
+.fanCard {
+  position: absolute;
+  width: 108px;
+  height: 154px;
+  @include card-surface;
+  @include paper-grain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  animation: fan-in 0.7s $ease-snap both;
+  animation-delay: var(--delay);
+  transform: rotate(var(--fan-rot)) translate(var(--fan-x), var(--fan-y));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 10px 22px rgba(0, 0, 0, 0.4);
+
+  &:nth-child(3) {
+    z-index: 2;
+    filter: brightness(1.05);
+  }
+}
+
+.fanSuit {
+  color: var(--card-suit);
+  font-size: 18px;
+  position: absolute;
+  top: 12px;
+  left: 14px;
+}
+
+.fanValue {
+  @include mono;
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--card-ink);
+}
+
+.feltLabel {
+  position: absolute;
+  bottom: 14%;
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(var(--accent-rgb), 0.85);
+  text-align: center;
+  padding: 6px 16px;
+  border-top: 1px solid rgba(var(--accent-rgb), 0.35);
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.35);
+}
+
+// ---------------------------------------------------------------------------
+// Features + footer
+// ---------------------------------------------------------------------------
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $sp-5;
+  padding-bottom: $sp-7;
+
+  @include media($bp-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feature {
+  @include panel;
+  padding: $sp-6;
+  background: var(--surface-soft);
+
+  h2 {
+    font-size: 17px;
+    margin-top: $sp-3;
+  }
+
+  p {
+    margin-top: $sp-2;
+    color: var(--ink-dim);
+    font-size: 14.5px;
+  }
+}
+
+.featureIcon {
+  font-size: 26px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+.footer {
+  border-top: 1px solid var(--felt-line);
+  padding: $sp-6 $sp-7;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+  align-items: center;
+  text-align: center;
+
+  p {
+    max-width: 60ch;
+    color: var(--ink-faint);
+    font-size: 13px;
+  }
+}
