@@ -23,6 +23,9 @@ endpoints are required.
 | `NEXT_PUBLIC_SOCKET_URL`| browser client     | `http://localhost:3001`   | ✅ set to the realtime server's public URL |
 | `NEXT_DIST_DIR`         | Next build         | `.next`                   | only for e2e isolation |
 
+- The realtime server also honors `PORT` when `SOCKET_PORT` is unset — Render
+  and Railway inject a random `PORT` into the environment.
+
 - `SOCKET_ORIGIN` accepts a comma-separated list of origins allowed to open a
   WebSocket connection. In production it must be the origin(s) the app is
   served from (e.g. `https://poker.example.com`), **not** `localhost`.
@@ -134,6 +137,34 @@ Two containers: `app` (Next.js, `npm start`) and `rt` (realtime server,
 `node server/index.mjs`), sharing a network. Pass env vars per service; keep
 the `rt` container publicly reachable (or proxied with WebSocket upgrade) at
 the URL you put in `NEXT_PUBLIC_SOCKET_URL` at build time.
+
+### D. Render (realtime server) + Vercel (Next.js) — recommended pairing
+
+Render web services run a long-lived Node process and forward WebSocket
+upgrades — exactly what the realtime server needs. The Next.js app stays on
+Vercel; the two services only talk through the browser.
+
+1. **Deploy the realtime server.** A [`render.yaml`](../../render.yaml)
+   blueprint is included: in Render pick **New → Blueprint** and select this
+   repo (or run `render blueprint launch`). The service starts with
+   `node server/index.mjs`; Render's injected `PORT` is honored automatically
+   (`SOCKET_PORT` wins when both are set).
+2. **Set `SOCKET_ORIGIN`** on the Render service to the origin the app is
+   served from — e.g. `https://your-app.vercel.app` (comma-separated list
+   works, useful for preview + production origins).
+3. **Point the client at it.** On Vercel, add `NEXT_PUBLIC_SOCKET_URL` =
+   `https://reveal-rt.onrender.com` under **Settings → Environment Variables**
+   and trigger a new deployment — the value is baked into the client bundle
+   at build time.
+4. **Verify.** `curl https://reveal-rt.onrender.com/` should return the
+   plain-text banner, then create a room on the deployed app.
+
+> **Free-tier caveat:** Render free web services sleep after ~15 minutes of
+> inactivity and cold-start on the next request, which can exceed the
+> client's 7-second connect timeout — the first visitor after an idle period
+> may see the *"Can't reach the realtime server"* error. Rooms are in-memory
+> anyway, so they are gone while the instance is asleep. Use the paid
+> **Starter** plan (no sleeping) for a reliable public demo.
 
 ---
 

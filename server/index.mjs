@@ -38,7 +38,9 @@ import {
   disconnectParticipant,
 } from './room.mjs';
 
-const PORT = Number(process.env.SOCKET_PORT || 3001);
+// Render / Railway inject a random PORT into the environment; SOCKET_PORT
+// (local dev, playwright) wins when both are set.
+const PORT = Number(process.env.SOCKET_PORT || process.env.PORT || 3001);
 const ORIGIN = process.env.SOCKET_ORIGIN || 'http://localhost:3000';
 
 /** @type {Map<string, import('./types').ServerRoom>} */

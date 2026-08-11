@@ -862,12 +862,18 @@ export default function DocsPage() {
                   <td>Next build output</td>
                   <td>.next</td>
                 </tr>
+                <tr>
+                  <td><Code>PORT</Code></td>
+                  <td>realtime server (Render/Railway)</td>
+                  <td>injected by host</td>
+                </tr>
               </tbody>
             </table>
             <p>
               For other devices on your LAN to join, set <Code>NEXT_PUBLIC_SOCKET_URL</Code> (and{' '}
-              <Code>SOCKET_ORIGIN</Code>) to your machine’s LAN IP. <Code>npm run build</Code> lints, typechecks and
-              builds; <Code>npm start</Code> serves it.
+              <Code>SOCKET_ORIGIN</Code>) to your machine’s LAN IP. On Render or Railway the realtime server also
+              honors the injected <Code>PORT</Code> variable; <Code>SOCKET_PORT</Code> wins when both are set.{' '}
+              <Code>npm run build</Code> lints, typechecks and builds; <Code>npm start</Code> serves it.
             </p>
           </section>
 

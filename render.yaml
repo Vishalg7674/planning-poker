@@ -1,0 +1,27 @@
+# Render Blueprint — the Realtime (Socket.io) server for Reveal.
+#
+# Rooms live in memory on this single process. Do NOT scale this service to
+# multiple instances: every participant must reach the same process, because
+# that process owns the room state. See docs/DEPLOYMENT.md.
+#
+# Set up:
+#   1. Render dashboard → New → Blueprint → pick this repo
+#      (or run `render blueprint launch` from the repo root).
+#   2. After creation, set SOCKET_ORIGIN in the service's Environment tab to
+#      the origin(s) the Next.js app is served from (e.g.
+#      https://your-app.vercel.app) — a comma-separated list works.
+#   3. On Vercel: Project → Settings → Environment Variables →
+#      NEXT_PUBLIC_SOCKET_URL = https://reveal-rt.onrender.com, then Redeploy —
+#      it is baked into the client bundle at build time.
+services:
+  - type: web
+    name: reveal-rt
+    runtime: node
+    plan: free # upgrade to "starter" ($7/mo) to avoid idle spin-down
+    buildCommand: npm ci
+    startCommand: node server/index.mjs
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: SOCKET_ORIGIN
+        sync: false # set in the dashboard: the app origin(s), e.g. https://your-app.vercel.app
