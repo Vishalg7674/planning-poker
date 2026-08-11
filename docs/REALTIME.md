@@ -25,10 +25,12 @@ and why the rules live on the server.
 ## Room creation & customization
 
 - **Host** — `room:create { hostName, teamName?, roomTitle?, deckId?,
-  accent?, revealMode? }` creates the room, seats the host as `facilitator`,
-  sets `room.hostId`, and joins the socket to the room channel. The
-  configuration is validated against the server allow-lists and fixed at
-  creation (the timer and reveal mode remain tweakable in the waiting room).
+  accent?, revealMode?, game?, questions? }` creates the room, seats the host
+  as `facilitator`, sets `room.hostId`, and joins the socket to the room
+  channel. The configuration is validated against the server allow-lists and
+  fixed at creation (the timer and reveal mode remain tweakable in the
+  waiting room). WYR rooms additionally store their sanitized question deck
+  (`game: 'would-you-rather'` + `questions`).
 - Every client in the room sees the configuration in the waiting room's
   config summary and as the accent applied to the room root — but only the
   host can change anything.
@@ -117,21 +119,47 @@ Two ways a round becomes revealable:
 
 - rejected if not host, already revealed, still `WAITING`, or
   (`VOTING` **and** not everyone voted);
-- accepted from `ENDED`, or from `VOTING` once everyone voted;
+- accepted from `ENDED`, or from `VOTING` once everyone voted — and, in a
+  **Would You Rather** room, from `VOTING`/`ENDED` at any time (the host
+  sets the icebreaker pace);
 - on success: `status` → `revealed`, `stats = computeStats(values, deckId)`
-  (which includes the `calculateConsensus` verdict), `timer = null`, and the
-  snapshot finally includes `votes` and `stats`.
+  for poker or `computeWyrStats(values)` for WYR (both include the
+  `calculateConsensus` verdict), `timer = null`, and the snapshot finally
+  includes `votes` and `stats`.
 
 Every client flips its cards from the same snapshot (`ResultsPanel` renders
 the values with a mode-aware staggered flip animation; full consensus
-triggers the celebration).
+triggers the celebration). WYR rooms render the A/B split instead — counts,
+percentages, voter chips and a unanimous-question celebration.
+
+## Would You Rather rounds
+
+WYR rooms run the exact same realtime plumbing, with a per-question loop:
+
+1. **Start** — `voting:start` puts question 0 on the table; the snapshot
+   carries the active `question` (the question text is public — only the
+   *picks* stay private).
+2. **Pick** — `vote:cast { value: 'A' | 'B' }`; the same permanent lock
+   applies per question (`hasVoted`), and `bad_value` rejects anything that
+   isn't `A` or `B`.
+3. **Reveal** — the host reveals at any time; everyone sees the split
+   (`stats.counts` for A and B, non-voters listed as *didn't pick*).
+4. **Next** — `wyr:next` (host only) wipes the previous question's votes,
+   resets `hasVoted`, advances `questionIndex`, and returns the room to
+   `VOTING`. When the deck is exhausted it returns `done: true`; the host
+   ends the session with `room:end`.
+
+The per-question wipe is server-authoritative — a participant can never
+vote twice on the *same* question, and is always free to pick again on the
+*next* one.
 
 ## Host controls
 
 Host-only actions that broadcast a snapshot: `voting:start`, `votes:reveal`,
-`room:settings` (timer + reveal mode), `room:lock`, `room:unlock`,
-`participant:remove`, `room:end`. All check `actorId === room.hostId`
-server-side; the UI merely hides the buttons for non-hosts.
+`wyr:next` (WYR), `room:settings` (timer + reveal mode), `room:lock`,
+`room:unlock`, `participant:remove`, `room:end`. All check
+`actorId === room.hostId` server-side; the UI merely hides the buttons for
+non-hosts.
 
 ## Disconnect
 

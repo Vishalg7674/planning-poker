@@ -36,6 +36,10 @@ export default function ScreenPage() {
   const roomCode = useAppSelector((s) => s.room.code);
   const roomGoneMessage = useAppSelector((s) => s.ui.roomGoneMessage);
   const teamName = useAppSelector((s) => s.room.teamName);
+  const game = useAppSelector((s) => s.room.game);
+  const question = useAppSelector((s) => s.voting.question);
+  const questionIndex = useAppSelector((s) => s.voting.questionIndex);
+  const questionCount = useAppSelector((s) => s.voting.questionCount);
   const participants = useAppSelector((s) => s.participants.list);
   const phase = useAppSelector((s) => s.voting.phase);
   const votes = useAppSelector((s) => s.voting.votes);
@@ -105,6 +109,97 @@ export default function ScreenPage() {
             </>
           )}
         </p>
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Would You Rather projection — question headline + A/B split (or the
+  // live pick status while voting). Same data, different stage.
+  // -------------------------------------------------------------------------
+  if (game === 'would-you-rather') {
+    const wyrRevealed = phase === 'revealed';
+    const aCount = stats?.counts.find((c) => c.value === 'A')?.count ?? 0;
+    const bCount = stats?.counts.find((c) => c.value === 'B')?.count ?? 0;
+    const total = (stats?.count ?? 0) || 1;
+    const aPct = Math.round((aCount / total) * 100);
+    const bPct = Math.round((bCount / total) * 100);
+
+    return (
+      <div className={styles.screen}>
+        <header className={styles.bar}>
+          <Wordmark size="sm" />
+          {teamName && <span className={styles.team}>{teamName}</span>}
+          <span className={styles.code} title="Room code">
+            {code}
+          </span>
+          <span className={styles.spacer} />
+          <span className={styles.live} role="status">
+            <span className={styles.liveDot} aria-hidden="true" /> LIVE
+          </span>
+          <Link href={`/r/${code}`} className={styles.exit}>
+            Exit
+          </Link>
+        </header>
+
+        <main className={styles.stage}>
+          <section className={styles.status}>
+            <p className={styles.eyebrow}>
+              {phase === 'waiting'
+                ? 'Would You Rather · waiting room'
+                : `Would You Rather · question ${questionIndex + 1} of ${questionCount}`}
+            </p>
+            {question ? (
+              <h1 className={styles.statusTitle}>
+                {question.a} <span className={styles.wyrOr}>or</span> {question.b}
+              </h1>
+            ) : (
+              <h1 className={styles.statusTitle}>Waiting for the host…</h1>
+            )}
+            {phase === 'voting' && <p className={styles.statusSub}>Everyone picks a side — votes lock the moment they tap.</p>}
+            {wyrRevealed && <p className={styles.statusSub}>Picks are in — the room is split.</p>}
+          </section>
+
+          {wyrRevealed ? (
+            <section className={styles.wyrSplit} aria-label="Vote split">
+              <div className={cx(styles.wyrSide, aCount > bCount && styles.wyrWinner)}>
+                <span className={styles.wyrLetter}>A</span>
+                <p className={styles.wyrText}>{question?.a}</p>
+                <span className={styles.wyrCount}>
+                  {aCount} · {aPct}%
+                </span>
+              </div>
+              <div className={cx(styles.wyrSide, bCount > aCount && styles.wyrWinner)}>
+                <span className={styles.wyrLetter}>B</span>
+                <p className={styles.wyrText}>{question?.b}</p>
+                <span className={styles.wyrCount}>
+                  {bCount} · {bPct}%
+                </span>
+              </div>
+            </section>
+          ) : (
+            <section className={styles.table} aria-label="Voting table">
+              {participants.map((p) => (
+                <div key={p.id} className={styles.card}>
+                  <Avatar name={p.name} hue={p.hue} size="lg" status={p.status} />
+                  <div className={styles.cardMeta}>
+                    <span className={styles.cardName}>{p.name}</span>
+                    {p.status === 'voted' && (
+                      <span className={styles.lockPip} title="picked">
+                        ✓
+                      </span>
+                    )}
+                    {phase === 'voting' && p.status === 'connected' && (
+                      <span className={styles.wyrThinking} title="thinking">
+                        ○
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </section>
+          )}
+        </main>
       </div>
     );
   }

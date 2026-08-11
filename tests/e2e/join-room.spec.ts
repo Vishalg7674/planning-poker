@@ -35,4 +35,27 @@ test.describe('Join room', () => {
       await guest.context.close();
     }
   });
+
+  test('a second participant cannot take a name already in the room', async ({ browser }) => {
+    const host = await createRoom(browser, 'Ada');
+    const guest = await joinRoom(browser, host.page.url(), 'Grace');
+    try {
+      // A third tab tries to take Grace's name — the server rejects it.
+      const dup = await browser.newContext();
+      const dupPage = await dup.newPage();
+      await dupPage.goto(host.page.url());
+      const input = dupPage.getByLabel('Enter your name');
+      await input.fill('Grace');
+      await dupPage.getByRole('button', { name: 'Join Room' }).click();
+      await expect(dupPage.getByRole('alert')).toHaveText('This name is already taken. Please choose another name.');
+
+      // The room still has exactly two participants — the duplicate never joined.
+      await expect(host.page.getByText('Ada')).toBeVisible();
+      await expect(host.page.getByText('Grace')).toBeVisible();
+      await dup.close();
+    } finally {
+      await host.context.close();
+      await guest.context.close();
+    }
+  });
 });

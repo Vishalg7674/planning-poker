@@ -28,6 +28,20 @@ describe('votingSlice', () => {
     expect(state.deckValues).toEqual(['XS', 'S', 'M', 'L', 'XL']);
   });
 
+  it('tracks the active Would You Rather question from the snapshot', () => {
+    const snapshot = makeSnapshot({
+      game: 'would-you-rather',
+      status: 'voting',
+      question: { a: 'Have the ability to fly', b: 'Have the ability to be invisible' },
+      questionIndex: 1,
+      questionCount: 3,
+    });
+    const state = reducer(undefined, snapshotReceived(snapshot));
+    expect(state.question).toEqual({ a: 'Have the ability to fly', b: 'Have the ability to be invisible' });
+    expect(state.questionIndex).toBe(1);
+    expect(state.questionCount).toBe(3);
+  });
+
   it('keeps votes private until the reveal', () => {
     const snapshot = makeSnapshot({
       status: 'voting',
@@ -69,9 +83,46 @@ describe('votingSlice', () => {
     expect(state.everyoneHasVoted).toBe(true);
   });
 
+  it('tracks the active Most Likely To prompt and session data from the snapshot', () => {
+    const snapshot = makeSnapshot({
+      game: 'most-likely-to',
+      status: 'revealed',
+      prompt: 'Forget their laptop',
+      promptIndex: 2,
+      promptCount: 5,
+      mltResult: { points: { p1: 100 }, counts: { p1: 3 }, winners: ['p1'], predictors: ['p2'] },
+      mltScores: { p1: 100, p2: 20 },
+      sessionOver: true,
+    });
+    const state = reducer(undefined, snapshotReceived(snapshot));
+    expect(state.prompt).toBe('Forget their laptop');
+    expect(state.promptIndex).toBe(2);
+    expect(state.promptCount).toBe(5);
+    expect(state.mltResult!.points.p1).toBe(100);
+    expect(state.mltScores.p2).toBe(20);
+    expect(state.sessionOver).toBe(true);
+  });
+
   it('resetVoting returns to the initial state', () => {
     const state = reducer(
-      { phase: 'revealed', deckValues: ['1'], votedIds: ['a'], everyoneHasVoted: true, votes: { a: '1' }, stats: null, myVote: '1' },
+      {
+        phase: 'revealed',
+        deckValues: ['1'],
+        votedIds: ['a'],
+        everyoneHasVoted: true,
+        votes: { a: '1' },
+        stats: null,
+        myVote: '1',
+        question: { a: 'x', b: 'y' },
+        questionIndex: 2,
+        questionCount: 4,
+        prompt: 'p',
+        promptIndex: 1,
+        promptCount: 2,
+        mltResult: { points: {}, counts: {}, winners: [], predictors: [] },
+        mltScores: { a: 5 },
+        sessionOver: true,
+      },
       resetVoting(),
     );
     expect(state).toEqual({
@@ -82,6 +133,15 @@ describe('votingSlice', () => {
       votes: {},
       stats: null,
       myVote: null,
+      question: null,
+      questionIndex: 0,
+      questionCount: 0,
+      prompt: null,
+      promptIndex: 0,
+      promptCount: 0,
+      mltResult: null,
+      mltScores: {},
+      sessionOver: false,
     });
   });
 });

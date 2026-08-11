@@ -366,6 +366,86 @@
 }
 
 // ---------------------------------------------------------------------------
+// Would You Rather projection
+// ---------------------------------------------------------------------------
+
+.wyrOr {
+  color: var(--ink-faint);
+  font-size: 0.5em;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.wyrSplit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px, 2.4vw, 32px);
+  width: 100%;
+  max-width: 1100px;
+  animation: modal-in $dur-slow $ease-out both;
+
+  @include media($bp-sm) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wyrSide {
+  @include panel;
+  background: var(--surface);
+  border-radius: $r-xl;
+  padding: clamp(18px, 3vh, 34px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-3;
+  text-align: center;
+  transition: border-color $dur-base $ease-out, box-shadow $dur-base $ease-out;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition-property: border-color, box-shadow;
+    transition-duration: $dur-base;
+    transition-timing-function: $ease-out;
+  }
+}
+
+.wyrWinner {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
+}
+
+.wyrLetter {
+  @include mono;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.wyrText {
+  font-size: clamp(18px, 2.4vw, 28px);
+  font-weight: 700;
+  line-height: 1.3;
+  max-width: 34ch;
+}
+
+.wyrCount {
+  @include mono;
+  font-size: clamp(20px, 2.6vw, 32px);
+  font-weight: 800;
+  color: var(--accent-bright);
+}
+
+.wyrThinking {
+  color: var(--ink-faint);
+  font-size: 15px;
+}
+
+// ---------------------------------------------------------------------------
 // Connecting / gone
 // ---------------------------------------------------------------------------
 

@@ -30,8 +30,9 @@ E2E Tests         → the real Next.js app + realtime server in Chrome
   are fast and independent of sass.
 - **Realtime tests** (`scripts/e2e.mjs`) connect several real
   `socket.io-client` sockets to a running `server/index.mjs` and exercise the
-  full protocol (121 checks) including privacy, the server-side vote lock,
-  room lock/unlock, deck validation, and accent/reveal-mode settings.
+  full protocol (146 checks) including privacy, the server-side vote lock,
+  room lock/unlock, deck validation, accent/reveal-mode settings, and the
+  full Would You Rather round loop.
 - **E2E tests** (Playwright) drive the real Next.js app in Chrome with
   separate browser contexts per user. They verify what a user actually sees,
   not internal state.
@@ -112,7 +113,7 @@ tests/
 ├── components/              # Field, Button, DistributionChart, Deck, StartPanel,
 │                            # RevealBar, EndedPanel, ParticipantsPanel,
 │                            # ResultsPanel, PresentationView, JoinForm,
-│                            # RoomQR, CreatePage
+│                            # RoomQR, CreatePage, WyrRoom, WyrCreatePage
 └── e2e/                     # Playwright specs (see below; excluded from Vitest)
 ```
 
@@ -120,7 +121,7 @@ tests/
 
 ## 3. Realtime protocol tests (`npm run test:realtime`)
 
-`scripts/e2e.mjs` is a headless multi-client suite (121 checks) that connects
+`scripts/e2e.mjs` is a headless multi-client suite (146 checks) that connects
 host, voter, observer, and screen sockets to a **live** `server/index.mjs`
 and verifies the wire contract end to end:
 
@@ -143,6 +144,12 @@ and verifies the wire contract end to end:
 - `room:end` wipes memory; removed participants get `you:removed`; screen
   (`role: 'screen'`) sockets watch without seating and cannot vote.
 - Disconnected non-voters don't deadlock `everyoneHasVoted`.
+- **Would You Rather**: room created with `game: 'would-you-rather'` and a
+  question deck (broadcast as `questionCount`, active `question` hidden
+  while waiting); picks restricted to `'A'`/`'B'` (`bad_value` otherwise)
+  with a per-question lock; the host reveals mid-question (host-paced);
+  `wyr:next` is host-only, wipes the votes, advances the question, and
+  returns `done: true` on the exhausted deck.
 
 Run it against a server on a custom port:
 
@@ -214,6 +221,8 @@ await revealVotes(host);
 | `results.spec.ts`             | Revealed values, "Didn't vote", average/median/mode/highest/lowest/range/distribution |
 | `presentation.spec.ts`        | Host enters presentation mode, drives the round from the big view, reveals |
 | `permissions.spec.ts`         | Participants never see host controls; host-only start/reveal              |
+| `would-you-rather.spec.ts`    | Full WYR flow: create from a question deck → join → pick A/B (locked) → host sees who picked → reveal split → next question (votes reset) → end session; non-voters; no host controls for participants |
+| `homepage.spec.ts`            | (updated) two LIVE badges — Planning Poker + Would You Rather; WYR card leads to its create page |
 
 ### Running
 
@@ -255,11 +264,14 @@ npx playwright test tests/e2e/timer.spec.ts   # one spec
 7. **Consensus** — full / strong / moderate / large thresholds are
    deterministic and unit-tested.
 8. **Room lock** — a locked room refuses brand-new joiners (`room_locked`)
-   while existing members keep their seats and votes; unlock re-opens it.
-9. **Statistics** — computed from submitted votes only; non-voters excluded
-   from math but shown as "Didn't vote".
+   while existing members keep their seats and votes; unlock re-opens it.9. **Statistics** — computed from submitted votes only; non-voters excluded
+    from math but shown as "Didn't vote".
 10. **Disconnected non-voters** — never deadlock the room (`everyoneHasVoted`
     counts only present participants).
+11. **WYR per-question lock** — a participant picks once per question
+    (`already_voted` on a second pick); `wyr:next` wipes the votes so the
+    lock re-arms for the next question; the host reveals at their own pace;
+    picks stay private until the reveal.
 
 ---
 

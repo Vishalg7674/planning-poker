@@ -10,9 +10,9 @@ describe('GameCatalog', () => {
     // One link per game card.
     expect(screen.getAllByRole('link')).toHaveLength(GAME_COUNT);
     expect(screen.getByText(`${GAME_COUNT} games`)).toBeInTheDocument();
-    // Planning poker is there with a LIVE badge.
+    // The three live games all carry a LIVE badge.
     expect(screen.getByText('Planning Poker')).toBeInTheDocument();
-    expect(screen.getAllByText('LIVE')).toHaveLength(1);
+    expect(screen.getAllByText('LIVE')).toHaveLength(3);
   });
 
   it('filters instantly by search', async () => {

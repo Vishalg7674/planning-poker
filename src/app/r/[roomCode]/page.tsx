@@ -21,6 +21,8 @@ import { useRoomShortcuts } from '@/components/room/useShortcuts';
 import EndSessionModal from '@/components/modals/EndSessionModal';
 import RemoveParticipantModal from '@/components/modals/RemoveParticipantModal';
 import PresentationView from '@/components/room/PresentationView';
+import WyrRoom from '@/components/wyr/WyrRoom';
+import MltRoom from '@/components/mlt/MltRoom';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setMyIdentity, pushToast, closeModal } from '@/store/slices/uiSlice';
 import { snapshotReceived, roomGone } from '@/store/actions';
@@ -39,6 +41,7 @@ export default function RoomPage() {
   const roomGoneMessage = useAppSelector((s) => s.ui.roomGoneMessage);
   const teamName = useAppSelector((s) => s.room.teamName);
   const roomTitle = useAppSelector((s) => s.room.roomTitle);
+  const game = useAppSelector((s) => s.room.game);
   const accent = useAppSelector((s) => s.room.settings.accent);
   const locked = useAppSelector((s) => s.room.locked);
   const phase = useAppSelector((s) => s.voting.phase);
@@ -151,9 +154,13 @@ export default function RoomPage() {
   }
 
   // ------------------------------------------------------------------
-  // The room — one round: waiting → voting → ended → revealed
+  // The room — one round: waiting → voting → ended → revealed.
+  // Would You Rather / Most Likely To rooms share this shell (header,
+  // participants, modals) but play their own table inside the main column.
   // ------------------------------------------------------------------
-  if (presentation) {
+  const isWyr = game === 'would-you-rather';
+  const isMlt = game === 'most-likely-to';
+  if (presentation && !isWyr && !isMlt) {
     return (
       <div className={styles.room} data-accent={accent}>
         <PresentationView />
@@ -200,31 +207,43 @@ export default function RoomPage() {
 
       <main className={styles.grid}>
         <section className={styles.table}>
-          <div className={styles.tableTop}>
-            <TimerBadge />
-          </div>
-          <div className={styles.tableSurface}>
-            {phase === 'waiting' && (
-              <>
-                <StartPanel />
-                <Deck />
-              </>
-            )}
-            {phase === 'voting' && (
-              <>
-                <Deck />
-                <RevealBar />
-              </>
-            )}
-            {phase === 'ended' && (
-              <>
-                <EndedPanel />
-                <Deck />
-              </>
-            )}
-            {phase === 'revealed' && <ResultsPanel />}
-          </div>
-          {isHost && <HostToolbar />}
+          {isWyr ? (
+            <div className={styles.tableSurface}>
+              <WyrRoom />
+            </div>
+          ) : isMlt ? (
+            <div className={styles.tableSurface}>
+              <MltRoom />
+            </div>
+          ) : (
+            <>
+              <div className={styles.tableTop}>
+                <TimerBadge />
+              </div>
+              <div className={styles.tableSurface}>
+                {phase === 'waiting' && (
+                  <>
+                    <StartPanel />
+                    <Deck />
+                  </>
+                )}
+                {phase === 'voting' && (
+                  <>
+                    <Deck />
+                    <RevealBar />
+                  </>
+                )}
+                {phase === 'ended' && (
+                  <>
+                    <EndedPanel />
+                    <Deck />
+                  </>
+                )}
+                {phase === 'revealed' && <ResultsPanel />}
+              </div>
+              {isHost && <HostToolbar />}
+            </>
+          )}
         </section>
 
         <aside className={styles.columnParticipants}>

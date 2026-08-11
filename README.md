@@ -3,10 +3,13 @@
 **Break the ice. Play together. No login required.**
 
 Reveal is a real-time multiplayer games platform for teams, retrospectives,
-icebreakers and everything in between. One game is live today — **Planning
-Poker** — with a catalog of **110 games across 9 categories** queued up behind
-it. Every game follows the same philosophy: create a room, share the link,
-and play together with zero signup.
+icebreakers and everything in between. Three games are live today —
+**Planning Poker** (estimate together, reveal together), **Would You Rather**
+(pick a side, reveal the split) and **Most Likely To** (secretly nominate the
+teammate most likely to do it — crowned players earn points, predictors earn
+bonuses) — with a catalog of **110 games across 9 categories** queued up
+behind them. Every game follows the same philosophy: create a room, share
+the link, and play together with zero signup.
 
 Rooms live **only in server memory**. No database, no accounts, no history.
 When the room empties (or the server restarts), it vanishes — by design.
@@ -31,6 +34,19 @@ Reveal unlocks when everyone has voted (or the timer ends the round)
 Everyone sees every vote + average / median / mode / range / consensus
 ```
 
+**Would You Rather** plays the same way on the same architecture — one link,
+per-question A/B voting, and a host-paced reveal:
+
+```
+Host creates the room (name + a curated or custom question deck)
+  →  participants join with just a name
+  →  Host starts the game → everyone sees “Would you rather A or B?”
+  →  Everyone picks A or B exactly once — the pick locks instantly
+  →  Host sees who picked / who is still thinking (picks stay hidden)
+  →  Host reveals → everyone sees the split (counts + percentages)
+  →  Host advances to the next question (votes reset) … → End session
+```
+
 ## Game catalog
 
 - The homepage and `/games` render entirely from one centralized registry,
@@ -40,17 +56,33 @@ Everyone sees every vote + average / median / mode / range / consensus
 - Each game is a small data entry: icon, name, description, category, player
   count, duration, status (`live` / `coming-soon`) and route. No hard-coded
   cards in JSX.
-- **Planning Poker** is the only `live` game; its card links straight to the
-  real implementation (`/create`). Every other game opens a shared
-  `Coming Soon` placeholder at `/games/<id>`.
+- Three games are `live`: **Planning Poker** (→ `/create`), **Would You
+  Rather** and **Most Likely To** (→ `/games/<id>`, their own create pages).
+  Every other game opens a shared `Coming Soon` placeholder at `/games/<id>`.
 - The catalog has instant **search** and **category filter chips**, plus
   per-category "View all" links. A game becomes playable by flipping
   `status: 'coming-soon'` to `'live'` — no homepage changes needed.
+- [`games.md`](games.md) at the repo root is the **master development
+  tracker**: every game listed with its status (⬜ / 🟡 / ✅). Games are
+  built one at a time, in order — the tracker is never rewritten, only
+  updated in place.
 
 ## Features
 
 - **Game catalog** — search + category filters over 110 games, grouped into
   9 category sections, responsive grid (4 → 2 → 1 cards per row).
+- **Would You Rather** — the second live game, running on the same realtime
+  room architecture: a question deck curated from the built-in bank (or the
+  host's own custom questions), one locked A/B pick per question, a
+  host-paced reveal showing the split, and **Next Question** rounds with
+  per-question vote locks.
+- **Most Likely To** — the third live game and the first built on the shared
+  game engine: secret teammate nominations (never yourself) with a
+  per-round lock, a host-paced reveal that crowns the most-nominated
+  player(s) with ranking points (100/80/60/40/20/10) plus a +20 predictor
+  bonus, session totals via the shared `Leaderboard`, and a `WinnerModal`
+  celebration — **Play Again** keeps the session scores so teams can crown
+  an overall champion across multiple sessions.
 - **Room customization** — host sets their name, an optional team name and
   room title, picks one of **five decks** (Fibonacci, Modified Fibonacci,
   Sequential, T-Shirt, Powers of 2) and an **accent color** (gold / purple /
@@ -83,6 +115,16 @@ Everyone sees every vote + average / median / mode / range / consensus
   URL (no external service), a copy-invite button with a friendly message,
   and native Web Share on supported devices.
 - **No accounts** — an identity is a name in sessionStorage for one tab.
+- **Shared game engine** — reusable infrastructure for every future
+  competitive game: `src/lib/gameTypes.ts` (player / leaderboard types),
+  `src/lib/scoring.ts` (ranking points 100/80/60/40/20/10, standard-
+  competition tie handling, `buildLeaderboard`, cross-game session merging),
+  a reduced-motion-aware `useAnimatedNumber` score counter, the
+  `Leaderboard` component (🥇🥈🥉 medals, avatar initials, animated totals,
+  "+N" round-delta chips), the `WinnerModal` celebration (confetti podium,
+  Play Again / Back to Games) and the `useGameSession` lifecycle hook
+  (ranks players, auto-opens the celebration the moment the server ends the
+  session, routes Play Again).
 - **Big-screen mode** — `/r/<CODE>/screen` is a read-only projection of the
   table (join as a `screen`, not a participant), and hosts can also toggle an
   in-room **presentation view**.
@@ -108,20 +150,24 @@ Everyone sees every vote + average / median / mode / range / consensus
 ├── src/
 │   ├── app/                  # Next.js routes: /, /games, /games/[gameId], /create, /r/[roomCode], /r/[roomCode]/screen
 │   ├── components/           # UI components (Button, Modal, Avatar, RoomQR, Toasts, …)
-│   │   ├── games/            # GameCard, GameCatalog, ComingSoonGame (homepage catalog)
+│   │   ├── games/            # GameCard, GameCatalog, ComingSoonGame, Leaderboard, WinnerModal
 │   │   ├── room/             # Deck, StartPanel, RevealBar, EndedPanel, ResultsPanel,
 │   │   │                     # PresentationView, ParticipantsPanel, …
+│   │   ├── wyr/              # WyrRoom (Would You Rather table: A/B cards, split, next question)
 │   │   ├── modals/           # EndSessionModal, RemoveParticipantModal
 │   │   ├── providers.tsx     # Redux provider + theme sync
 │   │   └── RealtimeBridge.tsx# socket → Redux bridge (the only socket consumer)
-│   ├── lib/                  # cx, decks, games (registry), identity, socket, theme, types
+│   ├── lib/                  # cx, decks, games (registry), gameTypes, scoring, useAnimatedNumber,
+│   │                         # useGameSession (lifecycle hook), identity, socket, theme, types,
+│   │                         # wyrQuestions (WYR question bank)
 │   ├── store/                # Redux store + 5 slices (room, participants, voting, timer, ui)
 │   │   └── actions.ts        # realtime → redux actions
 │   └── styles/               # global SCSS, tokens, mixins, animations, accent presets
 ├── server/
 │   ├── index.mjs             # Socket.io wiring, timers, room expiry
 │   └── room.mjs              # pure room-state logic (unit-tested)
-├── scripts/e2e.mjs           # socket-level E2E suite (121 checks)
+├── games.md                  # master game-development tracker (one game at a time)
+├── scripts/e2e.mjs           # socket-level E2E suite (146 checks)
 ├── tests/
 │   ├── unit/                 # Vitest: lib, Redux slices, server room logic
 │   ├── components/           # Vitest + Testing Library

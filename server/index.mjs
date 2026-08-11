@@ -31,11 +31,16 @@ import {
   startVoting,
   castVote,
   reveal,
+  nextQuestion,
+  nextPrompt,
+  finishMlt,
+  playAgainMlt,
   setTimerSec,
   setRevealMode,
   setLocked,
   removeParticipant,
   disconnectParticipant,
+  isNameTaken,
 } from './room.mjs';
 
 const PORT = Number(process.env.SOCKET_PORT || 3001);
@@ -89,6 +94,9 @@ io.on('connection', (socket) => {
         deckId: payload?.deckId,
         accent: payload?.accent,
         revealMode: payload?.revealMode,
+        game: payload?.game,
+        questions: payload?.questions,
+        prompts: payload?.prompts,
         hasCode: (code) => rooms.has(code),
       });
       rooms.set(room.code, room);
@@ -130,10 +138,14 @@ io.on('connection', (socket) => {
     if (id && room.participants.has(id)) {
       // Rejoin from the same tab — keep the "voted" status if a vote is locked.
       participant = room.participants.get(id);
+      // A returning seat may rename, but never onto another player's name.
+      if (isNameTaken(room, name, participant.id)) return ack?.({ ok: false, error: 'name_taken' });
       participant.name = (name || participant.name).slice(0, 32);
       participant.role = participant.role === 'facilitator' ? 'facilitator' : 'voter';
       participant.status = room.votes[participant.id] ? 'voted' : 'connected';
     } else {
+      // Brand-new joiners must pick a name nobody else at the table uses.
+      if (isNameTaken(room, name)) return ack?.({ ok: false, error: 'name_taken' });
       participant = addParticipant(room, { name, role: 'voter', id });
     }
     socket.join(room.code);
@@ -151,6 +163,7 @@ io.on('connection', (socket) => {
     // Locked rooms still admit their own participants — only strangers are refused (see room:join).
     const participant = room.participants.get(participantId);
     if (!participant) return ack?.({ ok: false, error: 'unknown_participant' });
+    if (isNameTaken(room, name, participant.id)) return ack?.({ ok: false, error: 'name_taken' });
     participant.name = (name || participant.name).slice(0, 32);
     participant.status = room.votes[participant.id] ? 'voted' : 'connected';
     socket.join(room.code);
@@ -203,6 +216,53 @@ io.on('connection', (socket) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_host' });
     const res = reveal(room, socket.data.participantId);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  // -------------------------------------------------------------------------
+  // Would You Rather: next question (host-only, after a reveal). The previous
+  // question's votes are wiped and the room returns to VOTING — or signals
+  // `done` when the deck is exhausted so the host can end the session.
+  // -------------------------------------------------------------------------
+  socket.on('wyr:next', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_host' });
+    const res = nextQuestion(room, socket.data.participantId);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true, done: res.done });
+    emitSnapshot(room);
+  });
+
+  // -------------------------------------------------------------------------
+  // Most Likely To: next prompt / finish / play again (all host-only).
+  // `mlt:next` advances a round and signals `done` on the last prompt;
+  // `mlt:finish` marks the session over (WinnerModal for everyone);
+  // `mlt:playAgain` resets rounds but keeps the session leaderboard.
+  // -------------------------------------------------------------------------
+  socket.on('mlt:next', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_host' });
+    const res = nextPrompt(room, socket.data.participantId);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true, done: res.done });
+    emitSnapshot(room);
+  });
+
+  socket.on('mlt:finish', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_host' });
+    const res = finishMlt(room, socket.data.participantId);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  socket.on('mlt:playAgain', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_host' });
+    const res = playAgainMlt(room, socket.data.participantId);
     if (!res.ok) return ack?.(res);
     ack?.({ ok: true });
     emitSnapshot(room);

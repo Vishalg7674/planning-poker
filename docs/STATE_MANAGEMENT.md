@@ -39,6 +39,7 @@ devtools enabled outside production.
     teamName: string;
     roomTitle: string;                       // optional, set at creation
     createdAt: number;
+    game: 'planning-poker' | 'would-you-rather'; // drives the room-page UI branch
     settings: { deckId, timerSec, accent, revealMode };
     locked: boolean;                         // host-only join gate
   }
@@ -66,15 +67,21 @@ devtools enabled outside production.
     votes: Record<string, string>;   // only populated after reveal
     stats: Stats | null;             // only populated after reveal
     myVote: string | null;           // optimistic lock for my card
+    question: WyrQuestion | null;    // active WYR prompt (null for poker / waiting)
+    questionIndex: number;           // 0-based active WYR question
+    questionCount: number;           // total WYR questions in this session
   }
   ```
 - **Actions**:
   - `setMyVote(value)` — optimistic card lock the instant I tap;
   - `clearMyVote()` — rollback when the server rejects;
   - `resetVoting()`;
-  - `snapshotReceived` hydrates phase/deck/votes/stats from the snapshot
+  - `snapshotReceived` hydrates phase/deck/votes/stats **and the active WYR
+    question** (question / questionIndex / questionCount) from the snapshot
     (the snapshot's `votes`/`stats` are `{}`/`null` until reveal — so the
-    slice naturally enforces privacy).
+    slice naturally enforces privacy);
+  - per-question reset: `WyrRoom` clears `myVote` when `questionIndex`
+    changes, so the optimistic lock never leaks into the next question.
 - **Socket events**: `snapshot`.
 
 ### `timerSlice` — `state.timer`

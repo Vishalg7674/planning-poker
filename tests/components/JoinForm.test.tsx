@@ -29,7 +29,7 @@ describe('JoinForm', () => {
   it('renders the room code and the join prompt', () => {
     renderWithStore(<JoinForm code="ABCDE" onGone={() => {}} />, {});
     expect(screen.getByText('ABCDE')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Join Planning Poker' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Join the room' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Join Room' })).toBeInTheDocument();
   });
 
@@ -89,5 +89,16 @@ describe('JoinForm', () => {
     await user.click(screen.getByRole('button', { name: 'Join Room' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('This room is locked. Ask the host for access.');
+  });
+
+  it('tells the user the name is already taken by someone in the room', async () => {
+    emitAckMock.mockResolvedValue({ ok: false, error: 'name_taken' });
+    const user = userEvent.setup();
+    renderWithStore(<JoinForm code="ABCDE" onGone={() => {}} />, {});
+
+    await user.type(screen.getByLabelText('Enter your name'), 'Grace');
+    await user.click(screen.getByRole('button', { name: 'Join Room' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('This name is already taken. Please choose another name.');
   });
 });

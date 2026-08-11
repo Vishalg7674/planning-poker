@@ -12,6 +12,7 @@ describe('roomSlice', () => {
       teamName: '',
       roomTitle: '',
       createdAt: 0,
+      game: 'planning-poker',
       settings: { deckId: 'fibonacci', timerSec: null, accent: 'gold', revealMode: 'staggered' },
       locked: false,
     });
@@ -37,6 +38,12 @@ describe('roomSlice', () => {
     expect(state.settings).toEqual({ deckId: 'tshirt', timerSec: 15, accent: 'purple', revealMode: 'dramatic' });
   });
 
+  it('tracks which game the room is playing', () => {
+    const snapshot = makeSnapshot({ game: 'would-you-rather' });
+    const state = reducer(undefined, snapshotReceived(snapshot));
+    expect(state.game).toBe('would-you-rather');
+  });
+
   it('copies settings rather than aliasing the snapshot', () => {
     const snapshot = makeSnapshot();
     const state = reducer(undefined, snapshotReceived(snapshot));
@@ -51,6 +58,7 @@ describe('roomSlice', () => {
         teamName: 'T',
         roomTitle: 'R',
         createdAt: 1,
+        game: 'would-you-rather',
         locked: true,
         settings: { deckId: 'sequential', timerSec: 10, accent: 'blue', revealMode: 'normal' },
       },

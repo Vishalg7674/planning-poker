@@ -89,8 +89,28 @@ const comingSoon = (
 
 export const GAMES: Game[] = [
   // --- 🧊 Icebreakers (1–15) -------------------------------------------------
-  comingSoon('most-likely-to', 'icebreakers', 'Most Likely To', 'Vote for the teammate most likely to do it — yes, that one.', '😂'),
-  comingSoon('would-you-rather', 'icebreakers', 'Would You Rather', 'Tough picks, hot takes, zero right answers.', '🤔'),
+  {
+    id: 'most-likely-to',
+    name: 'Most Likely To',
+    category: 'icebreakers',
+    description: 'Vote for the teammate most likely to do it — crowned teammates earn points, predictors earn bonuses. Live now.',
+    icon: '😂',
+    status: 'live',
+    route: '/games/most-likely-to',
+    players: '3–20 players',
+    duration: '10 min',
+  },
+  {
+    id: 'would-you-rather',
+    name: 'Would You Rather',
+    category: 'icebreakers',
+    description: 'Tough picks, hot takes, zero right answers. Live now — vote A or B and reveal the split together.',
+    icon: '🤔',
+    status: 'live',
+    route: '/games/would-you-rather',
+    players: '2–20 players',
+    duration: '10 min',
+  },
   comingSoon('this-or-that', 'icebreakers', 'This or That', 'Pick a side and defend it for 10 seconds.', '⚖️'),
   comingSoon('two-truths-and-a-lie', 'icebreakers', 'Two Truths & a Lie', 'Spot the lie before the room votes you out.', '🕵️'),
   comingSoon('who-said-it', 'icebreakers', 'Who Said It?', 'Guess which teammate actually said that quote.', '💬'),

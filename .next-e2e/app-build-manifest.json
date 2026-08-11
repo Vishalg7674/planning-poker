@@ -29,12 +29,6 @@
       "static/chunks/main-app.js",
       "static/css/app/games/[gameId]/page.css",
       "static/chunks/app/games/[gameId]/page.js"
-    ],
-    "/games/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/games/page.css",
-      "static/chunks/app/games/page.js"
     ]
   }
 }

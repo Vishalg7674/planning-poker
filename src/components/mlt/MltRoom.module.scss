@@ -1,0 +1,402 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-4;
+  text-align: center;
+  padding: $sp-6 $sp-4;
+  animation: modal-in $dur-base $ease-out both;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-bright);
+}
+
+.title {
+  @include display;
+  font-size: clamp(24px, 3.2vw, 34px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  max-width: 24ch;
+}
+
+.teamLine {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink-dim);
+  margin-top: -$sp-2;
+}
+
+.sub {
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  max-width: 46ch;
+  line-height: 1.55;
+}
+
+.promptLine {
+  @include display;
+  font-size: clamp(20px, 2.6vw, 28px);
+  font-weight: 700;
+  line-height: 1.4;
+  max-width: 42ch;
+
+  strong {
+    color: var(--accent-bright);
+    font-weight: 800;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Nomination chips (voting)
+// ---------------------------------------------------------------------------
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: $sp-3;
+  width: 100%;
+  max-width: 680px;
+}
+
+.chip {
+  @include button-reset;
+  @include focus-ring;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-2 $sp-4 $sp-2 $sp-2;
+  border: 1.5px solid var(--border-strong);
+  border-radius: $r-pill;
+  background: var(--surface-soft);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+  position: relative;
+  @include motion((transform, border-color, box-shadow, background-color), $dur-fast, $ease-snap);
+
+  &:hover:not(:disabled):not(.chipLocked) {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.97);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.82;
+  }
+}
+
+.chipPicked {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.12);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.3);
+}
+
+.chipLocked {
+  transform: translateY(4px) scale(0.97);
+  filter: saturate(0.85) brightness(0.97);
+}
+
+.chipName {
+  max-width: 16ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipPip {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #06271a;
+  font-size: 13px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+// ---------------------------------------------------------------------------
+// Status / reveal bar
+// ---------------------------------------------------------------------------
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: $sp-3 $sp-4;
+  border: 1px solid var(--border);
+  border-radius: $r-lg;
+  background: var(--surface-soft);
+  width: 100%;
+  max-width: 720px;
+}
+
+.count {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+
+.tick {
+  color: var(--success);
+  font-weight: 800;
+}
+
+.lockedNote {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--success);
+  background: rgba(var(--success-rgb), 0.08);
+  border: 1px solid rgba(var(--success-rgb), 0.35);
+  border-radius: $r-md;
+  padding: $sp-2 $sp-4;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+}
+
+.roomLockedNote {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--warning);
+  background: rgba(var(--warning-rgb), 0.08);
+  border: 1px solid rgba(var(--warning-rgb), 0.35);
+  border-radius: $r-md;
+  padding: $sp-2 $sp-4;
+}
+
+// ---------------------------------------------------------------------------
+// Revealed tally
+// ---------------------------------------------------------------------------
+
+.tally {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+  width: 100%;
+  max-width: 680px;
+}
+
+.tallyCard {
+  @include panel;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+  padding: $sp-4 $sp-5;
+  text-align: left;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  @include motion((border-color, box-shadow), $dur-base, $ease-out);
+}
+
+.tallyWinner {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.18);
+}
+
+.tallyHead {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+}
+
+.tallyName {
+  font-size: 15.5px;
+  font-weight: 750;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.you {
+  @include mono;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-bright);
+  background: rgba(var(--accent-rgb), 0.12);
+  border-radius: $r-pill;
+  padding: 1px 8px;
+  margin-left: $sp-2;
+  vertical-align: middle;
+}
+
+.crown {
+  font-size: 20px;
+  line-height: 1;
+  animation: pop-in $dur-base $ease-snap both;
+}
+
+.tallyCount {
+  @include mono;
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.tallyPoints {
+  @include mono;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--success);
+  background: rgba(var(--success-rgb), 0.1);
+  border: 1px solid rgba(var(--success-rgb), 0.35);
+  border-radius: $r-pill;
+  padding: 2px 10px;
+  white-space: nowrap;
+  animation: pop-in $dur-base $ease-snap both;
+}
+
+.tallyVoters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-2;
+  padding-left: $sp-5;
+}
+
+.voterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ink-dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: $r-pill;
+  padding: 3px 10px 3px 4px;
+}
+
+.predicted {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--accent-bright);
+  background: rgba(var(--accent-rgb), 0.08);
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  border-radius: $r-md;
+  padding: $sp-2 $sp-4;
+}
+
+.nonVoters {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.leaderboard {
+  width: 100%;
+  max-width: 620px;
+}
+
+// ---------------------------------------------------------------------------
+// Host controls / notes
+// ---------------------------------------------------------------------------
+
+.hostRow {
+  display: flex;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.lastNote {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink-dim);
+  width: 100%;
+}
+
+// ---------------------------------------------------------------------------
+// Invite (waiting room, host only)
+// ---------------------------------------------------------------------------
+
+.inviteWrap {
+  display: flex;
+  align-items: center;
+  gap: $sp-5;
+  width: 100%;
+  max-width: 620px;
+  padding: $sp-5;
+  border: 1px solid var(--border);
+  border-radius: $r-lg;
+  background: var(--surface-soft);
+
+  @include media($bp-sm) {
+    flex-direction: column;
+    gap: $sp-3;
+  }
+}
+
+.invite {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-3;
+}
+
+.inviteUrl {
+  @include mono;
+  width: 100%;
+  font-size: 12.5px;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  text-align: left;
+}
+
+.inviteActions {
+  display: flex;
+  gap: $sp-2;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.scanNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.note,
+.hint {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  max-width: 44ch;
+}
+
+/// Crown / points pop-in on the revealed tally.
+@keyframes pop-in {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

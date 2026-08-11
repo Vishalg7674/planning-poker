@@ -1,14 +1,25 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  MLT_PREDICTOR_BONUS,
+  MLT_RANKING_POINTS,
   addParticipant,
   buildSnapshot,
   calculateConsensus,
   castVote,
+  computeMltResult,
   computeStats,
+  computeWyrStats,
   createRoom,
   disconnectParticipant,
   everyoneHasVoted,
+  finishMlt,
   genCode,
+  isNameTaken,
+  nextPrompt,
+  nextQuestion,
+  normalizePrompts,
+  normalizeQuestions,
+  playAgainMlt,
   promoteHostIfNeeded,
   removeParticipant,
   reveal,
@@ -122,6 +133,36 @@ describe('addParticipant', () => {
     const room = createRoom({ hostName: 'Host' });
     const p = addParticipant(room, { name: 'x'.repeat(80) });
     expect(p.name).toHaveLength(32);
+  });
+});
+
+describe('isNameTaken', () => {
+  it('is false when no one at the table has the name', () => {
+    const room = createRoom({ hostName: 'Ada' });
+    expect(isNameTaken(room, 'Grace')).toBe(false);
+  });
+
+  it('is true when the host or a participant already uses the name', () => {
+    const room = createRoom({ hostName: 'Ada' });
+    expect(isNameTaken(room, 'ada')).toBe(true); // case-insensitive
+    expect(isNameTaken(room, '  Ada  ')).toBe(true); // trimmed
+    addNamed(room, 'Grace');
+    expect(isNameTaken(room, 'grace')).toBe(true);
+  });
+
+  it('is false for empty or blank names', () => {
+    const room = createRoom({ hostName: 'Ada' });
+    expect(isNameTaken(room, '')).toBe(false);
+    expect(isNameTaken(room, '   ')).toBe(false);
+    expect(isNameTaken(room, undefined)).toBe(false);
+  });
+
+  it('ignores the excluded participant (their own seat on rejoin)', () => {
+    const room = createRoom({ hostName: 'Ada' });
+    const grace = addNamed(room, 'Grace');
+    expect(isNameTaken(room, 'Grace', grace.id)).toBe(false);
+    // A different participant's name is still taken even with an excludeId.
+    expect(isNameTaken(room, 'Ada', grace.id)).toBe(true);
   });
 });
 
@@ -501,6 +542,224 @@ describe('reveal', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Would You Rather — game rooms, A/B voting, per-question rounds
+// ---------------------------------------------------------------------------
+
+const wyrQuestions = [
+  { a: 'Have the ability to fly', b: 'Have the ability to be invisible' },
+  { a: 'Always be 10 minutes early', b: 'Always be 10 minutes late' },
+  { a: 'Work from home forever', b: 'Work in the office forever' },
+];
+
+/** A WYR room in the VOTING state with the host seated. */
+function wyrVotingRoom(questions = wyrQuestions): Room {
+  const room = createRoom({ hostName: 'Host', game: 'would-you-rather', questions });
+  const res = startVoting(room, room.hostId!);
+  if (!res.ok) throw new Error(`helper: start failed ${res.error}`);
+  return room;
+}
+
+describe('createRoom (would-you-rather)', () => {
+  it('defaults to planning-poker when game is omitted or unknown', () => {
+    expect(createRoom({}).game).toBe('planning-poker');
+    expect(createRoom({ game: 'wyr' }).game).toBe('planning-poker');
+  });
+
+  it('stores the sanitized question deck for a WYR room', () => {
+    const room = createRoom({ game: 'would-you-rather', questions: wyrQuestions });
+    expect(room.game).toBe('would-you-rather');
+    expect(room.questions).toEqual(wyrQuestions);
+    expect(room.questionIndex).toBe(-1); // no active question yet
+  });
+
+  it('falls back to the built-in bank when no valid questions survive', () => {
+    const empty = createRoom({ game: 'would-you-rather', questions: [] });
+    expect(empty.questions.length).toBeGreaterThan(0);
+    const garbage = createRoom({ game: 'would-you-rather', questions: [{ a: '', b: '' }, 'nope', null] });
+    expect(garbage.questions.length).toBeGreaterThan(0);
+    const nonList = createRoom({ game: 'would-you-rather' });
+    expect(nonList.questions.length).toBeGreaterThan(0);
+  });
+
+  it('drops empty options and clamps the deck to 20 questions', () => {
+    const room = createRoom({
+      game: 'would-you-rather',
+      questions: [
+        ...wyrQuestions,
+        { a: 'Only valid', b: '' }, // dropped
+        ...Array.from({ length: 30 }, (_, i) => ({ a: `A${i}`, b: `B${i}` })),
+      ],
+    });
+    expect(room.questions).toHaveLength(20);
+    expect(room.questions.some((q) => q.a === 'Only valid')).toBe(false);
+  });
+
+  it('trims and clamps question option text', () => {
+    const room = createRoom({
+      game: 'would-you-rather',
+      questions: [{ a: '  fly  ', b: 'x'.repeat(300) }],
+    });
+    expect(room.questions[0].a).toBe('fly');
+    expect(room.questions[0].b).toHaveLength(120);
+  });
+});
+
+describe('normalizeQuestions', () => {
+  it('passes through valid {a, b} pairs', () => {
+    expect(normalizeQuestions(wyrQuestions)).toEqual(wyrQuestions);
+  });
+
+  it('returns the default bank for non-array input', () => {
+    expect(normalizeQuestions(undefined)).toHaveLength(5);
+  });
+});
+
+describe('computeWyrStats', () => {
+  it('returns null for zero votes', () => {
+    expect(computeWyrStats([])).toBeNull();
+  });
+
+  it('computes the A/B split with non-numeric stats', () => {
+    const stats = computeWyrStats(['A', 'B', 'A'])!;
+    expect(stats.count).toBe(3);
+    expect(stats.numeric).toBe(false);
+    expect(stats.avg).toBeNull();
+    expect(stats.mode).toBe('A');
+    expect(stats.modeShare).toBe(0.667); // rounded to 3 decimals
+    expect(stats.unique).toBe(2);
+    expect(stats.counts).toEqual([
+      { value: 'A', count: 2 },
+      { value: 'B', count: 1 },
+    ]);
+  });
+
+  it('labels a unanimous room as full consensus', () => {
+    expect(computeWyrStats(['B', 'B'])!.level).toBe('full');
+  });
+
+  it('labels an even split as moderate', () => {
+    expect(computeWyrStats(['A', 'B'])!.level).toBe('moderate');
+  });
+});
+
+describe('WYR voting', () => {
+  it('accepts only A or B — a deck card is rejected', () => {
+    const room = wyrVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    expect(castVote(room, grace.id, '8')).toEqual({ ok: false, error: 'bad_value' });
+    expect(castVote(room, grace.id, 'C')).toEqual({ ok: false, error: 'bad_value' });
+    expect(castVote(room, grace.id, 'A')).toEqual({ ok: true });
+  });
+
+  it('locks a pick per question — nextQuestion resets the lock', () => {
+    const room = wyrVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, 'A');
+    expect(castVote(room, grace.id, 'B')).toEqual({ ok: false, error: 'already_voted' });
+    // Host reveals and advances — the same participant may vote again.
+    castVote(room, hostId(room), 'B');
+    reveal(room, hostId(room));
+    const res = nextQuestion(room, hostId(room));
+    expect(res).toEqual({ ok: true, done: false });
+    expect(room.questionIndex).toBe(1);
+    expect(room.votes).toEqual({});
+    expect(room.participants.get(grace.id)!.hasVoted).toBe(false);
+    expect(castVote(room, grace.id, 'B')).toEqual({ ok: true });
+  });
+
+  it('the host may reveal mid-question without waiting for everyone', () => {
+    const room = wyrVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, 'A'); // host hasn't picked
+    const res = reveal(room, hostId(room));
+    expect(res).toEqual({ ok: true });
+    expect(room.stats!.count).toBe(1);
+    expect(room.stats!.mode).toBe('A');
+  });
+
+  it('a zero-pick reveal closes the question with null stats (UI shows the empty state)', () => {
+    const room = wyrVotingRoom();
+    addNamed(room, 'Grace'); // nobody picks
+    const res = reveal(room, hostId(room));
+    expect(res).toEqual({ ok: true });
+    expect(room.status).toBe('revealed');
+    expect(room.stats).toBeNull();
+  });
+
+  it('hides pick values until the reveal', () => {
+    const room = wyrVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, 'B');
+    const snap = buildSnapshot(room);
+    expect(snap.votedIds).toContain(grace.id);
+    expect(snap.votes).toEqual({});
+    expect(snap.stats).toBeNull();
+  });
+});
+
+describe('WYR snapshot', () => {
+  it('exposes the active question once the round starts', () => {
+    const room = wyrVotingRoom();
+    const snap = buildSnapshot(room);
+    expect(snap.game).toBe('would-you-rather');
+    expect(snap.question).toEqual(wyrQuestions[0]);
+    expect(snap.questionIndex).toBe(0);
+    expect(snap.questionCount).toBe(3);
+  });
+
+  it('keeps the question null while waiting', () => {
+    const room = createRoom({ game: 'would-you-rather', questions: wyrQuestions });
+    const snap = buildSnapshot(room);
+    expect(snap.question).toBeNull();
+    expect(snap.questionCount).toBe(3);
+  });
+
+  it('shows the revealed split values like every other game', () => {
+    const room = wyrVotingRoom([wyrQuestions[0]]);
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, 'A');
+    castVote(room, hostId(room), 'A');
+    reveal(room, hostId(room));
+    const snap = buildSnapshot(room);
+    expect(snap.votes[grace.id]).toBe('A');
+    expect(snap.stats!.counts).toEqual([{ value: 'A', count: 2 }]);
+  });
+});
+
+describe('nextQuestion', () => {
+  it('rejects non-hosts', () => {
+    const room = wyrVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    expect(nextQuestion(room, grace.id)).toEqual({ ok: false, error: 'not_host' });
+  });
+
+  it('is a no-op for planning-poker rooms', () => {
+    const room = votingRoom();
+    expect(nextQuestion(room, hostId(room))).toEqual({ ok: false, error: 'not_this_game' });
+  });
+
+  it('requires the room to be revealed first', () => {
+    const room = wyrVotingRoom();
+    expect(nextQuestion(room, hostId(room))).toEqual({ ok: false, error: 'not_revealed' });
+  });
+
+  it('advances through the deck and signals done at the end', () => {
+    const room = wyrVotingRoom([wyrQuestions[0], wyrQuestions[1]]);
+    castVote(room, hostId(room), 'A');
+    reveal(room, hostId(room));
+    const first = nextQuestion(room, hostId(room));
+    expect(first).toEqual({ ok: true, done: false });
+    expect(room.questionIndex).toBe(1);
+    expect(room.status).toBe('voting');
+    castVote(room, hostId(room), 'B');
+    reveal(room, hostId(room));
+    const last = nextQuestion(room, hostId(room));
+    expect(last).toEqual({ ok: true, done: true });
+    expect(room.questionIndex).toBe(1); // deck exhausted — stays put
+  });
+});
+
+// ---------------------------------------------------------------------------
 // setTimerSec — only the host, only in the waiting room, only 10/15/30/null
 // ---------------------------------------------------------------------------
 
@@ -610,6 +869,325 @@ describe('removeParticipant', () => {
     const grace = addNamed(room, 'Grace');
     expect(removeParticipant(room, grace.id, hostId(room))).toEqual({ ok: false, error: 'not_host' });
     expect(removeParticipant(room, hostId(room), 'nobody')).toEqual({ ok: false, error: 'no_participant' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Most Likely To — nomination rounds, crown scoring, predictor bonus
+// ---------------------------------------------------------------------------
+
+const mltPrompts = ['Forget their laptop at home', 'Reply-all to everyone', 'Show up 10 minutes late'];
+
+/** An MLT room in the VOTING state with the host seated. */
+function mltVotingRoom(prompts = mltPrompts): Room {
+  const room = createRoom({ hostName: 'Host', game: 'most-likely-to', prompts });
+  const res = startVoting(room, room.hostId!);
+  if (!res.ok) throw new Error(`helper: start failed ${res.error}`);
+  return room;
+}
+
+describe('createRoom (most-likely-to)', () => {
+  it('stores the sanitized prompt deck for an MLT room', () => {
+    const room = createRoom({ game: 'most-likely-to', prompts: mltPrompts });
+    expect(room.game).toBe('most-likely-to');
+    expect(room.prompts).toEqual(mltPrompts);
+    expect(room.promptIndex).toBe(-1); // no active prompt yet
+    expect(room.mltScores).toEqual({});
+    expect(room.mltResult).toBeNull();
+    expect(room.sessionOver).toBe(false);
+  });
+
+  it('falls back to the built-in bank when no valid prompts survive', () => {
+    const empty = createRoom({ game: 'most-likely-to', prompts: [] });
+    expect(empty.prompts.length).toBeGreaterThan(0);
+    const garbage = createRoom({ game: 'most-likely-to', prompts: ['', '   ', 42, null] });
+    expect(garbage.prompts.length).toBeGreaterThan(0);
+    const nonList = createRoom({ game: 'most-likely-to' });
+    expect(nonList.prompts.length).toBeGreaterThan(0);
+  });
+
+  it('drops blank prompts and clamps the deck to 12', () => {
+    const room = createRoom({
+      game: 'most-likely-to',
+      prompts: [...mltPrompts, '', '   ', ...Array.from({ length: 30 }, (_, i) => `Prompt ${i}`)],
+    });
+    expect(room.prompts).toHaveLength(12);
+    expect(room.prompts.some((p) => !p.trim())).toBe(false);
+  });
+
+  it('trims and clamps prompt text', () => {
+    const room = createRoom({ game: 'most-likely-to', prompts: ['  spaced  ', 'x'.repeat(300)] });
+    expect(room.prompts[0]).toBe('spaced');
+    expect(room.prompts[1]).toHaveLength(160);
+  });
+});
+
+describe('normalizePrompts', () => {
+  it('passes through valid prompt strings', () => {
+    expect(normalizePrompts(mltPrompts)).toEqual(mltPrompts);
+  });
+
+  it('returns the default bank for non-array input', () => {
+    expect(normalizePrompts(undefined).length).toBeGreaterThan(0);
+  });
+});
+
+describe('MLT voting', () => {
+  it('startVoting puts prompt 0 on the table', () => {
+    const room = mltVotingRoom();
+    expect(room.status).toBe('voting');
+    expect(room.promptIndex).toBe(0);
+  });
+
+  it('accepts a nomination for a real teammate and locks it', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    const res = castVote(room, hostId(room), grace.id);
+    expect(res).toEqual({ ok: true });
+    expect(room.votes[hostId(room)]).toBe(grace.id);
+    expect(room.participants.get(hostId(room))!.hasVoted).toBe(true);
+  });
+
+  it('rejects nominating yourself', () => {
+    const room = mltVotingRoom();
+    expect(castVote(room, hostId(room), hostId(room))).toEqual({ ok: false, error: 'self_vote' });
+  });
+
+  it('rejects an unknown target and deck-card values', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    expect(castVote(room, grace.id, 'nobody')).toEqual({ ok: false, error: 'bad_value' });
+    expect(castVote(room, grace.id, '8')).toEqual({ ok: false, error: 'bad_value' });
+    expect(castVote(room, grace.id, 'A')).toEqual({ ok: false, error: 'bad_value' });
+    expect(room.votes[grace.id]).toBeUndefined();
+  });
+
+  it('rejects a duplicate nomination and keeps the original', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, hostId(room));
+    const dup = castVote(room, grace.id, 'other');
+    expect(dup).toEqual({ ok: false, error: 'already_voted' });
+    expect(room.votes[grace.id]).toBe(hostId(room));
+  });
+
+  it('cannot nominate while waiting', () => {
+    const room = createRoom({ game: 'most-likely-to', prompts: mltPrompts });
+    const grace = addNamed(room, 'Grace');
+    expect(castVote(room, grace.id, hostId(room))).toEqual({ ok: false, error: 'not_voting' });
+  });
+});
+
+describe('computeMltResult (crown + predictor scoring)', () => {
+  it('crowns the most-nominated player with 100 and predicts +20', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    const ned = addNamed(room, 'Ned');
+    const priya = addNamed(room, 'Priya');
+    // Grace gets 3 nominations; the host gets 1.
+    castVote(room, hostId(room), grace.id);
+    castVote(room, grace.id, hostId(room));
+    castVote(room, ned.id, grace.id);
+    castVote(room, priya.id, grace.id);
+    const res = computeMltResult(room);
+    expect(res.winners).toEqual([grace.id]);
+    expect(res.points[grace.id]).toBe(100); // crowned
+    expect(res.points[hostId(room)]).toBe(80 + MLT_PREDICTOR_BONUS); // 2nd place + predicted
+    expect(res.points[ned.id]).toBe(MLT_PREDICTOR_BONUS); // predicted only
+    expect(res.points[priya.id]).toBe(MLT_PREDICTOR_BONUS);
+    expect(res.points).not.toHaveProperty('missing');
+  });
+
+  it('a tied top crowns everyone and the next rank is skipped', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    const ned = addNamed(room, 'Ned');
+    const priya = addNamed(room, 'Priya');
+    const quinn = addNamed(room, 'Quinn');
+    // Grace 2, Ned 2, Host 1 → ranks 1, 1, 3 (standard competition).
+    castVote(room, hostId(room), grace.id);
+    castVote(room, grace.id, ned.id);
+    castVote(room, ned.id, grace.id);
+    castVote(room, priya.id, ned.id);
+    castVote(room, quinn.id, hostId(room));
+    const res = computeMltResult(room);
+    expect(new Set(res.winners)).toEqual(new Set([grace.id, ned.id]));
+    expect(res.points[grace.id]).toBe(100 + MLT_PREDICTOR_BONUS);
+    expect(res.points[ned.id]).toBe(100 + MLT_PREDICTOR_BONUS);
+    // Host is rank 3 → 60, plus +20 for predicting a winner (voted Grace).
+    expect(res.points[hostId(room)]).toBe(60 + MLT_PREDICTOR_BONUS);
+    expect(res.points[priya.id]).toBe(MLT_PREDICTOR_BONUS);
+    expect(res.points[quinn.id]).toBeUndefined(); // zero nominations → no points
+  });
+
+  it('returns an empty result for zero nominations', () => {
+    const room = mltVotingRoom();
+    addNamed(room, 'Grace');
+    const res = computeMltResult(room);
+    expect(res.points).toEqual({});
+    expect(res.counts).toEqual({});
+    expect(res.winners).toEqual([]);
+    expect(res.predictors).toEqual([]);
+  });
+
+  it('uses the shared ranking table (100/80/60/40/20/10)', () => {
+    expect(MLT_RANKING_POINTS).toEqual([100, 80, 60, 40, 20, 10]);
+    expect(MLT_PREDICTOR_BONUS).toBe(20);
+  });
+});
+
+describe('MLT reveal', () => {
+  it('is host-paced: reveals while someone is still thinking', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, hostId(room)); // host hasn't nominated
+    const res = reveal(room, hostId(room));
+    expect(res).toEqual({ ok: true });
+    expect(room.status).toBe('revealed');
+    expect(room.mltResult!.counts[hostId(room)]).toBe(1);
+    expect(room.stats).toBeNull(); // MLT carries mltResult, not deck stats
+  });
+
+  it('accumulates session totals into mltScores at reveal', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    const ned = addNamed(room, 'Ned');
+    // Grace: 2 nominations → 100 crown. Ned: 1 → 80. Host: 0 → nothing.
+    // Predictors of the crowned player (+20): host and Ned both voted Grace.
+    castVote(room, hostId(room), grace.id);
+    castVote(room, grace.id, ned.id);
+    castVote(room, ned.id, grace.id);
+    reveal(room, hostId(room));
+    expect(room.mltScores[grace.id]).toBe(100); // crowned; voted Ned (not a winner)
+    expect(room.mltScores[ned.id]).toBe(100); // 80 second place + 20 prediction
+    expect(room.mltScores[hostId(room)]).toBe(20); // prediction only
+  });
+
+  it('keeps nomination values private until the reveal', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, hostId(room));
+    const snap = buildSnapshot(room);
+    expect(snap.votedIds).toContain(grace.id);
+    expect(snap.votes).toEqual({});
+    expect(snap.mltResult).toBeNull();
+  });
+
+  it('rejects reveal from the waiting room and a second reveal', () => {
+    const room = createRoom({ game: 'most-likely-to', prompts: mltPrompts });
+    expect(reveal(room, hostId(room))).toEqual({ ok: false, error: 'not_started' });
+    const started = mltVotingRoom();
+    const grace = addNamed(started, 'Grace');
+    castVote(started, grace.id, hostId(started));
+    reveal(started, hostId(started));
+    expect(reveal(started, hostId(started))).toEqual({ ok: false, error: 'already_revealed' });
+  });
+});
+
+describe('nextPrompt', () => {
+  it('rejects non-hosts and non-MLT rooms', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    expect(nextPrompt(room, grace.id)).toEqual({ ok: false, error: 'not_host' });
+    expect(nextPrompt(votingRoom(), hostId(votingRoom()))).toEqual({ ok: false, error: 'not_this_game' });
+  });
+
+  it('requires the round to be revealed first', () => {
+    const room = mltVotingRoom();
+    expect(nextPrompt(room, hostId(room))).toEqual({ ok: false, error: 'not_revealed' });
+  });
+
+  it('advances, wipes nominations and re-arms the per-round lock', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, hostId(room));
+    reveal(room, hostId(room));
+    const res = nextPrompt(room, hostId(room));
+    expect(res).toEqual({ ok: true, done: false });
+    expect(room.promptIndex).toBe(1);
+    expect(room.status).toBe('voting');
+    expect(room.votes).toEqual({});
+    expect(room.mltResult).toBeNull();
+    expect(room.participants.get(grace.id)!.hasVoted).toBe(false);
+    expect(castVote(room, grace.id, hostId(room))).toEqual({ ok: true });
+  });
+
+  it('signals done on the last prompt', () => {
+    const room = mltVotingRoom([mltPrompts[0]]);
+    // Solo room: nobody to nominate — reveal with zero votes, then advance.
+    reveal(room, hostId(room));
+    const last = nextPrompt(room, hostId(room));
+    expect(last).toEqual({ ok: true, done: true });
+    expect(room.promptIndex).toBe(0);
+  });
+});
+
+describe('finishMlt & playAgainMlt', () => {
+  it('finishMlt marks the session over (host-only, after a reveal)', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    expect(finishMlt(room, grace.id)).toEqual({ ok: false, error: 'not_host' });
+    expect(finishMlt(room, hostId(room))).toEqual({ ok: false, error: 'not_revealed' });
+    castVote(room, grace.id, hostId(room));
+    reveal(room, hostId(room));
+    expect(finishMlt(room, hostId(room))).toEqual({ ok: true });
+    expect(room.sessionOver).toBe(true);
+  });
+
+  it('playAgainMlt resets rounds but keeps the session leaderboard', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, hostId(room));
+    castVote(room, hostId(room), grace.id);
+    reveal(room, hostId(room));
+    expect(room.mltScores[grace.id]).toBe(120);
+    finishMlt(room, hostId(room));
+
+    const res = playAgainMlt(room, hostId(room));
+    expect(res).toEqual({ ok: true });
+    expect(room.status).toBe('waiting');
+    expect(room.promptIndex).toBe(-1);
+    expect(room.votes).toEqual({});
+    expect(room.mltResult).toBeNull();
+    expect(room.sessionOver).toBe(false);
+    expect(room.mltScores[grace.id]).toBe(120); // totals survive
+  });
+
+  it('playAgainMlt requires an over session', () => {
+    const room = mltVotingRoom();
+    expect(playAgainMlt(room, hostId(room))).toEqual({ ok: false, error: 'not_finished' });
+  });
+});
+
+describe('MLT snapshot', () => {
+  it('exposes the active prompt once the session starts', () => {
+    const room = mltVotingRoom();
+    const snap = buildSnapshot(room);
+    expect(snap.game).toBe('most-likely-to');
+    expect(snap.prompt).toBe(mltPrompts[0]);
+    expect(snap.promptIndex).toBe(0);
+    expect(snap.promptCount).toBe(3);
+  });
+
+  it('keeps the prompt null and scores empty while waiting', () => {
+    const room = createRoom({ game: 'most-likely-to', prompts: mltPrompts });
+    const snap = buildSnapshot(room);
+    expect(snap.prompt).toBeNull();
+    expect(snap.mltScores).toEqual({});
+    expect(snap.sessionOver).toBe(false);
+  });
+
+  it('shows nominations and the result only once revealed', () => {
+    const room = mltVotingRoom();
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, hostId(room));
+    castVote(room, hostId(room), grace.id);
+    reveal(room, hostId(room));
+    const snap = buildSnapshot(room);
+    expect(snap.votes[grace.id]).toBe(hostId(room));
+    // Both players tie for the crown (1 nomination each) — order-insensitive.
+    expect([...snap.mltResult!.winners].sort()).toEqual([grace.id, hostId(room)].sort());
+    expect(snap.mltScores[grace.id]).toBe(120); // 100 crown + 20 prediction
   });
 });
 

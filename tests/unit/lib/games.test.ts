@@ -57,11 +57,15 @@ describe('game registry', () => {
     }
   });
 
-  it('marks exactly planning poker as live, pointing at the real implementation', () => {
-    expect(LIVE_GAMES).toHaveLength(1);
-    expect(LIVE_GAMES[0].id).toBe('planning-poker');
-    expect(LIVE_GAMES[0].status).toBe('live');
-    expect(LIVE_GAMES[0].route).toBe('/create');
+  it('marks the live games, pointing at their real implementations', () => {
+    expect(LIVE_GAMES).toHaveLength(3);
+    expect(LIVE_GAMES.map((g) => g.id).sort()).toEqual(['most-likely-to', 'planning-poker', 'would-you-rather']);
+    const poker = getGame('planning-poker')!;
+    const wyr = getGame('would-you-rather')!;
+    expect(poker.status).toBe('live');
+    expect(poker.route).toBe('/create');
+    expect(wyr.status).toBe('live');
+    expect(wyr.route).toBe('/games/would-you-rather');
   });
 
   it('routes every coming-soon game to its placeholder page', () => {

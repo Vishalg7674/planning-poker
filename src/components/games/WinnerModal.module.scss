@@ -1,0 +1,90 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-5;
+}
+
+.eyebrow {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+}
+
+// ---------------------------------------------------------------------------
+// Winner banner
+// ---------------------------------------------------------------------------
+
+.winner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-4 $sp-6;
+  border-radius: $r-xl;
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  background:
+    radial-gradient(80% 90% at 50% 0%, rgba(var(--accent-rgb), 0.16), transparent 70%),
+    var(--surface);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.12), var(--shadow-panel);
+  animation: modal-in $dur-slow $ease-snap both;
+  min-width: min(320px, 100%);
+}
+
+.winnerMedal {
+  font-size: 42px;
+  line-height: 1;
+  animation: winner-drop 0.7s $ease-snap 0.15s both;
+}
+
+.winnerName {
+  @include display;
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-align: center;
+}
+
+.winnerScore {
+  @include mono;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+.winnerNumber {
+  font-variant-numeric: tabular-nums;
+}
+
+.noWinner {
+  font-size: 14px;
+  color: var(--ink-faint);
+  padding: $sp-3 0;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: $sp-3;
+  flex-wrap: wrap;
+}
+
+// The medal drops in with a tiny bounce after the modal appears.
+@keyframes winner-drop {
+  0% {
+    transform: translateY(-26px) scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}

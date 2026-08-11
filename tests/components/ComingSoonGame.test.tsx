@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vitest';
 import ComingSoonGame from '@/components/games/ComingSoonGame';
 import { getGame } from '@/lib/games';
 
-const game = getGame('most-likely-to')!;
+const game = getGame('this-or-that')!;
 
 describe('ComingSoonGame', () => {
   it('renders icon, name, description, category and coming-soon badge', () => {
     render(<ComingSoonGame game={game} />);
-    expect(screen.getByRole('heading', { name: 'Most Likely To' })).toBeInTheDocument();
-    expect(screen.getByText('😂')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'This or That' })).toBeInTheDocument();
+    expect(screen.getByText('⚖️')).toBeInTheDocument();
     expect(screen.getByText('COMING SOON')).toBeInTheDocument();
     expect(screen.getByText(/We're building this game!/)).toBeInTheDocument();
     expect(screen.getByText(/🧊 Icebreakers · 3–20 players · 5 min/)).toBeInTheDocument();

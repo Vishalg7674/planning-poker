@@ -29,6 +29,9 @@ creation.
 | `deckId`    | string?  | `fibonacci` \| `modifiedFibonacci` \| `sequential` \| `tshirt` \| `powersOfTwo`; unknown → `fibonacci` |
 | `accent`    | string?  | `gold` \| `purple` \| `blue` \| `green`; unknown → `gold`    |
 | `revealMode`| string?  | `normal` \| `staggered` \| `dramatic`; unknown → `staggered`|
+| `game`      | string?  | `planning-poker` \| `would-you-rather` \| `most-likely-to`; omitted → `planning-poker` |
+| `questions` | array?   | WYR only: `[{ a, b }, …]` — each option trimmed, ≤ 120 chars, deck clamped to 20; invalid decks fall back to the built-in bank |
+| `prompts`   | array?   | MLT only: `[string, …]` — each trimmed, ≤ 160 chars, deck clamped to 12; invalid decks fall back to the built-in bank |
 
 - **Response**: `{ ok: true, code, participantId }`
 - **Failure**: `{ ok: false, error }` (e.g. server error)
@@ -113,7 +116,7 @@ Submit a vote. **Final and permanent.**
 
 | Field   | Type   | Notes                     |
 | ------- | ------ | ------------------------- |
-| `value` | string | Any deck value (e.g. `"8"`, `"½"`, `"M"`, `"?"`) |
+| `value` | string | A deck value (e.g. `"8"`, `"½"`, `"M"`) — or, in a Would You Rather room, exactly `"A"` or `"B"` — or, in a Most Likely To room, the **participant id** of a teammate you are nominating |
 
 - **Response**: `{ ok: true }`
 - **Failure**:
@@ -122,8 +125,9 @@ Submit a vote. **Final and permanent.**
     a late vote also flips the room to `ended`)
   - `already_voted` — this participant already has a locked vote
   - `no_value` — empty value
-  - `bad_value` — the value is not on the room's deck (the server validates
-    against the same card list as the client)
+  - `bad_value` — the value is not allowed: not on the room's deck (Planning
+    Poker), not `A`/`B` (WYR), or not a real teammate's id (MLT)
+  - `self_vote` — MLT only: you cannot nominate yourself
   - `revealed` — round is over
 - **Authorization**: any seated participant, exactly once
 
@@ -138,7 +142,70 @@ Reveal the round. Host only.
   `already_revealed`
 - **Authorization**: host only
 - **Effect**: `VOTING|ENDED → REVEALED`; snapshot now includes `votes` and
-  `stats` (with the consensus verdict).
+  `stats` (with the consensus verdict). In a Would You Rather room the host
+  may reveal at **any time** while a question is live (no "everyone must
+  vote" gate) — the split stats (`numeric: false`) are computed by
+  `computeWyrStats`. In a Most Likely To room the same host-paced rule
+  applies; instead of `stats`, the snapshot carries `mltResult`
+  (crown points, nomination counts, winners, predictors) and the session
+  totals in `mltScores` are updated server-side.
+
+### `wyr:next`
+
+Advance to the next Would You Rather question. Host only, after a reveal.
+
+- **Payload**: `{}`
+- **Response**: `{ ok: true, done: boolean }` — `done: true` when the deck
+  is exhausted (the host should end the session)
+- **Failure**:
+  - `not_host` — a participant cannot advance the game
+  - `not_this_game` — sent to a Planning Poker room
+  - `not_revealed` — the current question hasn't been revealed yet
+- **Authorization**: host only
+- **Effect**: the previous question's votes are wiped (`votes = {}`,
+  `hasVoted` reset — the per-question lock re-arms), `questionIndex`
+  advances, and the room returns to `VOTING` with the next question live.
+
+### `mlt:next`
+
+Advance to the next Most Likely To prompt. Host only, after a reveal.
+
+- **Payload**: `{}`
+- **Response**: `{ ok: true, done: boolean }` — `done: true` when the prompt
+  deck is exhausted (the host then finishes the game)
+- **Failure**:
+  - `not_host` — a participant cannot advance the game
+  - `not_this_game` — sent to a non-MLT room
+  - `not_revealed` — the current prompt hasn't been revealed yet
+- **Authorization**: host only
+- **Effect**: the previous round's nominations are wiped (`votes = {}`,
+  `hasVoted` reset — the per-round lock re-arms), `promptIndex` advances,
+  and the room returns to `VOTING` with the next prompt live.
+
+### `mlt:finish`
+
+Finish the Most Likely To session. Host only, after the final round's reveal.
+
+- **Payload**: `{}`
+- **Response**: `{ ok: true }`
+- **Failure**: `not_host` · `not_this_game` · `not_revealed`
+- **Authorization**: host only
+- **Effect**: `sessionOver` flips to `true` in the snapshot — every client
+  opens the shared WinnerModal with the final leaderboard.
+
+### `mlt:playAgain`
+
+Restart the Most Likely To session. Host only, once the session is over.
+
+- **Payload**: `{}`
+- **Response**: `{ ok: true }`
+- **Failure**: `not_host` · `not_this_game` · `not_finished` (session not
+  over yet)
+- **Authorization**: host only
+- **Effect**: rounds, nominations and `sessionOver` reset; **`mltScores`
+  (the session leaderboard) is kept** — teams can play several sessions and
+  crown an overall champion. The room returns to `WAITING`; the host starts
+  the next session.
 
 ### `participant:remove`
 
@@ -178,6 +245,16 @@ Emitted after every mutation. The full privacy-aware room state.
   "teamName": "Frontend Team",
   "roomTitle": "Sprint 24 Planning",
   "createdAt": 1720000000000,
+  "game": "planning-poker",        // or "would-you-rather" / "most-likely-to"
+  "question": null,                 // active WYR prompt { a, b }; null while waiting / for other games
+  "questionIndex": 0,               // 0-based active WYR question
+  "questionCount": 0,               // WYR deck size (0 for other games)
+  "prompt": null,                   // active MLT prompt (string); null while waiting / for other games
+  "promptIndex": 0,                 // 0-based active MLT prompt
+  "promptCount": 0,                 // MLT deck size (0 for other games)
+  "mltResult": null,                // MLT round result { points, counts, winners, predictors }; revealed only
+  "mltScores": {},                  // MLT session totals (survive Play Again)
+  "sessionOver": false,             // true once the MLT host finished the final round
   "settings": {
     "deckId": "modifiedFibonacci",
     "timerSec": 15,

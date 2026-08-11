@@ -58,6 +58,9 @@ export default function JoinForm({ code, onGone }: JoinFormProps) {
       } else if (res?.error === 'room_locked') {
         setFormError('This room is locked. Ask the host for access.');
         setBusy(false);
+      } else if (res?.error === 'name_taken') {
+        setFormError('This name is already taken. Please choose another name.');
+        setBusy(false);
       } else {
         setFormError(res?.error || 'Could not join the room.');
         setBusy(false);
@@ -74,7 +77,7 @@ export default function JoinForm({ code, onGone }: JoinFormProps) {
         <span className={styles.codeLabel}>room</span>
         <span className={styles.code}>{code}</span>
       </div>
-      <h1 className={styles.h1}>Join Planning Poker</h1>
+      <h1 className={styles.h1}>Join the room</h1>
       <p className={styles.sub}>Enter your name — no account, no email, no history. Your identity lives in this tab.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate>

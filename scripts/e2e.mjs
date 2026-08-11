@@ -439,6 +439,74 @@ snap = await voterSnap((s) => s.code === codeD && s.status === 'revealed');
 check('room D revealed', snap?.status === 'revealed');
 check('stats exclude the disconnected ghost', snap?.stats?.count === 2 && snap?.stats?.avg === 5.5);
 
+// ===========================================================================
+// Would You Rather — A/B rounds, per-question locks, host-paced reveals
+// ===========================================================================
+console.log('— would you rather: create with a 2-question deck —');
+const createdW = await emitAck(host, 'room:create', {
+  hostName: 'Wyn',
+  game: 'would-you-rather',
+  questions: [
+    { a: 'Have the ability to fly', b: 'Have the ability to be invisible' },
+    { a: 'Always be 10 minutes early', b: 'Always be 10 minutes late' },
+  ],
+});
+check('WYR create ok', createdW?.ok === true, JSON.stringify(createdW));
+const codeW = createdW.code;
+snap = await hostSnap((s) => s.code === codeW);
+check('WYR game field broadcast', snap?.game === 'would-you-rather');
+check('WYR question count in snapshot', snap?.questionCount === 2);
+check('WYR question hidden while waiting', snap?.question === null, JSON.stringify(snap?.question));
+check('WYR room starts WAITING', snap?.status === 'waiting');
+
+const wyrP = await emitAck(voter, 'room:join', { code: codeW, name: 'Eve' });
+check('Eve joins the WYR room', wyrP?.ok === true, JSON.stringify(wyrP));
+const wyrId = wyrP.participantId;
+
+console.log('— would you rather: voting —');
+await emitAck(host, 'voting:start', {});
+snap = await hostSnap((s) => s.code === codeW && s.status === 'voting');
+check('WYR status → voting', snap?.status === 'voting');
+check('WYR first question broadcast', snap?.question?.a === 'Have the ability to fly' && snap?.question?.b === 'Have the ability to be invisible', JSON.stringify(snap?.question));
+check('WYR questionIndex 0', snap?.questionIndex === 0);
+
+const wyrVote = await emitAck(voter, 'vote:cast', { value: 'A' });
+check('WYR pick A ok', wyrVote?.ok === true, JSON.stringify(wyrVote));
+snap = await hostSnap((s) => s.code === codeW && s.votedIds?.includes(wyrId));
+check('host sees Eve picked — not what she picked', snap?.votedIds.includes(wyrId) && Object.keys(snap.votes).length === 0, JSON.stringify(snap?.votes));
+const wyrDup = await emitAck(voter, 'vote:cast', { value: 'B' });
+check('WYR duplicate pick rejected (already_voted)', wyrDup?.ok === false && wyrDup.error === 'already_voted', JSON.stringify(wyrDup));
+const wyrBad = await emitAck(host, 'vote:cast', { value: '8' });
+check('WYR deck card rejected (bad_value — only A/B allowed)', wyrBad?.ok === false && wyrBad.error === 'bad_value', JSON.stringify(wyrBad));
+
+console.log('— would you rather: host-paced reveal —');
+const wyrReveal = await emitAck(host, 'votes:reveal', {});
+check('WYR reveal mid-question ok (host sets the pace)', wyrReveal?.ok === true, JSON.stringify(wyrReveal));
+snap = await voterSnap((s) => s.code === codeW && s.status === 'revealed');
+check('WYR revealed for the voter', snap?.status === 'revealed');
+check('WYR split stats (non-numeric, A wins)', snap?.stats?.numeric === false && snap?.stats?.count === 1 && snap?.stats?.mode === 'A', JSON.stringify(snap?.stats));
+check('WYR pick visible after reveal', snap?.votes[wyrId] === 'A');
+
+console.log('— would you rather: next question —');
+const wyrNextNonHost = await emitAck(voter, 'wyr:next', {});
+check('non-host cannot advance', wyrNextNonHost?.ok === false && wyrNextNonHost.error === 'not_host', JSON.stringify(wyrNextNonHost));
+const wyrNext = await emitAck(host, 'wyr:next', {});
+check('WYR next question ok', wyrNext?.ok === true && wyrNext?.done === false, JSON.stringify(wyrNext));
+snap = await hostSnap((s) => s.code === codeW && s.questionIndex === 1 && s.status === 'voting');
+check('WYR advanced to question 2', snap?.question?.a === 'Always be 10 minutes early', JSON.stringify(snap?.question));
+check('WYR votes wiped for the new question', snap?.votedIds.length === 0);
+const wyrVote2 = await emitAck(voter, 'vote:cast', { value: 'B' });
+check('Eve can vote again on the new question (per-question lock)', wyrVote2?.ok === true, JSON.stringify(wyrVote2));
+
+await emitAck(host, 'votes:reveal', {});
+snap = await voterSnap((s) => s.code === codeW && s.status === 'revealed' && s.questionIndex === 1);
+const wyrDone = await emitAck(host, 'wyr:next', {});
+check('WYR done on an exhausted deck', wyrDone?.ok === true && wyrDone?.done === true, JSON.stringify(wyrDone));
+
+await emitAck(host, 'room:end', {});
+const wyrJoinAfter = await emitAck(voter, 'room:join', { code: codeW, name: 'Zed' });
+check('WYR room gone after end (not_found)', wyrJoinAfter?.ok === false && wyrJoinAfter.error === 'not_found', JSON.stringify(wyrJoinAfter));
+
 host.disconnect();
 voter.disconnect();
 observer.disconnect();

@@ -14,12 +14,15 @@ test.describe('Homepage', () => {
     await expect(page.getByRole('link', { name: 'Create a room' })).toBeVisible();
   });
 
-  test('features Planning Poker as the live game', async ({ page }) => {
+  test('features Planning Poker and Would You Rather as the live games', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('⭐ Featured')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Planning Poker' }).first()).toBeVisible();
-    // Exactly one LIVE badge in the catalog.
-    await expect(page.getByText('LIVE', { exact: true })).toHaveCount(1);
+    // The three live games carry a LIVE badge; everything else says COMING SOON.
+    await expect(page.getByText('LIVE', { exact: true })).toHaveCount(3);
+    await expect(card(page, 'Planning Poker', 'live')).toBeVisible();
+    await expect(card(page, 'Would You Rather', 'live')).toBeVisible();
+    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
   });
 
   test('renders all 110 game cards across the category sections', async ({ page }) => {
@@ -29,7 +32,7 @@ test.describe('Homepage', () => {
       await expect(page.getByRole('heading', { name: new RegExp(title) })).toBeVisible();
     }
     // Spot-check games from different categories.
-    await expect(card(page, 'Most Likely To')).toBeVisible();
+    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
     await expect(card(page, 'Fastest Finger')).toBeVisible();
     await expect(card(page, 'Draw & Guess')).toBeVisible();
     await expect(card(page, 'Trivia Battle')).toBeVisible();
@@ -40,19 +43,19 @@ test.describe('Homepage', () => {
     const search = page.getByRole('searchbox', { name: 'Search games' });
     await search.fill('poker');
     await expect(card(page, 'Planning Poker', 'live')).toBeVisible();
-    await expect(card(page, 'Most Likely To')).toBeHidden();
+    await expect(card(page, 'Most Likely To', 'live')).toBeHidden();
 
     await search.fill('zzzzzz');
     await expect(page.getByText('No games found.')).toBeVisible();
 
     await search.fill('');
-    await expect(card(page, 'Most Likely To')).toBeVisible();
+    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
   });
 
   test('category filter chips narrow the catalog', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Icebreakers', exact: true }).click();
-    await expect(card(page, 'Most Likely To')).toBeVisible();
+    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
     await expect(card(page, 'Planning Poker', 'live')).toBeHidden();
     await expect(card(page, 'Guess the Error')).toBeHidden();
 
@@ -69,15 +72,23 @@ test.describe('Homepage', () => {
 
   test('a coming-soon game opens its placeholder page and Back to Games works', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('link', { name: /Most Likely To/ }).first().click();
-    await expect(page).toHaveURL(/\/games\/most-likely-to$/);
-    await expect(page.getByRole('heading', { name: 'Most Likely To' })).toBeVisible();
+    await page.getByRole('link', { name: /This or That/ }).first().click();
+    await expect(page).toHaveURL(/\/games\/this-or-that$/);
+    await expect(page.getByRole('heading', { name: 'This or That' })).toBeVisible();
     await expect(page.getByText("We're building this game!")).toBeVisible();
     await expect(page.getByText('COMING SOON')).toBeVisible();
 
     await page.getByRole('link', { name: /Back to Games/ }).click();
     await expect(page).toHaveURL(/\/games$/);
     await expect(page.getByRole('heading', { name: 'Explore Games' })).toBeVisible();
+  });
+
+  test('the live Would You Rather card leads to its create page', async ({ page }) => {
+    await page.goto('/');
+    await card(page, 'Would You Rather', 'live').click();
+    await expect(page).toHaveURL(/\/games\/would-you-rather$/);
+    await expect(page.getByRole('heading', { name: 'Would You Rather' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Create Room' })).toBeVisible();
   });
 
   test('the /games page respects a category from the URL', async ({ page }) => {
@@ -93,7 +104,7 @@ test.describe('Homepage', () => {
     try {
       await page.goto('/');
       await expect(page.getByRole('heading', { level: 1 })).toContainText('Break the ice.');
-      await expect(card(page, 'Most Likely To')).toBeVisible();
+      await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
       expect(overflow).toBe(true);
       // Mobile nav hides the "Games" link but keeps the create CTA.

@@ -26,7 +26,11 @@ export default async function GamePage({ params }: GamePageProps) {
   const game = getGame(gameId);
   if (!game) notFound();
 
-  // Live games are real — send players to the actual implementation.
+  // Live games are real — send players to the actual implementation. A game
+  // whose route is /games/<id> has its own static page which shadows this
+  // dynamic route, so this redirect never loops: /games/would-you-rather is
+  // served by the static page, and only games implemented elsewhere (e.g.
+  // planning-poker → /create) ever reach this redirect.
   if (game.status === 'live') redirect(game.route);
 
   const category = getCategory(game.category);

@@ -15,15 +15,46 @@
  * @typedef {'gold' | 'purple' | 'blue' | 'green'} Accent
  * @typedef {'normal' | 'staggered' | 'dramatic'} RevealMode
  * @typedef {'full' | 'strong' | 'moderate' | 'large'} ConsensusLevel
+ * @typedef {'planning-poker' | 'would-you-rather' | 'most-likely-to'} GameId
+ * @typedef {{ a: string, b: string }} WyrQuestion
+ * @typedef {{ points: Record<string, number>, counts: Record<string, number>, winners: string[], predictors: string[] }} MltRoundResult
  * @typedef {{ id: string, name: string, role: 'facilitator' | 'voter', status: ParticipantStatus, hasVoted: boolean, joinedAt: number, hue: number }} Participant
  * @typedef {{ count: number, mode: string, modeShare: number, unique: number, numeric: boolean, avg: number | null, median: number | null, spread: number | null, highest: number | null, lowest: number | null, range: number | null, level: ConsensusLevel, counts: Array<{ value: string, count: number }> }} RoomStats
- * @typedef {{ code: string, hostId: string | null, teamName: string, roomTitle: string, createdAt: number, settings: { deckId: DeckId, timerSec: number | null, accent: Accent, revealMode: RevealMode }, locked: boolean, participants: Map<string, Participant>, status: RoomStatus, votes: Record<string, string>, stats: RoomStats | null, timer: { durationSec: number, endsAt: number } | null, emptySince: number | null }} Room
+ * @typedef {{ code: string, hostId: string | null, teamName: string, roomTitle: string, createdAt: number, game: GameId, questions: WyrQuestion[], questionIndex: number, prompts: string[], promptIndex: number, mltScores: Record<string, number>, mltResult: MltRoundResult | null, sessionOver: boolean, settings: { deckId: DeckId, timerSec: number | null, accent: Accent, revealMode: RevealMode }, locked: boolean, participants: Map<string, Participant>, status: RoomStatus, votes: Record<string, string>, stats: RoomStats | null, timer: { durationSec: number, endsAt: number } | null, emptySince: number | null }} Room
  * @typedef {{ ok: true } | { ok: false, error: string, timerEnded?: boolean }} ActionResult
  */
 
 export const ROOM_TTL_MS = 10 * 60 * 1000; // empty rooms live 10 more minutes, then vanish
 export const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // no 0/O/1/I/L
 export const CODE_LENGTH = 5;
+
+export const KNOWN_GAMES = new Set(['planning-poker', 'would-you-rather', 'most-likely-to']);
+export const MAX_WYR_QUESTIONS = 20;
+export const MAX_MLT_PROMPTS = 12;
+
+/** Fallback question bank when a WYR room is created without valid questions. */
+export const DEFAULT_WYR_QUESTIONS = [
+  { a: 'Have the ability to fly', b: 'Have the ability to be invisible' },
+  { a: 'Always be 10 minutes early', b: 'Always be 10 minutes late' },
+  { a: 'Work from home forever', b: 'Work in the office forever' },
+  { a: 'Never write a status update again', b: 'Never read a status update again' },
+  { a: 'Be immune to bugs', b: 'Be immune to meetings' },
+];
+
+/** Fallback prompt bank when an MLT room is created without valid prompts. */
+export const DEFAULT_MLT_PROMPTS = [
+  'Forget their laptop at home on the day of the big demo',
+  'Reply-all to the entire company by accident',
+  'Show up to the meeting 10 minutes late, every single time',
+  'Name every file final_v2_FINAL(1).docx',
+  'Say “it works on my machine” completely unironically',
+  'Push straight to main on a Friday afternoon',
+];
+
+/** Default ranking points by placement — mirror of src/lib/scoring.ts. */
+export const MLT_RANKING_POINTS = [100, 80, 60, 40, 20, 10];
+/** Flat bonus every voter earns for predicting the round's crowned player(s). */
+export const MLT_PREDICTOR_BONUS = 20;
 
 export const KNOWN_DECKS = new Set(['fibonacci', 'modifiedFibonacci', 'sequential', 'tshirt', 'powersOfTwo']);
 export const NUMERIC_DECKS = new Set(['fibonacci', 'modifiedFibonacci', 'sequential', 'powersOfTwo']);
@@ -44,6 +75,38 @@ export const DEFAULT_ACCENT = 'gold';
 export const DEFAULT_REVEAL_MODE = 'staggered';
 
 /**
+ * Sanitize client-supplied WYR questions: keep `{a, b}` pairs with non-empty
+ * trimmed text, clamp each option to 120 chars, cap the deck at 20. Falls
+ * back to the built-in bank when nothing valid survives.
+ * @param {unknown} raw
+ * @returns {WyrQuestion[]}
+ */
+export function normalizeQuestions(raw) {
+  if (!Array.isArray(raw)) return DEFAULT_WYR_QUESTIONS.map((q) => ({ ...q }));
+  const clean = raw
+    .filter((q) => q && typeof q === 'object' && typeof q.a === 'string' && typeof q.b === 'string')
+    .map((q) => ({ a: q.a.trim().slice(0, 120), b: q.b.trim().slice(0, 120) }))
+    .filter((q) => q.a && q.b);
+  return clean.length ? clean.slice(0, MAX_WYR_QUESTIONS) : DEFAULT_WYR_QUESTIONS.map((q) => ({ ...q }));
+}
+
+/**
+ * Sanitize client-supplied MLT prompts: keep non-empty trimmed strings, clamp
+ * each prompt to 160 chars, cap the deck at MAX_MLT_PROMPTS. Falls back to
+ * the built-in bank when nothing valid survives.
+ * @param {unknown} raw
+ * @returns {string[]}
+ */
+export function normalizePrompts(raw) {
+  if (!Array.isArray(raw)) return DEFAULT_MLT_PROMPTS.map((p) => p);
+  const clean = raw
+    .filter((p) => typeof p === 'string')
+    .map((p) => p.trim().slice(0, 160))
+    .filter((p) => p.length > 0);
+  return clean.length ? clean.slice(0, MAX_MLT_PROMPTS) : DEFAULT_MLT_PROMPTS.map((p) => p);
+}
+
+/**
  * Unique room code from the unambiguous alphabet; never collides with `hasCode`.
  * @param {(code: string) => boolean} [hasCode]
  * @returns {string}
@@ -58,18 +121,29 @@ export function genCode(hasCode = () => false) {
 
 /**
  * Create a room with the host already seated. Room customization (team name,
- * room title, deck, accent, reveal mode) is fixed at creation.
- * @param {{ hostName?: string, teamName?: string, roomTitle?: string, deckId?: string, accent?: string, revealMode?: string, hasCode?: (code: string) => boolean }} [options]
+ * room title, deck, accent, reveal mode) is fixed at creation. Would You
+ * Rather rooms additionally carry their question deck (`game` + `questions`).
+ * @param {{ hostName?: string, teamName?: string, roomTitle?: string, deckId?: string, accent?: string, revealMode?: string, game?: string, questions?: unknown, prompts?: unknown, hasCode?: (code: string) => boolean }} [options]
  * @returns {Room}
  */
-export function createRoom({ hostName, teamName, roomTitle, deckId, accent, revealMode, hasCode = () => false } = {}) {
+export function createRoom({ hostName, teamName, roomTitle, deckId, accent, revealMode, game, questions, prompts, hasCode = () => false } = {}) {
   const code = genCode(hasCode);
+  const isWyr = game === 'would-you-rather';
+  const isMlt = game === 'most-likely-to';
   const room = {
     code,
     hostId: null, // set when the host's participant is created
     teamName: (teamName || '').slice(0, 40),
     roomTitle: (roomTitle || '').slice(0, 60),
     createdAt: Date.now(),
+    game: KNOWN_GAMES.has(game) ? game : 'planning-poker',
+    questions: isWyr ? normalizeQuestions(questions) : [],
+    questionIndex: -1, // set to 0 when the round starts (WYR only)
+    prompts: isMlt ? normalizePrompts(prompts) : [],
+    promptIndex: -1, // set to 0 when the session starts (MLT only)
+    mltScores: {}, // playerId -> session total (survives Play Again)
+    mltResult: null, // computed at reveal (MLT only)
+    sessionOver: false, // true once the host finishes the final round (MLT only)
     settings: {
       deckId: KNOWN_DECKS.has(deckId) ? deckId : DEFAULT_DECK,
       timerSec: null, // null = timer OFF; only 10 / 15 / 30 are allowed
@@ -79,7 +153,7 @@ export function createRoom({ hostName, teamName, roomTitle, deckId, accent, reve
     locked: false,
     participants: new Map(), // id -> participant
     status: 'waiting', // 'waiting' | 'voting' | 'ended' | 'revealed'
-    votes: {}, // participantId -> value (this round only)
+    votes: {}, // participantId -> value (this round / question only)
     stats: null,
     timer: null, // {durationSec, endsAt}
     emptySince: null,
@@ -107,6 +181,26 @@ export function addParticipant(room, { name, role = 'voter', id } = {}) {
     hue: hueFromString(name || 'Guest'),
   });
   return room.participants.get(pid);
+}
+
+/**
+ * Whether a participant name is already taken in the room (case-insensitive,
+ * whitespace-trimmed). Names must be unique per room so nobody can impersonate
+ * or double-book a seat; the host's own name counts too. Rejoins with an
+ * existing participant id skip this via `excludeId`.
+ * @param {Room} room
+ * @param {string} name
+ * @param {string} [excludeId] — a participant to ignore (their own seat)
+ * @returns {boolean}
+ */
+export function isNameTaken(room, name, excludeId) {
+  const target = (name || '').trim().toLowerCase();
+  if (!target) return false;
+  for (const p of room.participants.values()) {
+    if (p.id === excludeId) continue;
+    if ((p.name || '').trim().toLowerCase() === target) return true;
+  }
+  return false;
 }
 
 /**
@@ -156,6 +250,35 @@ export function calculateConsensus(values) {
  * @param {string} deckId
  * @returns {RoomStats | null}
  */
+/**
+ * Compute the A/B split for a Would You Rather question. Same shape as
+ * `computeStats` but never numeric: only the distribution, mode and a
+ * consensus level (full when the whole room picked the same side).
+ * @param {string[]} values — 'A' | 'B' picks
+ * @returns {RoomStats | null} — null when there are no votes
+ */
+export function computeWyrStats(values) {
+  if (!values.length) return null;
+  const counts = {};
+  for (const v of values) counts[v] = (counts[v] || 0) + 1;
+  const entries = Object.entries(counts).sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0])));
+  return {
+    count: values.length,
+    mode: entries[0][0],
+    modeShare: Math.round((entries[0][1] / values.length) * 1000) / 1000,
+    unique: entries.length,
+    numeric: false,
+    avg: null,
+    median: null,
+    spread: null,
+    highest: null,
+    lowest: null,
+    range: null,
+    level: calculateConsensus(values),
+    counts: entries.map(([value, count]) => ({ value, count })),
+  };
+}
+
 export function computeStats(values, deckId = DEFAULT_DECK) {
   if (!values.length) return null;
   const numeric = NUMERIC_DECKS.has(deckId);
@@ -196,6 +319,55 @@ export function computeStats(values, deckId = DEFAULT_DECK) {
   };
 }
 
+/** Standard-competition ranking — mirror of src/lib/scoring.ts calculateRanks. */
+function rankScores(scored) {
+  const sorted = [...scored].sort((a, b) => b.score - a.score || a.playerId.localeCompare(b.playerId));
+  let prevScore = null;
+  let prevRank = 1;
+  return sorted.map((entry, index) => {
+    if (entry.score === prevScore) return { ...entry, rank: prevRank };
+    prevScore = entry.score;
+    prevRank = index + 1;
+    return { ...entry, rank: prevRank };
+  });
+}
+
+/**
+ * Most Likely To round result — the server computes this at reveal:
+ *
+ *   - **Crown points**: teammates ranked by nominations received earn the
+ *     shared ranking table (100/80/60/40/20/10, 6th+ floors at 10). Ties share
+ *     points with the next rank skipped (standard competition); teammates with
+ *     zero nominations earn 0.
+ *   - **Predictor bonus**: every voter who nominated a crowned (top-voted)
+ *     player earns MLT_PREDICTOR_BONUS on top.
+ *
+ * @param {Room} room
+ * @returns {MltRoundResult}
+ */
+export function computeMltResult(room) {
+  const counts = {};
+  for (const targetId of Object.values(room.votes)) counts[targetId] = (counts[targetId] || 0) + 1;
+  const points = {};
+  if (Object.keys(counts).length) {
+    const ranked = rankScores(Object.entries(counts).map(([playerId, score]) => ({ playerId, score })));
+    for (const r of ranked) {
+      points[r.playerId] = MLT_RANKING_POINTS[r.rank - 1] ?? MLT_RANKING_POINTS[MLT_RANKING_POINTS.length - 1];
+    }
+  }
+  const topCount = Object.keys(counts).length ? Math.max(...Object.values(counts)) : 0;
+  const winners = Object.entries(counts)
+    .filter(([, c]) => c === topCount)
+    .map(([id]) => id)
+    .sort();
+  const predictors = Object.entries(room.votes)
+    .filter(([, target]) => winners.includes(target))
+    .map(([voter]) => voter)
+    .sort();
+  for (const voter of predictors) points[voter] = (points[voter] || 0) + MLT_PREDICTOR_BONUS;
+  return { points, counts, winners, predictors };
+}
+
 /**
  * "Everyone has voted" = every participant who is still at the table (not
  * disconnected) has cast a vote. A participant who closed their tab without
@@ -216,12 +388,27 @@ export function everyoneHasVoted(room) {
 export function buildSnapshot(room) {
   const participants = [...room.participants.values()].map((p) => ({ ...p }));
   const votedIds = Object.keys(room.votes);
+  // The active question is public (it's on the table); the vote *values* are
+  // not. WYR rooms expose the current question once the round has started.
+  const question = room.status === 'waiting' ? null : (room.questions[room.questionIndex] ?? null);
   return {
     code: room.code,
     hostId: room.hostId,
     teamName: room.teamName,
     roomTitle: room.roomTitle,
     createdAt: room.createdAt,
+    game: room.game,
+    question,
+    questionIndex: room.questionIndex >= 0 ? room.questionIndex : 0,
+    questionCount: room.questions.length,
+    // The active prompt is public once the session starts (MLT rooms).
+    prompt: room.status === 'waiting' ? null : (room.prompts[room.promptIndex] ?? null),
+    promptIndex: room.promptIndex >= 0 ? room.promptIndex : 0,
+    promptCount: room.prompts.length,
+    // MLT session data — votes travel in the shared `votes` map (revealed only).
+    mltResult: room.status === 'revealed' ? room.mltResult : null,
+    mltScores: { ...room.mltScores },
+    sessionOver: !!room.sessionOver,
     settings: { ...room.settings },
     locked: room.locked,
     participants,
@@ -248,6 +435,9 @@ export function startVoting(room, actorId) {
   room.status = 'voting';
   room.votes = {};
   room.stats = null;
+  room.mltResult = null;
+  if (room.game === 'would-you-rather') room.questionIndex = 0; // first question is live
+  if (room.game === 'most-likely-to') room.promptIndex = 0; // first prompt is live
   for (const p of room.participants.values()) {
     p.hasVoted = false;
     p.status = 'connected';
@@ -274,9 +464,19 @@ export function castVote(room, participantId, value) {
   if (p.hasVoted) return { ok: false, error: 'already_voted' };
   const v = String(value ?? '');
   if (!v) return { ok: false, error: 'no_value' };
-  // The server validates the value against the room's deck — a client can
-  // never invent a card that isn't on the table (mirror of src/lib/decks.ts).
-  if (!(DECK_VALUES[room.settings.deckId] || []).includes(v)) return { ok: false, error: 'bad_value' };
+  // The server validates the value against what this game allows — a client
+  // can never invent a card that isn't on the table. Planning Poker votes
+  // against the room deck (mirror of src/lib/decks.ts); Would You Rather
+  // accepts exactly 'A' | 'B'; Most Likely To accepts a real teammate (not
+  // yourself).
+  if (room.game === 'most-likely-to') {
+    const target = room.participants.get(v);
+    if (!target) return { ok: false, error: 'bad_value' };
+    if (target.id === participantId) return { ok: false, error: 'self_vote' };
+  } else {
+    const allowed = room.game === 'would-you-rather' ? ['A', 'B'] : DECK_VALUES[room.settings.deckId] || [];
+    if (!allowed.includes(v)) return { ok: false, error: 'bad_value' };
+  }
   // The server owns the timer: a vote that lands after it hit zero is closed.
   if (room.timer && room.timer.endsAt <= Date.now()) {
     room.status = 'ended';
@@ -300,12 +500,124 @@ export function reveal(room, actorId) {
   if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
   if (room.status === 'revealed') return { ok: false, error: 'already_revealed' };
   if (room.status === 'waiting') return { ok: false, error: 'not_started' };
-  if (room.status !== 'ended' && !(room.status === 'voting' && everyoneHasVoted(room))) {
+  // Planning Poker: only after the timer ended the round, or once every
+  // present participant has voted. Would You Rather / Most Likely To: the
+  // host sets the pace and may reveal at any time while the round is live.
+  const everyoneVoted = room.status === 'voting' && everyoneHasVoted(room);
+  const wyrCanReveal = room.game === 'would-you-rather' && (room.status === 'voting' || room.status === 'ended');
+  const mltCanReveal = room.game === 'most-likely-to' && (room.status === 'voting' || room.status === 'ended');
+  if (room.status !== 'ended' && !everyoneVoted && !wyrCanReveal && !mltCanReveal) {
     return { ok: false, error: 'not_all_voted' };
   }
   room.status = 'revealed';
-  room.stats = computeStats(Object.values(room.votes), room.settings.deckId);
+  if (room.game === 'most-likely-to') {
+    // Crown the most-nominated teammate(s), award totals, ship the result.
+    room.mltResult = computeMltResult(room);
+    for (const [playerId, gained] of Object.entries(room.mltResult.points)) {
+      room.mltScores[playerId] = (room.mltScores[playerId] || 0) + gained;
+    }
+    room.stats = null;
+  } else {
+    const values = Object.values(room.votes);
+    room.stats = room.game === 'would-you-rather' ? computeWyrStats(values) : computeStats(values, room.settings.deckId);
+    room.mltResult = null;
+  }
   room.timer = null;
+  return { ok: true };
+}
+
+/**
+ * Advance to the next Would You Rather question (host-only, after a reveal).
+ * The previous question's votes are wiped — the one-vote-per-question lock
+ * resets — and the room returns to VOTING with the next question live.
+ * @param {Room} room
+ * @param {string} actorId
+ * @returns {{ ok: true, done: boolean } | { ok: false, error: string }}
+ */
+export function nextQuestion(room, actorId) {
+  if (room.game !== 'would-you-rather') return { ok: false, error: 'not_this_game' };
+  if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
+  if (room.status !== 'revealed' && room.status !== 'ended') return { ok: false, error: 'not_revealed' };
+  if (room.questionIndex + 1 >= room.questions.length) return { ok: true, done: true };
+  room.questionIndex += 1;
+  room.votes = {};
+  room.stats = null;
+  room.status = 'voting';
+  for (const p of room.participants.values()) {
+    p.hasVoted = false;
+    p.status = 'connected';
+  }
+  const sec = room.settings.timerSec;
+  room.timer = sec ? { durationSec: sec, endsAt: Date.now() + sec * 1000 } : null;
+  return { ok: true, done: false };
+}
+
+/**
+ * Advance to the next Most Likely To prompt (host-only, after a reveal). The
+ * previous round's nominations are wiped — the one-vote-per-round lock
+ * resets — and the room returns to VOTING with the next prompt live.
+ * @param {Room} room
+ * @param {string} actorId
+ * @returns {{ ok: true, done: boolean } | { ok: false, error: string }}
+ */
+export function nextPrompt(room, actorId) {
+  if (room.game !== 'most-likely-to') return { ok: false, error: 'not_this_game' };
+  if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
+  if (room.status !== 'revealed' && room.status !== 'ended') return { ok: false, error: 'not_revealed' };
+  if (room.promptIndex + 1 >= room.prompts.length) return { ok: true, done: true };
+  room.promptIndex += 1;
+  room.votes = {};
+  room.stats = null;
+  room.mltResult = null;
+  room.status = 'voting';
+  for (const p of room.participants.values()) {
+    p.hasVoted = false;
+    p.status = 'connected';
+  }
+  room.timer = null;
+  return { ok: true, done: false };
+}
+
+/**
+ * Finish the session (host-only, after the final round's reveal): the server
+ * marks `sessionOver` so every client opens the WinnerModal. The room stays
+ * alive — Play Again can start a fresh session on the same scores.
+ * @param {Room} room
+ * @param {string} actorId
+ * @returns {ActionResult}
+ */
+export function finishMlt(room, actorId) {
+  if (room.game !== 'most-likely-to') return { ok: false, error: 'not_this_game' };
+  if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
+  if (room.status !== 'revealed') return { ok: false, error: 'not_revealed' };
+  room.sessionOver = true;
+  return { ok: true };
+}
+
+/**
+ * Play Again (host-only, once the session is over): rounds, nominations and
+ * the current prompt reset — the session leaderboard (`mltScores`) is kept so
+ * teams can play several sessions and crown an overall champion. The room
+ * returns to WAITING; the host starts the next session.
+ * @param {Room} room
+ * @param {string} actorId
+ * @returns {ActionResult}
+ */
+export function playAgainMlt(room, actorId) {
+  if (room.game !== 'most-likely-to') return { ok: false, error: 'not_this_game' };
+  if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
+  if (!room.sessionOver) return { ok: false, error: 'not_finished' };
+  room.promptIndex = -1;
+  room.votes = {};
+  room.stats = null;
+  room.mltResult = null;
+  room.sessionOver = false;
+  room.status = 'waiting';
+  room.timer = null;
+  for (const p of room.participants.values()) {
+    p.hasVoted = false;
+    p.status = 'connected';
+  }
   return { ok: true };
 }
 

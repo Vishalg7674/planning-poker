@@ -51,7 +51,7 @@ export default function Celebration({ tick, label }: CelebrationProps) {
   if (!tick) return null;
 
   return (
-    <div className={styles.burst} aria-hidden="true">
+    <div className={styles.burst} aria-hidden="true" data-tick={tick}>
       <div className={styles.flash} />
       {pieces.map((p) => (
         <span

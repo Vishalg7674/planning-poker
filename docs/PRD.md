@@ -3,10 +3,11 @@
 ## Product vision
 
 A **real-time multiplayer games platform for teams** — "Break the ice. Play
-together. No login required." One game is live today (**Planning Poker**, the
-featured game), backed by a catalog of **110 games across 9 categories**
-(icebreakers, speed, guessing, estimation, funny, developer, creative, word,
-competitive) that is positioned on the homepage but not yet implemented.
+together. No login required." Two games are live today (**Planning Poker**,
+the featured game, and **Would You Rather**), backed by a catalog of **110
+games across 9 categories** (icebreakers, speed, guessing, estimation, funny,
+developer, creative, word, competitive) that is positioned on the homepage
+but not yet implemented.
 
 Whatever the game, the core product philosophy stays identical: create a
 room, share a link (or a QR code), everyone plays together in real time — no
@@ -55,6 +56,12 @@ Host:  Create Room (name, team, title, deck, accent) → Share link / QR
        → End room
 Participant: Open link → Enter name → Join → See the team → Wait for host
        → Voting starts → Pick one card → Vote locked → Wait → Reveal → See results
+
+Would You Rather:
+Host:  Pick a question deck (bank + custom) → Share link → Start Game
+       → See who picked / who's thinking → Reveal the split → Next Question → … → End session
+Participant: Open link → Enter name → Join → Wait for host → Pick A or B (locked)
+       → Wait → See the split → Next question → pick again → …
 ```
 
 ## Functional requirements
@@ -170,6 +177,26 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
   in real time over Socket.io. A projector mode (`/r/<CODE>/screen`) mirrors
   the table read-only.
 
+### Would You Rather
+- The host creates the room from `/games/would-you-rather`: name (required),
+  optional team name / room title, an **accent**, and a **question deck**
+  curated from the built-in 24-question bank or the host's own custom
+  `A/B` questions (1–20 questions).
+- Participants join with just a name via the same `/r/<CODE>` link.
+- The host **starts the game**; everyone sees the current question as two
+  large A/B choice cards.
+- Each participant picks **A or B exactly once per question** — the pick
+  locks instantly (same server-side lock as Planning Poker).
+- The host sees who picked / who is still thinking — never what they picked.
+- The host reveals at their own pace (no timer, no waiting for everyone);
+  the reveal shows the **split**: per-side counts, percentages and the
+  voters' avatars, with non-voters listed as *didn't pick*.
+- **Next Question** wipes the votes and re-arms the per-question lock; when
+  the deck is exhausted the host ends the session (everyone is
+  disconnected, the room is wiped from memory).
+- A unanimous question celebrates with a confetti burst; otherwise the split
+  is shown neutrally.
+
 ## Non-functional requirements
 
 - **Performance** — full-room snapshots are small (tens of participants);
@@ -214,6 +241,12 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
   consensus so we can discuss the estimates meaningfully.
 - As a **host**, I want the room to vanish from memory when we're done so no
   session history lingers.
+- As a **host**, I want to run Would You Rather as an icebreaker with a
+  curated or custom question deck so the team can play without setup.
+- As a **participant**, I want my A/B pick to lock per question so the game
+  stays honest and fast.
+- As a **host**, I want to reveal the split at my own pace and move to the
+  next question so the game fits however much time we have.
 
 ## Acceptance criteria
 
@@ -231,6 +264,10 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
   correct average/median/mode/highest/lowest/range/distribution/count plus a
   consensus verdict (T-Shirt rounds omit numeric stats).
 - A locked room refuses new joiners; the host can unlock it.
+- Would You Rather: the host creates a room from a question deck, everyone
+  picks A or B exactly once per question, the host reveals the split at their
+  own pace, advances to the next question, and ends the session when the
+  deck is done.
 - Rooms are in-memory only: no database, no login, no stories, no revote, no
   history.
 
@@ -246,5 +283,6 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
 - Custom deck editors, arbitrary timer values, custom accent themes.
 - Analytics dashboards or export of results.
 - Horizontal scaling / shared server state (see [DEPLOYMENT.md](DEPLOYMENT.md)).
-- The actual gameplay for the 109 catalog games beyond Planning Poker — they
-  are marketed on the homepage (status `coming-soon`) but not implemented.
+- The actual gameplay for the 108 catalog games beyond Planning Poker and
+  Would You Rather — they are marketed on the homepage (status
+  `coming-soon`) but not implemented.

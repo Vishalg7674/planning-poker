@@ -33,7 +33,7 @@ flowchart TD
 | File             | Responsibility                                                        |
 | ---------------- | --------------------------------------------------------------------- |
 | `server/index.mjs` | Socket.io wiring, CORS, the `rooms` Map, snapshot broadcasts, the server-side countdown sweep, room expiry sweep, `room:end` teardown |
-| `server/room.mjs`  | Pure, unit-tested room logic: `createRoom`, `addParticipant`, `castVote`, `startVoting`, `reveal`, `setTimerSec`, `setRevealMode`, `setLocked`, `calculateConsensus`, `computeStats`, `buildSnapshot`, `everyoneHasVoted`, disconnect/promotion helpers |
+| `server/room.mjs`  | Pure, unit-tested room logic: `createRoom`, `addParticipant`, `castVote`, `startVoting`, `reveal`, `nextQuestion`, `setTimerSec`, `setRevealMode`, `setLocked`, `calculateConsensus`, `computeStats`, `computeWyrStats`, `normalizeQuestions`, `buildSnapshot`, `everyoneHasVoted`, disconnect/promotion helpers |
 
 `server/room.mjs` has zero I/O — it is plain functions over plain data, which
 is why it can be unit-tested directly (see `tests/unit/server/room.test.ts`).
@@ -48,6 +48,17 @@ can be changed later in the waiting room by the host. Everything is validated
 server-side against the known allow-lists (`KNOWN_DECKS`, `KNOWN_TIMERS`,
 `KNOWN_ACCENTS`, `KNOWN_REVEAL_MODES`); unknown values fall back to the
 defaults (Fibonacci deck, gold accent, staggered reveal, timer Off).
+
+Rooms also carry a **`game`** field (`planning-poker` | `would-you-rather` |
+`most-likely-to`, defaulting to `planning-poker`). Would You Rather rooms
+additionally store their **question deck** (`questions`, `{ a, b }` pairs,
+clamped to 20, validated by `normalizeQuestions` with a built-in fallback
+bank) and an active `questionIndex`. Most Likely To rooms store their
+**prompt deck** (`prompts`, strings clamped to 12, validated by
+`normalizePrompts`) plus MLT session state: `promptIndex`, `mltScores`
+(session totals that survive Play Again), `mltResult` (computed at reveal)
+and `sessionOver`. The game field routes the server rules (allowed vote
+values, reveal gating) and the client UI branch.
 
 ### Decks
 
@@ -92,6 +103,59 @@ stateDiagram-v2
   host can reveal (values still hidden).
 - **REVEALED** — everyone sees every vote plus statistics; the round is closed
   for good.
+
+### Would You Rather lifecycle
+
+WYR rooms reuse the same statuses but play **multiple question rounds**: the
+first `voting:start` puts question 0 on the table; each `votes:reveal` shows
+the A/B split; the host then advances with `wyr:next`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> WAITING: room:create (game: would-you-rather)
+    WAITING --> VOTING: voting:start (question 0 is live)
+    VOTING --> REVEALED: votes:reveal (host-paced — no need to wait for everyone)
+    REVEALED --> VOTING: wyr:next (votes wiped, next question)
+    REVEALED --> [*]: room:end (deck exhausted / host ends)
+```
+
+- **Votes are per question**: `wyr:next` wipes `room.votes` and resets
+  `hasVoted`, so the one-pick lock re-arms for the next prompt.
+- The host can reveal at **any time** during a question (icebreaker pace) —
+  non-voters simply appear as *didn't pick* in the split.
+- When the deck is exhausted, `wyr:next` returns `done: true` and the host
+  ends the session (`room:end`).
+
+### Most Likely To lifecycle
+
+MLT rooms reuse the same statuses, play **multiple prompt rounds**, and end
+with a server-flagged session:
+
+```mermaid
+stateDiagram-v2
+    [*] --> WAITING: room:create (game: most-likely-to)
+    WAITING --> VOTING: voting:start (prompt 0 is live)
+    VOTING --> REVEALED: votes:reveal (host-paced — no need to wait for everyone)
+    REVEALED --> VOTING: mlt:next (votes wiped, next prompt)
+    REVEALED --> REVEALED: mlt:finish (last prompt → sessionOver)
+    REVEALED --> [*]: mlt:playAgain (rounds reset, mltScores kept, back to WAITING)
+```
+
+- **Nominations are votes**: MLT reuses the shared `room.votes` map and the
+  permanent per-round lock — `vote:cast` validates that the value is a real
+  teammate's id (`bad_value` otherwise) and rejects nominating yourself
+  (`self_vote`). `mlt:next` wipes `votes` so the lock re-arms.
+- **Reveal is host-paced** (icebreaker pace): non-voters appear as *didn't
+  nominate*.
+- **Scoring** (server-authoritative, at reveal via `computeMltResult`):
+  teammates ranked by nominations receive the shared ranking table
+  (100/80/60/40/20/10, standard-competition ties, 0 for zero nominations)
+  and every voter who nominated a crowned player earns a +20 predictor
+  bonus. Totals accumulate in `mltScores`.
+- **Session end**: the host calls `mlt:finish` after the final reveal →
+  `sessionOver` → every client opens the shared `WinnerModal` (driven by
+  `useGameSession`). `mlt:playAgain` resets rounds but **keeps `mltScores`**
+  so teams can play several sessions and crown an overall champion.
 
 ### Room lock
 
@@ -165,11 +229,13 @@ Every important action is validated server-side:
 | Action           | Required condition                                        | Rejection      |
 | ---------------- | --------------------------------------------------------- | -------------- |
 | `voting:start`   | actor is the host **and** status is `WAITING`             | `not_host`, `in_progress` |
-| `vote:cast`      | status is `VOTING`, participant has not voted, timer alive, value on the room deck | `not_voting`, `already_voted`, `no_value`, `bad_value` |
-| `votes:reveal`   | actor is the host **and** status is `ENDED`, or `VOTING` + everyone voted | `not_host`, `not_all_voted`, `already_revealed`, `not_started` |
+| `vote:cast`      | status is `VOTING`, participant has not voted, timer alive, value on the room deck (`A`/`B` for WYR; a real teammate's id, not yourself, for MLT) | `not_voting`, `already_voted`, `no_value`, `bad_value`, `self_vote` (MLT) |
+| `votes:reveal`   | actor is the host **and** status is `ENDED`, or `VOTING` + everyone voted — for WYR rooms, `VOTING`/`ENDED` alone suffices (host-paced) | `not_host`, `not_all_voted`, `already_revealed`, `not_started` |
+| `wyr:next`       | actor is the host, room is a WYR room, status is `REVEALED`/`ENDED` | `not_host`, `not_this_game`, `not_revealed` |
 | `room:settings`  | actor is the host **and** status is `WAITING` **and** timer ∈ {null, 10, 15, 30} **and** reveal mode ∈ {normal, staggered, dramatic} | `not_host`, `in_progress`, `bad_timer`, `bad_reveal_mode` |
 | `room:lock` / `room:unlock` | actor is the host (any phase)               | `not_host` |
 | `participant:remove` | actor is the host, target exists and is not the host | `not_host`, `cannot_remove`, `no_participant` |
+| `room:join` / `room:rejoin` | the name is unique in the room (case-insensitive, trimmed) | `name_taken` |
 | `room:join` (locked) | the joining id must already be seated          | `room_locked` |
 
 The server never trusts the client: the browser's card lock is just UX; the
@@ -182,6 +248,13 @@ Vote **values** are stored server-side in `room.votes` but only included in a
 snapshot when `status === 'revealed'`. Before that, snapshots expose only
 `votedIds` — who has voted, never what. This is enforced in `buildSnapshot`
 and covered by both the unit tests and the Playwright `vote-privacy` spec.
+
+For Would You Rather, the **question text itself is public** (it is on the
+table — the snapshot carries the active `question` once voting starts) but the
+**picks** follow the same rule: only `votedIds` until the host reveals. The
+same holds for Most Likely To: the **prompt** is public while the
+**nominations** (`votes` = who picked whom, plus `mltResult`) only leave the
+server at reveal.
 
 ## Presence
 
@@ -203,6 +276,29 @@ lock because the server state is authoritative.
 - A participant who leaves the room link and opens a *different* room gets a
   fresh join form (the stale identity is discarded).
 
+## Shared game engine
+
+The two live games (Planning Poker, Would You Rather) each have specialized
+state and UIs. **New** competitive games (Most Likely To, trivia, quizzes, …)
+are meant to be built on a small set of shared, framework-neutral modules so
+they feel like one platform without re-implementing scoring or celebration
+UI. See [`games.md`](../games.md) — the master tracker — for the build order:
+one game at a time, top to bottom, never deleting entries.
+
+| Module | Purpose |
+| ------ | ------- |
+| `src/lib/gameTypes.ts` | Shared session vocabulary: `GamePhase`, `PlayerGameStatus`, `GamePlayer` (round + total score), `LeaderboardEntry`, `RoundResult`, `makeGamePlayer` |
+| `src/lib/scoring.ts` | Pure scoring engine: default ranking points `100/80/60/40/20/10` (6th+ floors at 10), `calculateRanks` with **standard-competition ties** (scores 100/80/80/60 → ranks 1/2/2/4 — tied players share points, the next rank skips), `awardRankingPoints` (custom tables for fastest-answer/survival/etc.), `buildLeaderboard`, `applyRound` (roundScore replaced, totalScore accumulated, input not mutated), `mergeLeaderboards` (sums boards across games — the building block for a future multi-game **Game Night** session) |
+| `src/lib/useAnimatedNumber.ts` | Reduced-motion-aware rAF counter used by every animated score display |
+| `src/lib/useGameSession.ts` | Client lifecycle for a competitive game: ranks the server-provided players into a leaderboard, auto-opens the WinnerModal the moment the server marks the session `ended`, and routes Play Again / dismissal. Shared flow only — never game rules |
+| `src/components/games/Leaderboard.tsx` | Ranked scoreboard: 🥇/🥈/🥉 medals for the top three (number chips beyond), avatar initials, animated total, "+N" round-delta chips, "you" highlight |
+| `src/components/games/WinnerModal.tsx` | End-of-game celebration: confetti burst (reuses `Celebration`), winner banner with animated score, full medal podium, Play Again / Back to Games |
+
+Scoring stays **server-authoritative per game**: the server owns answers,
+correctness and awarded points (the client never sends scores). The shared
+client-side utilities are pure *derived-state* helpers — deterministic,
+unit-tested, and safe for any game to call on the server-received state.
+
 ## Key implementation notes
 
 - The room code is 5 chars from `ABCDEFGHJKMNPQRSTUVWXYZ23456789` (no
@@ -220,6 +316,10 @@ lock because the server state is authoritative.
   is a separate read-only projection that joins as `role: 'screen'`.
 - The QR code is generated **locally** with `qrcode.react` (SVG, no external
   service) and encodes the room URL built from the room code.
-- `scripts/e2e.mjs` is a socket-level E2E suite (121 checks) that exercises
+- Rooms are game-aware: `room.game` routes vote validation (deck cards vs
+  `A`/`B` vs teammate ids), reveal gating (everyone-voted vs host-paced) and
+  the client UI branch — Planning Poker, Would You Rather and Most Likely To
+  share the same `/r/<CODE>` rooms, joins, presence and lifecycle.
+- `scripts/e2e.mjs` is a socket-level E2E suite (146 checks) that exercises
   the real server protocol without a browser; Playwright covers the UI on
   top.

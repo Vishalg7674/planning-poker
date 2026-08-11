@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import type { Settings } from '@/lib/types';
+import type { GameId, Settings } from '@/lib/types';
 import { DEFAULT_DECK_ID } from '@/lib/decks';
 import { snapshotReceived } from '../actions';
 
@@ -10,6 +10,8 @@ export interface RoomState {
   /** Optional room title set by the host at creation. */
   roomTitle: string;
   createdAt: number;
+  /** Which game this room plays — drives the room-page UI branch. */
+  game: GameId;
   settings: Settings;
   /** Host-only: while locked, brand-new participants cannot join. */
   locked: boolean;
@@ -28,6 +30,7 @@ const initialState: RoomState = {
   teamName: '',
   roomTitle: '',
   createdAt: 0,
+  game: 'planning-poker',
   settings: defaultSettings,
   locked: false,
 };
@@ -47,6 +50,7 @@ const roomSlice = createSlice({
         teamName: s.teamName,
         roomTitle: s.roomTitle ?? '',
         createdAt: s.createdAt,
+        game: s.game ?? 'planning-poker',
         settings: { ...s.settings },
         locked: !!s.locked,
       };
