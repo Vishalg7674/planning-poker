@@ -68,6 +68,8 @@ export interface TimerInfo {
 /** Full privacy-aware room state broadcast to clients after every mutation. */
 export interface Snapshot {
   code: string;
+  /** Increments on every startVoting — a stable per-round identity for result modals. */
+  roundId: number;
   hostId: string | null;
   teamName: string;
   /** Optional room title set by the host at creation. */

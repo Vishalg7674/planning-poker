@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,6 +10,7 @@ import Wordmark from '@/components/Wordmark';
 import Button from '@/components/Button';
 import { Field, Input } from '@/components/Field';
 import { emitAck } from '@/lib/socket';
+import { friendlyError } from '@/lib/errors';
 import { saveIdentity } from '@/lib/identity';
 import { useAppDispatch } from '@/store';
 import { setMyIdentity, pushToast } from '@/store/slices/uiSlice';
@@ -38,6 +39,7 @@ export default function CreatePage() {
   const dispatch = useAppDispatch();
   const [creating, setCreating] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const creatingRef = useRef(false);
   const [deckId, setDeckId] = useState<string>('fibonacci');
   const [accent, setAccent] = useState<Accent>('gold');
 
@@ -48,6 +50,9 @@ export default function CreatePage() {
   } = useForm<CreateForm>({ resolver: yupResolver(createSchema), defaultValues: { name: '', teamName: '', roomTitle: '' } });
 
   const onSubmit = async (values: CreateForm) => {
+    // Double-click protection: a second submit would create a duplicate room.
+    if (creatingRef.current) return;
+    creatingRef.current = true;
     setCreating(true);
     setServerError(null);
     try {
@@ -59,8 +64,9 @@ export default function CreatePage() {
         accent,
       });
       if (!res?.ok || !res.code || !res.participantId) {
-        setServerError(res?.error || 'Could not create the room.');
+        setServerError(friendlyError(res?.error, 'Could not create the room.'));
         setCreating(false);
+        creatingRef.current = false;
         return;
       }
       const participantId = res.participantId;
@@ -71,6 +77,7 @@ export default function CreatePage() {
     } catch (e) {
       setServerError(e instanceof Error ? e.message : 'Could not create the room.');
       setCreating(false);
+      creatingRef.current = false;
     }
   };
 
@@ -91,6 +98,7 @@ export default function CreatePage() {
             One round, one vote each. Configure the table below, share the link, and your team just needs a name to join.
           </p>
 
+          {/* eslint-disable-next-line react-hooks/refs -- handleSubmit wraps an async handler that reads a ref guard against same-tick double submits; the rule cannot trace ref usage through react-hook-form's wrapper. */}
           <form onSubmit={handleSubmit(onSubmit)} className={styles.form} noValidate>
             <Field label="Your Name" error={errors.name?.message} htmlFor="name" hint="Required — you become the host.">
               <Input id="name" placeholder="e.g. Ada" autoComplete="off" maxLength={24} {...register('name')} />

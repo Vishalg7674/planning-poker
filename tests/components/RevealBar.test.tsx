@@ -16,9 +16,21 @@ function preload(over: { host?: boolean; voted?: number; total?: number; everyon
   const { host = true, voted = 1, total = 2, everyone = false } = over;
   return {
     room: { hostId: 'p1' },
-    voting: { phase: 'voting', votedIds: Array.from({ length: voted }, (_, i) => `v${i}`), everyoneHasVoted: everyone },
+    voting: {
+      phase: 'voting',
+      votedIds: Array.from({ length: voted }, (_, i) => `p${i}`),
+      everyoneHasVoted: everyone,
+    },
     participants: {
-      list: Array.from({ length: total }, (_, i) => ({ id: `p${i}`, name: `P${i}`, role: 'voter' as const, status: 'connected' as const, hasVoted: false, joinedAt: i, hue: i })),
+      list: Array.from({ length: total }, (_, i) => ({
+        id: `p${i}`,
+        name: `P${i}`,
+        role: 'voter' as const,
+        status: i < voted ? 'voted' as const : 'connected' as const,
+        hasVoted: i < voted,
+        joinedAt: i,
+        hue: i,
+      })),
     },
     ui: { myParticipantId: host ? 'p1' : 'p2' },
   } as never;

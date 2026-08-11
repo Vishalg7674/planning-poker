@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { setPresentation, pushToast } from '@/store/slices/uiSlice';
-import { emitAck } from '@/lib/socket';
+import { setPresentation } from '@/store/slices/uiSlice';
+import { requestReveal, requestStart } from '@/lib/roomActions';
 import Avatar from '@/components/Avatar';
 import Button from '@/components/Button';
 import Deck from '@/components/room/Deck';
@@ -23,8 +23,11 @@ export default function PresentationView() {
 
   const phase = useAppSelector((s) => s.voting.phase);
   const participants = useAppSelector((s) => s.participants.list);
-  const votedCount = useAppSelector((s) => s.voting.votedIds.length);
   const everyoneHasVoted = useAppSelector((s) => s.voting.everyoneHasVoted);
+  // Progress counts ignore disconnected participants, matching the server's
+  // everyoneHasVoted definition.
+  const activeCount = participants.filter((p) => p.status !== 'disconnected').length;
+  const activeVotedCount = participants.filter((p) => p.status !== 'disconnected' && p.hasVoted).length;
   const votes = useAppSelector((s) => s.voting.votes);
   const stats = useAppSelector((s) => s.voting.stats);
   const teamName = useAppSelector((s) => s.room.teamName);
@@ -40,33 +43,13 @@ export default function PresentationView() {
   const start = () => {
     if (starting) return;
     setStarting(true);
-    emitAck<{ ok: boolean; error?: string }>('voting:start', {})
-      .then((res) => {
-        if (!res?.ok) {
-          dispatch(pushToast({ kind: 'error', title: 'Could not start', message: res?.error }));
-          setStarting(false);
-        }
-      })
-      .catch(() => {
-        dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' }));
-        setStarting(false);
-      });
+    requestStart(dispatch).finally(() => setStarting(false));
   };
 
   const reveal = () => {
     if (revealing) return;
     setRevealing(true);
-    emitAck<{ ok: boolean; error?: string }>('votes:reveal', {})
-      .then((res) => {
-        if (!res?.ok) {
-          dispatch(pushToast({ kind: 'error', title: 'Could not reveal', message: res?.error }));
-          setRevealing(false);
-        }
-      })
-      .catch(() => {
-        dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' }));
-        setRevealing(false);
-      });
+    requestReveal(dispatch).finally(() => setRevealing(false));
   };
 
   const title = roomTitle || (teamName ? `${teamName} — Planning Poker` : 'Planning Poker');
@@ -110,7 +93,7 @@ export default function PresentationView() {
           <section className={styles.votingBlock}>
             <div className={styles.counter} aria-live="polite">
               <span className={styles.counterBig}>
-                {votedCount} / {participants.length}
+                {activeVotedCount} / {activeCount}
               </span>
               <span className={styles.counterLabel}>voted</span>
               {everyoneHasVoted && <span className={styles.allVoted}>✓ Everyone has voted</span>}

@@ -12,7 +12,7 @@ export interface Toast {
   message?: string;
 }
 
-export type ModalId = 'endSession' | 'removeParticipant';
+export type ModalId = 'endSession' | 'removeParticipant' | 'roundResult';
 
 export interface UiState {
   theme: Theme;
@@ -30,6 +30,40 @@ export interface UiState {
   celebrationTick: number;
   /** Host-only big-screen view — a simplified, large layout of the same state. */
   presentation: boolean;
+  /**
+   * "<code>:<roundId>" of the round whose result modal (consensus / large
+   * disagreement) the user dismissed. Keyed by room code so a brand-new room
+   * (which also starts at roundId 1) is always treated as a fresh event.
+   * Persisted to sessionStorage so a refresh never resurrects the modal for
+   * the same round.
+   */
+  acknowledgedRound: string | null;
+  /** The round key currently surfaced in the round-result modal. */
+  roundResultRound: string | null;
+}
+
+const ACK_KEY = 'reveal:acknowledgedRound';
+
+/** Read the dismissed-round marker. Survives a refresh within the same tab. */
+function readAcknowledgedRound(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.sessionStorage.getItem(ACK_KEY);
+    return raw || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Persist the dismissed-round marker (best effort — storage may be blocked). */
+function writeAcknowledgedRound(roundKey: string | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (roundKey == null) window.sessionStorage.removeItem(ACK_KEY);
+    else window.sessionStorage.setItem(ACK_KEY, roundKey);
+  } catch {
+    /* storage unavailable — the in-memory ack still guards this session */
+  }
 }
 
 const initialState: UiState = {
@@ -43,10 +77,13 @@ const initialState: UiState = {
   modals: {
     endSession: false,
     removeParticipant: false,
+    roundResult: false,
   },
   toasts: [],
   celebrationTick: 0,
   presentation: false,
+  acknowledgedRound: readAcknowledgedRound(),
+  roundResultRound: null,
 };
 
 let toastSeq = 0;
@@ -76,6 +113,12 @@ const uiSlice = createSlice({
     },
     closeModal: (state, action: { payload: ModalId }) => {
       state.modals[action.payload] = false;
+      // Once dismissed, a round's result modal must never reappear — even
+      // after reconnects or unrelated snapshots for the same round.
+      if (action.payload === 'roundResult') {
+        state.acknowledgedRound = state.roundResultRound;
+        writeAcknowledgedRound(state.roundResultRound);
+      }
     },
     pushToast: (state, action: { payload: Omit<Toast, 'id'> }) => {
       const id = `toast-${++toastSeq}-${Date.now()}`;
@@ -127,6 +170,20 @@ const uiSlice = createSlice({
       }
       // We're in a live room again — clear any stale "room gone" notice.
       state.roomGoneMessage = null;
+
+      // Round-result modal: open exactly once per reveal, only for the two
+      // results that deserve attention (full consensus / large disagreement),
+      // and never again for the same round once dismissed. The key includes
+      // the room code, so a new room is always a genuinely new event. A new
+      // round (startVoting increments roundId) re-opens it.
+      const roundKey = `${s.code}:${s.roundId ?? 0}`;
+      const level = s.stats?.level;
+      if (s.status === 'revealed' && (level === 'full' || level === 'large') && state.acknowledgedRound !== roundKey) {
+        state.modals.roundResult = true;
+        state.roundResultRound = roundKey;
+      } else if (s.status !== 'revealed') {
+        state.modals.roundResult = false;
+      }
     });
   },
 });

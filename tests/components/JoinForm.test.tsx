@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import JoinForm from '@/components/room/JoinForm';
@@ -69,7 +69,7 @@ describe('JoinForm', () => {
     await waitFor(() => expect(onGone).toHaveBeenCalledWith(expect.stringContaining('ABCDE')));
   });
 
-  it('shows a server error inline when the join fails', async () => {
+  it('shows a friendly server error inline when the join fails', async () => {
     emitAckMock.mockResolvedValue({ ok: false, error: 'full' });
     const user = userEvent.setup();
     renderWithStore(<JoinForm code="ABCDE" onGone={() => {}} />, {});
@@ -77,7 +77,34 @@ describe('JoinForm', () => {
     await user.type(screen.getByLabelText('Enter your name'), 'Grace');
     await user.click(screen.getByRole('button', { name: 'Join Room' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('full');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not join the room.');
+  });
+
+  it('a failed join releases the button so the user can retry', async () => {
+    emitAckMock.mockResolvedValue({ ok: false, error: 'not_found' });
+    const user = userEvent.setup();
+    renderWithStore(<JoinForm code="ABCDE" onGone={() => {}} />, {});
+
+    await user.type(screen.getByLabelText('Enter your name'), 'Grace');
+    await user.click(screen.getByRole('button', { name: 'Join Room' }));
+
+    // The button must not stay stuck on "Joining…" after a not-found reply.
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Join Room' })).toBeEnabled());
+  });
+
+  it('never seats a duplicate participant on a double-click', async () => {
+    emitAckMock.mockResolvedValue(joinAck());
+    const user = userEvent.setup();
+    const { container } = renderWithStore(<JoinForm code="ABCDE" onGone={() => {}} />, {});
+    await user.type(screen.getByLabelText('Enter your name'), 'Grace');
+
+    const form = container.querySelector('form')!;
+    // Two synchronous submits — the second is a real double-click before React
+    // re-renders; the ref guard must let only one room:join through.
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    await waitFor(() => expect(emitAckMock).toHaveBeenCalledTimes(1));
   });
 
   it('tells the user the room is locked when the host locked it', async () => {

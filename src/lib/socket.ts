@@ -35,6 +35,19 @@ export function closeSocket() {
   socket = null;
 }
 
+/**
+ * Rejoin dedupe: both the room page (cold load) and the RealtimeBridge
+ * (socket reconnect) want to rejoin the room. The flag makes sure only one
+ * `room:rejoin` is in flight at a time.
+ */
+let rejoinPending = false;
+export function isRejoinPending(): boolean {
+  return rejoinPending;
+}
+export function setRejoinPending(pending: boolean): void {
+  rejoinPending = pending;
+}
+
 /** Resolves once the socket is actually connected (or rejects after timeout). */
 export function ensureConnected(timeoutMs = 7000): Promise<Socket> {
   const s = getSocket();

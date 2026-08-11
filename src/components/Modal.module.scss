@@ -31,6 +31,9 @@
   transform-origin: var(--origin, center);
   animation: modal-in $dur-slow $ease-snap both;
   background: var(--surface-raised);
+  // Focus is managed programmatically on open; a focus ring here would double
+  // up with the visible border.
+  outline: none;
 
   &.sm {
     max-width: 420px;

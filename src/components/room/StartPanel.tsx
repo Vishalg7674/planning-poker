@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { pushToast, setPresentation } from '@/store/slices/uiSlice';
+import { requestStart } from '@/lib/roomActions';
+import { friendlyError } from '@/lib/errors';
 import { emitAck } from '@/lib/socket';
 import Button from '@/components/Button';
 import RoomQR from '@/components/RoomQR';
@@ -28,7 +30,9 @@ const REVEAL_MODES = [
 export default function StartPanel() {
   const dispatch = useAppDispatch();
   const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
-  const participantCount = useAppSelector((s) => s.participants.list.length);
+  const participants = useAppSelector((s) => s.participants.list);
+  // "At the table" = people still connected; ghosts are excluded.
+  const participantCount = participants.filter((p) => p.status !== 'disconnected').length;
   const timerSec = useAppSelector((s) => s.room.settings.timerSec);
   const revealMode = useAppSelector((s) => s.room.settings.revealMode);
   const deckId = useAppSelector((s) => s.room.settings.deckId);
@@ -51,7 +55,9 @@ export default function StartPanel() {
     setSaving(true);
     emitAck<{ ok: boolean; error?: string }>('room:settings', { timerSec: sec })
       .then((res) => {
-        if (!res?.ok) dispatch(pushToast({ kind: 'error', title: 'Could not save timer', message: res?.error }));
+        if (!res?.ok) {
+          dispatch(pushToast({ kind: 'error', title: 'Could not save timer', message: friendlyError(res?.error, 'The timer could not be saved.') }));
+        }
       })
       .catch(() => dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' })))
       .finally(() => setSaving(false));
@@ -62,7 +68,9 @@ export default function StartPanel() {
     setSaving(true);
     emitAck<{ ok: boolean; error?: string }>('room:settings', { revealMode: mode })
       .then((res) => {
-        if (!res?.ok) dispatch(pushToast({ kind: 'error', title: 'Could not save reveal mode', message: res?.error }));
+        if (!res?.ok) {
+          dispatch(pushToast({ kind: 'error', title: 'Could not save reveal mode', message: friendlyError(res?.error, 'The reveal mode could not be saved.') }));
+        }
       })
       .catch(() => dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' })))
       .finally(() => setSaving(false));
@@ -94,7 +102,9 @@ export default function StartPanel() {
     setSaving(true);
     emitAck<{ ok: boolean; error?: string }>(locked ? 'room:unlock' : 'room:lock', {})
       .then((res) => {
-        if (!res?.ok) dispatch(pushToast({ kind: 'error', title: 'Could not change lock', message: res?.error }));
+        if (!res?.ok) {
+          dispatch(pushToast({ kind: 'error', title: 'Could not change lock', message: friendlyError(res?.error, 'The room lock could not be changed.') }));
+        }
       })
       .catch(() => dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' })))
       .finally(() => setSaving(false));
@@ -103,17 +113,7 @@ export default function StartPanel() {
   const start = () => {
     if (starting) return;
     setStarting(true);
-    emitAck<{ ok: boolean; error?: string }>('voting:start', {})
-      .then((res) => {
-        if (!res?.ok) {
-          dispatch(pushToast({ kind: 'error', title: 'Could not start', message: res?.error }));
-          setStarting(false);
-        }
-      })
-      .catch(() => {
-        dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' }));
-        setStarting(false);
-      });
+    requestStart(dispatch).finally(() => setStarting(false));
   };
 
   return (

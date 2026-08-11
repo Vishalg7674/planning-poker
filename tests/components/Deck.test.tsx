@@ -66,8 +66,21 @@ describe('Deck', () => {
     expect(screen.getByText(/Vote locked/)).toBeInTheDocument();
   });
 
-  it('a rejected vote rolls back the optimistic lock and warns', async () => {
+  it('treats already_voted as success — the lock stays and no error is shown', async () => {
     emitAckMock.mockResolvedValue({ ok: false, error: 'already_voted' });
+    const user = userEvent.setup();
+    const { store } = renderWithStore(<Deck />, {
+      preloaded: preload({ voting: { phase: 'voting' } }),
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Vote 8' }));
+
+    await waitFor(() => expect(store.getState().voting.myVote).toBe('8'));
+    expect(store.getState().ui.toasts).toHaveLength(0);
+  });
+
+  it('rolls back the lock and warns when the server truly rejects the vote', async () => {
+    emitAckMock.mockResolvedValue({ ok: false, error: 'bad_value' });
     const user = userEvent.setup();
     const { store } = renderWithStore(<Deck />, {
       preloaded: preload({ voting: { phase: 'voting' } }),
@@ -77,6 +90,7 @@ describe('Deck', () => {
 
     await waitFor(() => expect(store.getState().voting.myVote).toBeNull());
     expect(store.getState().ui.toasts[0]?.title).toBe('Vote not counted');
+    expect(store.getState().ui.toasts[0]?.message).toBe('That card isn’t on the table.');
   });
 
   it('does not cast when the round has ended', async () => {

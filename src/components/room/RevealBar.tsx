@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { pushToast } from '@/store/slices/uiSlice';
-import { emitAck } from '@/lib/socket';
+import { requestReveal } from '@/lib/roomActions';
 import Button from '@/components/Button';
 import styles from './RevealBar.module.scss';
 
@@ -15,25 +14,19 @@ import styles from './RevealBar.module.scss';
 export default function RevealBar() {
   const dispatch = useAppDispatch();
   const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
-  const votedCount = useAppSelector((s) => s.voting.votedIds.length);
-  const participantCount = useAppSelector((s) => s.participants.list.length);
+  const participants = useAppSelector((s) => s.participants.list);
+  // Progress counts only reflect people actually at the table — a participant
+  // who disconnected must not inflate the denominator (the server's
+  // everyoneHasVoted already ignores them).
+  const activeCount = participants.filter((p) => p.status !== 'disconnected').length;
+  const activeVotedCount = participants.filter((p) => p.status !== 'disconnected' && p.hasVoted).length;
   const everyoneHasVoted = useAppSelector((s) => s.voting.everyoneHasVoted);
   const [revealing, setRevealing] = useState(false);
 
   const reveal = () => {
     if (revealing) return;
     setRevealing(true);
-    emitAck<{ ok: boolean; error?: string }>('votes:reveal', {})
-      .then((res) => {
-        if (!res?.ok) {
-          dispatch(pushToast({ kind: 'error', title: 'Could not reveal', message: res?.error }));
-          setRevealing(false);
-        }
-      })
-      .catch(() => {
-        dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' }));
-        setRevealing(false);
-      });
+    requestReveal(dispatch).finally(() => setRevealing(false));
   };
 
   return (
@@ -44,11 +37,11 @@ export default function RevealBar() {
             <span className={styles.tick} aria-hidden="true">
               ✓
             </span>{' '}
-            Everyone has voted · {votedCount} / {participantCount}
+            Everyone has voted · {activeVotedCount} / {activeCount}
           </>
         ) : (
           <>
-            {votedCount} / {participantCount} voted
+            {activeVotedCount} / {activeCount} voted
           </>
         )}
       </span>

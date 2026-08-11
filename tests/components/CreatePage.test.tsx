@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import CreatePage from '@/app/create/page';
@@ -70,7 +70,7 @@ describe('CreatePage', () => {
     expect(window.sessionStorage.getItem('reveal:identity')).toContain('"role":"facilitator"');
   });
 
-  it('shows a server error when creation fails', async () => {
+  it('shows a friendly server error when creation fails', async () => {
     emitAckMock.mockResolvedValue({ ok: false, error: 'nope' });
     const user = userEvent.setup();
     renderWithStore(<CreatePage />, {});
@@ -78,7 +78,22 @@ describe('CreatePage', () => {
     await user.type(screen.getByLabelText('Your Name'), 'Ada');
     await user.click(screen.getByRole('button', { name: 'Create Room' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('nope');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not create the room.');
     expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it('never creates a duplicate room on a double-click', async () => {
+    emitAckMock.mockResolvedValue({ ok: true, code: 'XYZ12', participantId: 'h1' });
+    const user = userEvent.setup();
+    const { container } = renderWithStore(<CreatePage />, {});
+    await user.type(screen.getByLabelText('Your Name'), 'Ada');
+
+    const form = container.querySelector('form')!;
+    // Two synchronous submits — the second is a real double-click before React
+    // re-renders; the ref guard must let only one room:create through.
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    await waitFor(() => expect(emitAckMock).toHaveBeenCalledTimes(1));
   });
 });

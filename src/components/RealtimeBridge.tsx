@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { useAppDispatch, useAppStore } from '@/store';
-import { getSocket } from '@/lib/socket';
+import { getSocket, isRejoinPending, setRejoinPending } from '@/lib/socket';
 import { loadIdentity, clearIdentity } from '@/lib/identity';
 import { snapshotReceived, roomEnded, roomGone, youRemoved, connectionChanged, timerUp } from '@/store/actions';
 import { tick, resetTimer } from '@/store/slices/timerSlice';
@@ -68,10 +68,17 @@ export default function RealtimeBridge() {
       if (!m) return;
       const identity = loadIdentity();
       if (!identity?.participantId) return;
+      // The room page's cold-load rejoin and this reconnect rejoin must never
+      // run at the same time — one round-trip is enough.
+      if (isRejoinPending()) return;
+      setRejoinPending(true);
+      const guard = window.setTimeout(() => setRejoinPending(false), 8000);
       socket.emit(
         'room:rejoin',
         { code: m[1].toUpperCase(), participantId: identity.participantId, name: identity.name },
         (res: any) => {
+          window.clearTimeout(guard);
+          setRejoinPending(false);
           if (res?.ok) {
             const me = res.snapshot.participants.find((p: any) => p.id === identity.participantId);
             dispatch(

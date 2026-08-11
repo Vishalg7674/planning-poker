@@ -1,9 +1,7 @@
 'use client';
 
-import { useAppDispatch, useAppSelector } from '@/store';
-import { setMyVote, clearMyVote } from '@/store/slices/votingSlice';
-import { pushToast } from '@/store/slices/uiSlice';
-import { emitAck } from '@/lib/socket';
+import { useAppDispatch, useAppSelector, useAppStore } from '@/store';
+import { requestVote } from '@/lib/roomActions';
 import styles from './Deck.module.scss';
 import { cx } from '@/lib/cx';
 
@@ -17,6 +15,7 @@ import { cx } from '@/lib/cx';
  */
 export default function Deck() {
   const dispatch = useAppDispatch();
+  const store = useAppStore();
   const phase = useAppSelector((s) => s.voting.phase);
   const deckValues = useAppSelector((s) => s.voting.deckValues);
   const myVote = useAppSelector((s) => s.voting.myVote);
@@ -35,18 +34,8 @@ export default function Deck() {
 
   const cast = (value: string) => {
     if (!interactive) return; // the server would reject this anyway
-    dispatch(setMyVote(value));
-    emitAck<{ ok: boolean; error?: string }>('vote:cast', { value })
-      .then((res) => {
-        if (!res.ok) {
-          dispatch(clearMyVote());
-          dispatch(pushToast({ kind: 'error', title: 'Vote not counted', message: res.error }));
-        }
-      })
-      .catch(() => {
-        dispatch(clearMyVote());
-        dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table — check your connection.' }));
-      });
+    // Shared path guards against double-fires and translates server errors.
+    requestVote(dispatch, store.getState, value);
   };
 
   const hint =

@@ -24,6 +24,7 @@ export function makeParticipant(over: Partial<Participant> = {}): Participant {
 export function makeSnapshot(over: Partial<Snapshot> = {}): Snapshot {
   return {
     code: 'ABCDE',
+    roundId: 1,
     hostId: 'p1',
     teamName: '',
     roomTitle: '',

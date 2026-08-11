@@ -2,15 +2,17 @@
 
 import { useEffect } from 'react';
 import { useAppDispatch, useAppStore } from '@/store';
-import { setMyVote } from '@/store/slices/votingSlice';
-import { emitAck } from '@/lib/socket';
+import { requestReveal, requestVote } from '@/lib/roomActions';
 
 /**
  * Keyboard shortcuts:
  *  - Host: Space reveals the round once the timer ended, or as soon as
  *    everyone has voted
  *  - Anyone: 1–9 keys vote the deck by position while voting is live
- * Ignored while typing in a field or with a modal open.
+ * Ignored while typing in a field, with a modal open, or when the focus is on
+ * an interactive control (so Space still activates a focused button).
+ * All actions route through the shared room-action helpers, so they carry the
+ * same double-fire guards and friendly error handling as the buttons.
  */
 export function useRoomShortcuts() {
   const dispatch = useAppDispatch();
@@ -19,7 +21,16 @@ export function useRoomShortcuts() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+      if (
+        t &&
+        (t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA' ||
+          t.tagName === 'SELECT' ||
+          t.isContentEditable ||
+          t.closest('button, a, [role="button"], [role="radio"], [role="checkbox"]'))
+      ) {
+        return;
+      }
 
       const s = store.getState();
       if (Object.values(s.ui.modals).some(Boolean)) return;
@@ -29,19 +40,15 @@ export function useRoomShortcuts() {
 
       if (canReveal && (e.code === 'Space' || e.key === ' ')) {
         e.preventDefault();
-        emitAck('votes:reveal', {});
+        requestReveal(dispatch);
         return;
       }
 
       if (!e.ctrlKey && !e.metaKey && !e.altKey) {
         const num = Number(e.key);
-        const st = store.getState();
-        if (num >= 1 && num <= 9 && st.voting.phase === 'voting' && !st.voting.myVote) {
-          const value = st.voting.deckValues[num - 1];
-          if (value) {
-            dispatch(setMyVote(value));
-            emitAck('vote:cast', { value });
-          }
+        if (num >= 1 && num <= 9) {
+          const value = store.getState().voting.deckValues[num - 1];
+          if (value) requestVote(dispatch, store.getState, value);
         }
       }
     };

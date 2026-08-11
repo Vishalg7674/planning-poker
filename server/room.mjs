@@ -17,7 +17,7 @@
  * @typedef {'full' | 'strong' | 'moderate' | 'large'} ConsensusLevel
  * @typedef {{ id: string, name: string, role: 'facilitator' | 'voter', status: ParticipantStatus, hasVoted: boolean, joinedAt: number, hue: number }} Participant
  * @typedef {{ count: number, mode: string, modeShare: number, unique: number, numeric: boolean, avg: number | null, median: number | null, spread: number | null, highest: number | null, lowest: number | null, range: number | null, level: ConsensusLevel, counts: Array<{ value: string, count: number }> }} RoomStats
- * @typedef {{ code: string, hostId: string | null, teamName: string, roomTitle: string, createdAt: number, settings: { deckId: DeckId, timerSec: number | null, accent: Accent, revealMode: RevealMode }, locked: boolean, participants: Map<string, Participant>, status: RoomStatus, votes: Record<string, string>, stats: RoomStats | null, timer: { durationSec: number, endsAt: number } | null, emptySince: number | null }} Room
+ * @typedef {{ code: string, roundId: number, hostId: string | null, teamName: string, roomTitle: string, createdAt: number, settings: { deckId: DeckId, timerSec: number | null, accent: Accent, revealMode: RevealMode }, locked: boolean, participants: Map<string, Participant>, status: RoomStatus, votes: Record<string, string>, stats: RoomStats | null, timer: { durationSec: number, endsAt: number } | null, emptySince: number | null }} Room
  * @typedef {{ ok: true } | { ok: false, error: string, timerEnded?: boolean }} ActionResult
  */
 
@@ -66,6 +66,7 @@ export function createRoom({ hostName, teamName, roomTitle, deckId, accent, reve
   const code = genCode(hasCode);
   const room = {
     code,
+    roundId: 0, // incremented on every startVoting — a stable identity per round
     hostId: null, // set when the host's participant is created
     teamName: (teamName || '').slice(0, 40),
     roomTitle: (roomTitle || '').slice(0, 60),
@@ -218,6 +219,7 @@ export function buildSnapshot(room) {
   const votedIds = Object.keys(room.votes);
   return {
     code: room.code,
+    roundId: room.roundId,
     hostId: room.hostId,
     teamName: room.teamName,
     roomTitle: room.roomTitle,
@@ -245,6 +247,7 @@ export function buildSnapshot(room) {
 export function startVoting(room, actorId) {
   if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
   if (room.status !== 'waiting') return { ok: false, error: 'in_progress' };
+  room.roundId = (room.roundId || 0) + 1;
   room.status = 'voting';
   room.votes = {};
   room.stats = null;

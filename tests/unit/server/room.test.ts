@@ -96,6 +96,13 @@ describe('createRoom', () => {
     expect(createRoom({ revealMode: 'slow-mo' }).settings.revealMode).toBe('staggered');
   });
 
+  it('starts at roundId 0 and increments on every start', () => {
+    const room = createRoom({ hostName: 'Host' });
+    expect(room.roundId).toBe(0);
+    startVoting(room, hostId(room));
+    expect(room.roundId).toBe(1);
+  });
+
   it('generates codes that never collide with existing rooms', () => {
     // Force Math.random so the first attempt is always AAAAA, then SSSSS.
     const random = vi.spyOn(Math, 'random');
@@ -281,6 +288,11 @@ describe('buildSnapshot', () => {
     expect(snap.status).toBe('revealed');
     expect(snap.votes[grace.id]).toBe('8');
     expect(snap.stats!.count).toBe(2);
+  });
+
+  it('ships the round id in the snapshot', () => {
+    expect(buildSnapshot(votingRoom()).roundId).toBe(1);
+    expect(buildSnapshot(createRoom({ hostName: 'Host' })).roundId).toBe(0);
   });
 
   it('carries the room customization into the snapshot', () => {

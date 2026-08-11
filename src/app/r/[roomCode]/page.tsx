@@ -17,14 +17,16 @@ import ResultsPanel from '@/components/room/ResultsPanel';
 import ParticipantsPanel from '@/components/room/ParticipantsPanel';
 import TimerBadge from '@/components/room/TimerBadge';
 import HostToolbar from '@/components/room/HostToolbar';
+import RoomErrorBoundary from '@/components/room/RoomErrorBoundary';
 import { useRoomShortcuts } from '@/components/room/useShortcuts';
 import EndSessionModal from '@/components/modals/EndSessionModal';
 import RemoveParticipantModal from '@/components/modals/RemoveParticipantModal';
+import RoundResultModal from '@/components/modals/RoundResultModal';
 import PresentationView from '@/components/room/PresentationView';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setMyIdentity, pushToast, closeModal } from '@/store/slices/uiSlice';
 import { snapshotReceived, roomGone } from '@/store/actions';
-import { emitAck } from '@/lib/socket';
+import { emitAck, isRejoinPending, setRejoinPending } from '@/lib/socket';
 import { loadIdentity, clearIdentity } from '@/lib/identity';
 import type { Participant } from '@/lib/types';
 import styles from './room.module.scss';
@@ -60,7 +62,14 @@ export default function RoomPage() {
     if (joined || rejoinAttempted.current) return;
     const identity = loadIdentity();
     if (!identity?.participantId) return;
+    // The bridge may already be rejoining after a socket reconnect — only one
+    // room:rejoin may be in flight at a time. When the bridge owns the rejoin
+    // we leave the spinner flag alone: the bridge's outcome (join form, gone
+    // screen or room) decides what shows next, so a failed rejoin can never
+    // strand us on the "walking up" spinner.
+    if (isRejoinPending()) return;
     rejoinAttempted.current = true;
+    setRejoinPending(true);
     emitAck<{ ok: boolean; participantId?: string; snapshot?: any; error?: string }>('room:rejoin', {
       code,
       participantId: identity.participantId,
@@ -85,12 +94,17 @@ export default function RoomPage() {
         } else if (res?.error === 'unknown_participant') {
           // Stale identity from another room — drop it and show the join form.
           clearIdentity();
+          rejoinAttempted.current = false;
+        } else {
+          // Unexpected reply — never hang on the "walking up" spinner.
+          rejoinAttempted.current = false;
         }
       })
       .catch(() => {
         // Server unreachable — let the user try the join form.
         rejoinAttempted.current = false;
-      });
+      })
+      .finally(() => setRejoinPending(false));
   }, [joined, code, dispatch]);
 
   const copyLink = () => {
@@ -155,15 +169,19 @@ export default function RoomPage() {
   // ------------------------------------------------------------------
   if (presentation) {
     return (
-      <div className={styles.room} data-accent={accent}>
-        <PresentationView />
-      </div>
+      <RoomErrorBoundary>
+        <div className={styles.room} data-accent={accent}>
+          <PresentationView />
+          <RoundResultModal open={modals.roundResult} onClose={() => dispatch(closeModal('roundResult'))} />
+        </div>
+      </RoomErrorBoundary>
     );
   }
 
   return (
-    <div className={styles.room} data-accent={accent}>
-      <header className={styles.header}>
+    <RoomErrorBoundary>
+      <div className={styles.room} data-accent={accent}>
+        <header className={styles.header}>
         <span className={styles.homeLink}>
           <Wordmark size="sm" />
         </span>
@@ -240,7 +258,16 @@ export default function RoomPage() {
       <Celebration tick={celebrationTick} label="Nailed it — full consensus!" />
 
       <EndSessionModal open={modals.endSession} onClose={() => dispatch(closeModal('endSession'))} />
-      <RemoveParticipantModal open={modals.removeParticipant} target={removeTarget} onClose={() => dispatch(closeModal('removeParticipant'))} />
-    </div>
+      <RemoveParticipantModal
+        open={modals.removeParticipant}
+        target={removeTarget}
+        onClose={() => {
+          setRemoveTarget(null);
+          dispatch(closeModal('removeParticipant'));
+        }}
+      />
+        <RoundResultModal open={modals.roundResult} onClose={() => dispatch(closeModal('roundResult'))} />
+      </div>
+    </RoomErrorBoundary>
   );
 }

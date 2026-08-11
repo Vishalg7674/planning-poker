@@ -45,9 +45,11 @@ test.describe('Optional timer', () => {
       // No new votes can be cast afterwards.
       await expect(rahul.page.getByRole('button', { name: 'Vote 8', exact: true })).toBeDisabled();
 
-      // The host can still reveal (non-voters are marked, not invented).
+      // The host can still reveal (non-voters are marked, not invented). The
+      // single-vote round is "full consensus", so the round-result modal also
+      // shows an Average stat — scope to the first match.
       await reveal(host.page);
-      await expect(rahul.page.getByText('Average')).toBeVisible();
+      await expect(rahul.page.getByText('Average').first()).toBeVisible();
       await expect(rahul.page.getByLabel('Revealed votes').getByText('8')).toBeVisible();
       await expect(host.page.getByLabel('Revealed votes').getByText(/Didn.t vote/)).toBeVisible();
     } finally {

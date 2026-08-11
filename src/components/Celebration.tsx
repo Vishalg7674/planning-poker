@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -8,6 +9,8 @@ interface CelebrationProps {
   tick: number;
   /** Optional short celebratory microcopy shown mid-burst. */
   label?: string;
+  /** Called when the user closes the celebration. */
+  onClose?: () => void;
 }
 
 const PALETTE = [
@@ -26,13 +29,19 @@ const PIECE_COUNT = 46;
  * Reusable confetti / particle burst. Pure DOM + CSS custom properties —
  * no canvas. Keyed on `tick` so every reveal replays the burst.
  */
-export default function Celebration({ tick, label }: CelebrationProps) {
+export default function Celebration({
+  tick,
+  label,
+  onClose,
+}: CelebrationProps) {
   /* eslint-disable react-hooks/purity -- random confetti is the whole point; the memo is keyed on `tick` so it recomputes per burst. */
   const pieces = useMemo(() => {
     if (!tick) return [];
+
     return Array.from({ length: PIECE_COUNT }, (_, i) => {
       const angle = Math.random() * Math.PI * 2;
       const dist = 90 + Math.random() * 200;
+
       return {
         id: `${tick}-${i}`,
         cx: Math.cos(angle) * dist,
@@ -51,8 +60,9 @@ export default function Celebration({ tick, label }: CelebrationProps) {
   if (!tick) return null;
 
   return (
-    <div className={styles.burst} aria-hidden="true">
+    <div className={styles.burst}>
       <div className={styles.flash} />
+
       {pieces.map((p) => (
         <span
           key={p.id}
@@ -71,7 +81,19 @@ export default function Celebration({ tick, label }: CelebrationProps) {
           }
         />
       ))}
+
       {label && <span className={styles.label}>{label}</span>}
+
+      {onClose && (
+        <button
+          type="button"
+          className={styles.close}
+          onClick={onClose}
+          aria-label="Close celebration"
+        >
+          ×
+        </button>
+      )}
     </div>
   );
 }
