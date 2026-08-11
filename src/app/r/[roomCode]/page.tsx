@@ -255,7 +255,7 @@ export default function RoomPage() {
         everyone leaves.
       </footer>
 
-      <Celebration tick={celebrationTick} label="Nailed it — full consensus!" />
+      {/* <Celebration tick={celebrationTick} label="Nailed it — full consensus!" /> */}
 
       <EndSessionModal open={modals.endSession} onClose={() => dispatch(closeModal('endSession'))} />
       <RemoveParticipantModal
