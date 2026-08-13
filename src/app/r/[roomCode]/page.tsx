@@ -6,7 +6,6 @@ import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
 import ThemeToggle from '@/components/ThemeToggle';
 import ConnectionPill from '@/components/ConnectionPill';
-import Celebration from '@/components/Celebration';
 import Button from '@/components/Button';
 import JoinForm from '@/components/room/JoinForm';
 import StartPanel from '@/components/room/StartPanel';
@@ -45,7 +44,6 @@ export default function RoomPage() {
   const accent = useAppSelector((s) => s.room.settings.accent);
   const locked = useAppSelector((s) => s.room.locked);
   const phase = useAppSelector((s) => s.voting.phase);
-  const celebrationTick = useAppSelector((s) => s.ui.celebrationTick);
   const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
   const presentation = useAppSelector((s) => s.ui.presentation);
   const modals = useAppSelector((s) => s.ui.modals);
@@ -256,8 +254,6 @@ export default function RoomPage() {
         <span className={styles.footerDot} aria-hidden="true" /> This room exists in server memory only — it disappears when
         everyone leaves.
       </footer>
-
-      {/* <Celebration tick={celebrationTick} label="Nailed it — full consensus!" /> */}
 
       <EndSessionModal open={modals.endSession} onClose={() => dispatch(closeModal('endSession'))} />
       <RemoveParticipantModal

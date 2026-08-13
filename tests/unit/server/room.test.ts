@@ -13,6 +13,7 @@ import {
   removeParticipant,
   reveal,
   setLocked,
+  skipVote,
   setRevealMode,
   setTimerSec,
   startNewRound,
@@ -462,6 +463,96 @@ describe('castVote', () => {
     expect(dup.error).toBe('already_voted');
     expect(dup.timerEnded).toBeUndefined();
     expect(room.votes[grace.id]).toBe('8');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// skipVote — host-only: sit the round out, count as done, no vote value
+// ---------------------------------------------------------------------------
+
+describe('skipVote', () => {
+  it('marks the host as done without adding a vote value', () => {
+    const room = votingRoom();
+    const res = skipVote(room, hostId(room));
+    expect(res).toEqual({ ok: true });
+    expect(room.participants.get(hostId(room))!.hasVoted).toBe(true);
+    expect(room.participants.get(hostId(room))!.skipped).toBe(true);
+    expect(room.participants.get(hostId(room))!.status).toBe('voted');
+    expect(room.votes[hostId(room)]).toBeUndefined();
+  });
+
+  it('unlocks everyoneHasVoted once the rest of the table has voted', () => {
+    const room = votingRoom();
+    const grace = addNamed(room, 'Grace');
+    skipVote(room, hostId(room));
+    expect(everyoneHasVoted(room)).toBe(false); // Grace is still thinking
+    castVote(room, grace.id, '8');
+    expect(everyoneHasVoted(room)).toBe(true);
+  });
+
+  it('keeps skipped hosts out of the stats', () => {
+    const room = votingRoom();
+    const grace = addNamed(room, 'Grace');
+    skipVote(room, hostId(room));
+    castVote(room, grace.id, '8');
+    reveal(room, hostId(room));
+    expect(room.status).toBe('revealed');
+    expect(room.stats!.count).toBe(1); // only Grace's value counts
+    expect(Object.keys(room.votes)).toEqual([grace.id]);
+  });
+
+  it('rejects a non-host actor', () => {
+    const room = votingRoom();
+    const grace = addNamed(room, 'Grace');
+    expect(skipVote(room, grace.id)).toEqual({ ok: false, error: 'not_host' });
+    expect(room.participants.get(grace.id)!.skipped).toBe(false);
+  });
+
+  it('rejects skipping outside the voting phase', () => {
+    const room = createRoom({ hostName: 'Host' }); // waiting
+    expect(skipVote(room, hostId(room))).toEqual({ ok: false, error: 'not_voting' });
+  });
+
+  it('rejects a second skip or a skip after voting (already_voted)', () => {
+    const room = votingRoom();
+    skipVote(room, hostId(room));
+    expect(skipVote(room, hostId(room))).toEqual({ ok: false, error: 'already_voted' });
+    const room2 = votingRoom();
+    castVote(room2, hostId(room2), '5');
+    expect(skipVote(room2, hostId(room2))).toEqual({ ok: false, error: 'already_voted' });
+  });
+
+  it('closes the round when a skip lands after the timer expired', () => {
+    const room = votingRoom(10);
+    room.timer!.endsAt = Date.now() - 1000;
+    const res = skipVote(room, hostId(room)) as { ok: false; error: string; timerEnded: boolean };
+    expect(res.ok).toBe(false);
+    expect(res.error).toBe('not_voting');
+    expect(res.timerEnded).toBe(true);
+    expect(room.status).toBe('ended');
+    expect(room.participants.get(hostId(room))!.skipped).toBe(false);
+  });
+
+  it('resets the skip when the next round starts', () => {
+    const room = votingRoom();
+    const grace = addNamed(room, 'Grace');
+    skipVote(room, hostId(room));
+    castVote(room, grace.id, '8');
+    reveal(room, hostId(room)); // REVEALED — startNewRound is legal from here
+    expect(room.participants.get(hostId(room))!.skipped).toBe(true);
+    startNewRound(room, hostId(room));
+    expect(room.participants.get(hostId(room))!.skipped).toBe(false);
+    expect(room.participants.get(hostId(room))!.hasVoted).toBe(false);
+  });
+
+  it('ships skippedIds in the snapshot (but only the host skips)', () => {
+    const room = votingRoom();
+    const grace = addNamed(room, 'Grace');
+    skipVote(room, hostId(room));
+    const snap = buildSnapshot(room);
+    expect(snap.skippedIds).toEqual([hostId(room)]);
+    expect(snap.skippedIds).not.toContain(grace.id);
+    expect(snap.votedIds).toEqual([]); // no vote value, so not in votedIds
   });
 });
 

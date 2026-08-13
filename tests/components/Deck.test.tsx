@@ -100,4 +100,40 @@ describe('Deck', () => {
     await user.click(screen.getByRole('button', { name: 'Vote 8' }));
     expect(emitAckMock).not.toHaveBeenCalled();
   });
+
+  it('shows the skip button to the host only while voting', () => {
+    const host = renderWithStore(<Deck />, {
+      preloaded: preload({ voting: { phase: 'voting' }, ui: { myParticipantId: 'p1' } }),
+    });
+    expect(screen.getByRole('button', { name: 'Skip this round' })).toBeInTheDocument();
+    host.unmount();
+
+    // A non-host never sees it.
+    const voter = renderWithStore(<Deck />, { preloaded: preload({ voting: { phase: 'voting' } }) });
+    expect(screen.queryByRole('button', { name: 'Skip this round' })).not.toBeInTheDocument();
+    voter.unmount();
+
+    // And it hides once the host has locked a vote.
+    renderWithStore(<Deck />, {
+      preloaded: preload({ voting: { phase: 'voting', myVote: '8' }, ui: { myParticipantId: 'p1' } }),
+    });
+    expect(screen.queryByRole('button', { name: 'Skip this round' })).not.toBeInTheDocument();
+  });
+
+  it('lets the host skip: locks the deck and sends vote:skip', async () => {
+    const user = userEvent.setup();
+    const { store } = renderWithStore(<Deck />, {
+      preloaded: preload({ voting: { phase: 'voting' }, ui: { myParticipantId: 'p1' } }),
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Skip this round' }));
+
+    await waitFor(() => expect(store.getState().voting.mySkipped).toBe(true));
+    expect(emitAckMock).toHaveBeenCalledWith('vote:skip', {});
+    // Every card is now inert — the host is done.
+    expect(screen.getByRole('button', { name: 'Vote 8' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Skip this round' })).not.toBeInTheDocument();
+    expect(screen.getByText(/You skipped this round/)).toBeInTheDocument();
+
+  });
 });

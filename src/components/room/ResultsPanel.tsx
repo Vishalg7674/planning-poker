@@ -40,6 +40,7 @@ export default function ResultsPanel() {
   const dispatch = useAppDispatch();
   const stats = useAppSelector((s) => s.voting.stats);
   const votes = useAppSelector((s) => s.voting.votes);
+  const skippedIds = useAppSelector((s) => s.voting.skippedIds);
   const participants = useAppSelector((s) => s.participants.list);
   const myId = useAppSelector((s) => s.ui.myParticipantId);
   const revealMode = useAppSelector((s) => s.room.settings.revealMode);
@@ -68,7 +69,11 @@ export default function ResultsPanel() {
   }
 
   const voters: Participant[] = participants.filter((p) => votes[p.id] !== undefined);
-  const nonVoters: Participant[] = participants.filter((p) => votes[p.id] === undefined);
+  // Skipped participants (host sat the round out) are neither voters nor
+  // non-voters — they show their own "Skipped" card and never inflate the
+  // "did not vote" count or the stats.
+  const skipped: Participant[] = participants.filter((p) => votes[p.id] === undefined && skippedIds.includes(p.id));
+  const nonVoters: Participant[] = participants.filter((p) => votes[p.id] === undefined && !skippedIds.includes(p.id));
   const delayPer = REVEAL_DELAY[revealMode] ?? 70;
   const durationSec = REVEAL_DURATION[revealMode] ?? 0.55;
 
@@ -124,9 +129,10 @@ export default function ResultsPanel() {
       )}
 
       <div className={styles.cards} aria-label="Revealed votes">
-        {[...voters, ...nonVoters].map((p, i) => {
+        {[...voters, ...skipped, ...nonVoters].map((p, i) => {
           const value = votes[p.id];
           const didVote = value !== undefined;
+          const didSkip = !didVote && skippedIds.includes(p.id);
           const isLowest = lowestVoters.includes(p);
           const isHighest = highestVoters.includes(p);
           return (
@@ -135,6 +141,7 @@ export default function ResultsPanel() {
               className={cx(
                 styles.voteCard,
                 !didVote && styles.blank,
+                didSkip && styles.skipped,
                 isLowest && styles.extreme,
                 isHighest && styles.extreme,
               )}
@@ -142,13 +149,13 @@ export default function ResultsPanel() {
             >
               <div className={didVote ? styles.voteFace : styles.blankFace}>
                 {didVote && <span className={styles.voteSuit} aria-hidden="true">♦</span>}
-                <span className={didVote ? styles.voteValue : styles.blankMark}>{didVote ? value : '?'}</span>
+                <span className={didVote ? styles.voteValue : styles.blankMark}>{didVote ? value : didSkip ? '—' : '?'}</span>
               </div>
               <div className={styles.voterMeta}>
                 <Avatar name={p.name} hue={p.hue} size="sm" status={p.status} isMe={p.id === myId} />
                 <span className={styles.voterName}>{p.id === myId ? 'You' : p.name}</span>
               </div>
-              {!didVote && <span className={styles.noVote}>Didn&rsquo;t vote</span>}
+              {!didVote && <span className={styles.noVote}>{didSkip ? 'Skipped' : 'Didn’t vote'}</span>}
               {isLowest && <span className={styles.extremeTag}>Lowest</span>}
               {isHighest && <span className={styles.extremeTag}>Highest</span>}
             </div>

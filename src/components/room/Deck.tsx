@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { useAppDispatch, useAppSelector, useAppStore } from '@/store';
-import { requestVote } from '@/lib/roomActions';
+import { requestSkip, requestVote } from '@/lib/roomActions';
 import styles from './Deck.module.scss';
 import { cx } from '@/lib/cx';
 
@@ -12,6 +13,10 @@ import { cx } from '@/lib/cx';
  *
  * A committed vote is FINAL: the server permanently locks it, so there is no
  * change, no cancel, no revote. The selected card tucks in with a checkmark.
+ *
+ * The host also gets one Skip button: instead of picking a card they can sit
+ * the round out. Skipping counts them as done (so the reveal unlocks once
+ * everyone else has voted) without contributing a vote to the stats.
  */
 export default function Deck() {
   const dispatch = useAppDispatch();
@@ -21,13 +26,17 @@ export default function Deck() {
   const myVote = useAppSelector((s) => s.voting.myVote);
   const myId = useAppSelector((s) => s.ui.myParticipantId);
   const votedIds = useAppSelector((s) => s.voting.votedIds);
+  const skippedIds = useAppSelector((s) => s.voting.skippedIds);
+  const mySkipped = useAppSelector((s) => s.voting.mySkipped);
   const story = useAppSelector((s) => s.voting.story);
   const roundId = useAppSelector((s) => s.voting.roundId);
   const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
+  const [skipping, setSkipping] = useState(false);
 
   // Locked = I committed this session (optimistic) OR the server already has
-  // my vote (after a refresh / a vote cast from another tab).
-  const locked = myVote !== null || (myId != null && votedIds.includes(myId));
+  // my vote / skip (after a refresh or an action from another tab).
+  const skipped = mySkipped || (myId != null && skippedIds.includes(myId));
+  const locked = myVote !== null || (myId != null && votedIds.includes(myId)) || skipped;
   // Cards are inert outside the live voting phase.
   const interactive = phase === 'voting' && !locked;
   // Larger decks (modified Fibonacci, sequential) get a denser layout so the
@@ -38,6 +47,12 @@ export default function Deck() {
     if (!interactive) return; // the server would reject this anyway
     // Shared path guards against double-fires and translates server errors.
     requestVote(dispatch, store.getState, value);
+  };
+
+  const skip = () => {
+    if (phase !== 'voting' || locked) return;
+    setSkipping(true);
+    requestSkip(dispatch).finally(() => setSkipping(false));
   };
 
   const hint =
@@ -51,10 +66,11 @@ export default function Deck() {
         ? locked
           ? 'Voting ended — your vote stays locked until the host reveals.'
           : 'Voting ended — no more cards can be played.'
-        : locked
-          ? undefined // handled below
-          : 'Pick a card. Your vote locks in the moment you tap — and it’s final.';
-
+        : skipped
+          ? 'You skipped this round — the table moves on without your vote.'
+          : locked
+            ? undefined // handled below
+            : 'Pick a card. Your vote locks in the moment you tap — and it’s final.';
   return (
     <div className={styles.wrap}>
       {(phase === 'voting' || phase === 'ended') && (
@@ -95,11 +111,18 @@ export default function Deck() {
           );
         })}
       </div>
+      {isHost && phase === 'voting' && !locked && (
+        <button type="button" className={styles.skipBtn} onClick={skip} disabled={skipping}>
+          {skipping ? 'Skipping…' : 'Skip this round'}
+        </button>
+      )}
       <p className={styles.hint}>
         {phase === 'voting' && locked ? (
           <>
-            <span className={styles.lockPip}>✓</span> Vote locked — your vote has been submitted. It stays face-down until the
-            reveal.
+            <span className={styles.lockPip}>✓</span>{' '}
+            {skipped
+              ? 'You skipped this round — you count as done and the reveal can unlock.'
+              : 'Vote locked — your vote has been submitted. It stays face-down until the reveal.'}
           </>
         ) : (
           hint

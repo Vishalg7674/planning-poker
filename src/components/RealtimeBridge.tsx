@@ -29,6 +29,9 @@ export default function RealtimeBridge() {
     const socket = getSocket();
 
     const onSnapshot = (payload: any) => {
+      // Game rooms (e.g. Most Likely To) carry their own snapshot shape and are
+      // driven by their own page — never feed them into the poker slices.
+      if (payload?.game && payload.game !== 'planning-poker') return;
       dispatch(snapshotReceived(payload));
       if (!payload.timer) {
         activeTimerKey.current = null;

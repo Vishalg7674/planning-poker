@@ -35,6 +35,7 @@ import {
   startVoting,
   startNewRound,
   castVote,
+  skipVote,
   reveal,
   setTimerSec,
   setRevealMode,
@@ -42,6 +43,16 @@ import {
   removeParticipant,
   disconnectParticipant,
 } from './room.mjs';
+import {
+  createGame,
+  startPrompt,
+  castPick,
+  reveal as revealGame,
+  setLocked as setGameLocked,
+  removeParticipant as removeGameParticipant,
+  disconnectParticipant as disconnectGameParticipant,
+  buildGameSnapshot,
+} from './games/mostLikelyTo.mjs';
 
 // Render / Railway inject a random PORT into the environment; SOCKET_PORT
 // (local dev, playwright) wins when both are set.
@@ -62,7 +73,12 @@ const io = new Server(httpServer, {
 });
 
 function emitSnapshot(room) {
-  io.to(room.code).emit('snapshot', buildSnapshot(room));
+  io.to(room.code).emit('snapshot', snapshotFor(room));
+}
+
+/** Build the room's snapshot using the right game's serializer. */
+function snapshotFor(room) {
+  return room.game === 'most-likely-to' ? buildGameSnapshot(room) : buildSnapshot(room);
 }
 
 // ---------------------------------------------------------------------------
@@ -72,7 +88,8 @@ function emitSnapshot(room) {
 setInterval(() => {
   const now = Date.now();
   for (const room of rooms.values()) {
-    if (room.status === 'voting' && room.timer && room.timer.endsAt <= now) {
+    // Planning poker only — the game has no countdown.
+    if (room.game !== 'most-likely-to' && room.status === 'voting' && room.timer && room.timer.endsAt <= now) {
       room.status = 'ended';
       emitSnapshot(room);
     }
@@ -89,15 +106,23 @@ io.on('connection', (socket) => {
 
   socket.on('room:create', (payload, ack) => {
     try {
-      const room = createRoom({
-        hostName: payload?.hostName,
-        teamName: payload?.teamName,
-        roomTitle: payload?.roomTitle,
-        deckId: payload?.deckId,
-        accent: payload?.accent,
-        revealMode: payload?.revealMode,
-        hasCode: (code) => rooms.has(code),
-      });
+      const isGame = payload?.game === 'most-likely-to';
+      const room = isGame
+        ? createGame({
+            hostName: payload?.hostName,
+            teamName: payload?.teamName,
+            roomTitle: payload?.roomTitle,
+            hasCode: (code) => rooms.has(code),
+          })
+        : createRoom({
+            hostName: payload?.hostName,
+            teamName: payload?.teamName,
+            roomTitle: payload?.roomTitle,
+            deckId: payload?.deckId,
+            accent: payload?.accent,
+            revealMode: payload?.revealMode,
+            hasCode: (code) => rooms.has(code),
+          });
       rooms.set(room.code, room);
       socket.join(room.code);
       socket.data.roomCode = room.code;
@@ -122,7 +147,7 @@ io.on('connection', (socket) => {
       socket.join(room.code);
       socket.data.roomCode = room.code;
       socket.data.participantId = null;
-      ack?.({ ok: true, participantId: null, screen: true, snapshot: buildSnapshot(room) });
+      ack?.({ ok: true, participantId: null, screen: true, snapshot: snapshotFor(room) });
       emitSnapshot(room);
       return;
     }
@@ -139,7 +164,8 @@ io.on('connection', (socket) => {
       participant = room.participants.get(id);
       participant.name = (name || participant.name).slice(0, 32);
       participant.role = participant.role === 'facilitator' ? 'facilitator' : 'voter';
-      participant.status = room.votes[participant.id] ? 'voted' : 'connected';
+      const committed = room.game === 'most-likely-to' ? room.picks?.[participant.id] : room.votes?.[participant.id];
+      participant.status = committed ? 'voted' : 'connected';
     } else {
       participant = addParticipant(room, { name, role: 'voter', id });
     }
@@ -147,7 +173,7 @@ io.on('connection', (socket) => {
     socket.data.roomCode = room.code;
     socket.data.participantId = participant.id;
     room.emptySince = null;
-    ack?.({ ok: true, participantId: participant.id, snapshot: buildSnapshot(room) });
+    ack?.({ ok: true, participantId: participant.id, snapshot: snapshotFor(room) });
     emitSnapshot(room);
   });
 
@@ -159,12 +185,13 @@ io.on('connection', (socket) => {
     const participant = room.participants.get(participantId);
     if (!participant) return ack?.({ ok: false, error: 'unknown_participant' });
     participant.name = (name || participant.name).slice(0, 32);
-    participant.status = room.votes[participant.id] ? 'voted' : 'connected';
+    const committed = room.game === 'most-likely-to' ? room.picks?.[participant.id] : room.votes?.[participant.id];
+    participant.status = committed ? 'voted' : 'connected';
     socket.join(room.code);
     socket.data.roomCode = room.code;
     socket.data.participantId = participantId;
     room.emptySince = null;
-    ack?.({ ok: true, participantId, snapshot: buildSnapshot(room) });
+    ack?.({ ok: true, participantId, snapshot: snapshotFor(room) });
     emitSnapshot(room);
   });
 
@@ -195,6 +222,39 @@ io.on('connection', (socket) => {
   // code, host, participants, settings — is preserved. Server-side guards
   // make it idempotent: a second call while WAITING/VOTING is rejected.
   // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
+  // Most Likely To — game actions. Same transport (code / participants /
+  // snapshots) as planning poker, its own events: startPrompt (host, from
+  // WAITING or REVEALED), pick (one teammate per round), reveal (host, once
+  // everyone has picked).
+  // -------------------------------------------------------------------------
+  socket.on('game:startPrompt', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room || room.game !== 'most-likely-to') return ack?.({ ok: false, error: 'not_found' });
+    const res = startPrompt(room, socket.data.participantId);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  socket.on('game:pick', (payload, ack) => {
+    const room = roomFor(socket);
+    if (!room || room.game !== 'most-likely-to') return ack?.({ ok: false, error: 'not_found' });
+    const res = castPick(room, socket.data.participantId, payload?.targetId);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  socket.on('game:reveal', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room || room.game !== 'most-likely-to') return ack?.({ ok: false, error: 'not_found' });
+    const res = revealGame(room, socket.data.participantId);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
   socket.on('room:newRound', (_payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_host' });
@@ -212,6 +272,21 @@ io.on('connection', (socket) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_found' });
     const res = castVote(room, socket.data.participantId, payload?.value);
+    if (res.timerEnded) emitSnapshot(room); // the server-side timer just expired
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  // -------------------------------------------------------------------------
+  // Skip — host-only, while VOTING, once. The host does not have to vote:
+  // skipping marks them as done so the reveal unlocks when everyone else has
+  // voted. Mirrors vote:cast's guards (and its timer-expiry behavior).
+  // -------------------------------------------------------------------------
+  socket.on('vote:skip', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_found' });
+    const res = skipVote(room, socket.data.participantId);
     if (res.timerEnded) emitSnapshot(room); // the server-side timer just expired
     if (!res.ok) return ack?.(res);
     ack?.({ ok: true });
@@ -255,7 +330,7 @@ io.on('connection', (socket) => {
   socket.on('room:lock', (payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_host' });
-    const res = setLocked(room, socket.data.participantId, true);
+    const res = room.game === 'most-likely-to' ? setGameLocked(room, socket.data.participantId, true) : setLocked(room, socket.data.participantId, true);
     if (!res.ok) return ack?.(res);
     ack?.({ ok: true });
     emitSnapshot(room);
@@ -264,7 +339,7 @@ io.on('connection', (socket) => {
   socket.on('room:unlock', (_payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_host' });
-    const res = setLocked(room, socket.data.participantId, false);
+    const res = room.game === 'most-likely-to' ? setGameLocked(room, socket.data.participantId, false) : setLocked(room, socket.data.participantId, false);
     if (!res.ok) return ack?.(res);
     ack?.({ ok: true });
     emitSnapshot(room);
@@ -273,7 +348,10 @@ io.on('connection', (socket) => {
   socket.on('participant:remove', (payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_host' });
-    const res = removeParticipant(room, socket.data.participantId, payload?.participantId);
+    const res =
+      room.game === 'most-likely-to'
+        ? removeGameParticipant(room, socket.data.participantId, payload?.participantId)
+        : removeParticipant(room, socket.data.participantId, payload?.participantId);
     if (!res.ok) return ack?.(res);
     // Tell that exact socket it's gone, if it's still connected.
     for (const s of io.sockets.sockets.values()) {
@@ -301,7 +379,8 @@ io.on('connection', (socket) => {
     if (!roomCode) return;
     const room = rooms.get(roomCode);
     if (!room) return;
-    disconnectParticipant(room, participantId);
+    if (room.game === 'most-likely-to') disconnectGameParticipant(room, participantId);
+    else disconnectParticipant(room, participantId);
     emitSnapshot(room);
   });
 });

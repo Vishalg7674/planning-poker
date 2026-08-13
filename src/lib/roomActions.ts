@@ -1,7 +1,7 @@
 'use client';
 
 import type { AppDispatch, RootState } from '@/store';
-import { clearMyVote, setMyVote } from '@/store/slices/votingSlice';
+import { clearMyVote, clearMySkipped, setMyVote, setMySkipped } from '@/store/slices/votingSlice';
 import { pushToast } from '@/store/slices/uiSlice';
 import { emitAck } from '@/lib/socket';
 import { friendlyError } from '@/lib/errors';
@@ -21,6 +21,7 @@ import type { Story } from '@/lib/types';
 let revealInFlight = false;
 let startInFlight = false;
 let newRoundInFlight = false;
+let skipInFlight = false;
 
 /**
  * Cast a vote. Optimistically locks my card, then talks to the server. A
@@ -49,6 +50,37 @@ export function requestVote(dispatch: AppDispatch, getState: () => RootState, va
     .catch(() => {
       dispatch(clearMyVote());
       dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table — check your connection.' }));
+    });
+}
+
+/**
+ * Skip my vote (host-only — the server enforces it). Optimistically locks the
+ * skip so the deck goes inert immediately, then talks to the server. A
+ * double-click cannot double-send (module in-flight flag); `already_voted`
+ * means the server already has us down as done — that is success.
+ */
+export function requestSkip(dispatch: AppDispatch): Promise<boolean> {
+  if (skipInFlight) return Promise.resolve(false);
+  skipInFlight = true;
+  dispatch(setMySkipped());
+  return emitAck<{ ok: boolean; error?: string }>('vote:skip', {})
+    .then((res) => {
+      // already_voted = we're already down as done (a vote or a skip landed
+      // first). That is success — keep the skip state, no error toast.
+      if (res?.ok || res?.error === 'already_voted') return true;
+      dispatch(clearMySkipped());
+      dispatch(
+        pushToast({ kind: 'error', title: 'Could not skip', message: friendlyError(res?.error, 'Your skip was not recorded.') }),
+      );
+      return false;
+    })
+    .catch(() => {
+      dispatch(clearMySkipped());
+      dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table — check your connection.' }));
+      return false;
+    })
+    .finally(() => {
+      skipInFlight = false;
     });
 }
 

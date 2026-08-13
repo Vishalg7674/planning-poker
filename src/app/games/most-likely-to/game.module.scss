@@ -1,0 +1,649 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+// ---------------------------------------------------------------------------
+// Header
+// ---------------------------------------------------------------------------
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-3 $sp-5;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: $z-header;
+}
+
+.homeLink {
+  display: inline-flex;
+  align-items: center;
+}
+
+.headerGame {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+.codeWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  margin-left: auto;
+}
+
+.code {
+  @include mono;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  padding: 4px 10px;
+  border-radius: $r-md;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.copyBtn {
+  @include button-reset;
+  @include focus-ring;
+  font-size: 15px;
+  color: var(--ink-dim);
+  border: 1px solid var(--line);
+  border-radius: $r-md;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+
+  &:hover {
+    color: var(--ink);
+    border-color: var(--accent);
+  }
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+}
+
+// ---------------------------------------------------------------------------
+// Layout
+// ---------------------------------------------------------------------------
+
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: $sp-5;
+  padding: $sp-5;
+  align-items: start;
+
+  @include media($bp-md) {
+    grid-template-columns: 1fr;
+    padding: $sp-4;
+  }
+}
+
+.table {
+  min-width: 0;
+  animation: modal-in $dur-base $ease-out both;
+}
+
+.centered {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: $sp-6 $sp-4;
+}
+
+.panel {
+  @include panel;
+  padding: $sp-6;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+  align-items: center;
+  text-align: center;
+
+  @include media($bp-sm) {
+    padding: $sp-5 $sp-4;
+  }
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-bright);
+}
+
+.title {
+  @include display;
+  font-size: clamp(24px, 3.4vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.teamLine {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink-dim);
+}
+
+.sub {
+  font-size: 14px;
+  color: var(--ink-faint);
+  max-width: 52ch;
+}
+
+.prompt {
+  @include display;
+  font-size: clamp(24px, 3.6vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+
+  em {
+    font-style: italic;
+    color: var(--accent-bright);
+  }
+}
+
+.choose {
+  font-size: 14px;
+  color: var(--ink-faint);
+  max-width: 52ch;
+}
+
+// ---------------------------------------------------------------------------
+// Invite (waiting room)
+// ---------------------------------------------------------------------------
+
+.invite {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.inviteUrl {
+  @include mono;
+  font-size: 12px;
+  color: var(--ink-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: $r-md;
+  padding: $sp-2 $sp-3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scanNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+// ---------------------------------------------------------------------------
+// Pick grid (playing)
+// ---------------------------------------------------------------------------
+
+.pickGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: $sp-3;
+  width: 100%;
+}
+
+.pickCard {
+  @include button-reset;
+  @include focus-ring;
+  @include card-surface;
+  @include paper-grain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-4 $sp-3;
+  cursor: pointer;
+  @include motion((transform, box-shadow, opacity), $dur-base, $ease-snap);
+
+  &:hover:not(:disabled):not(.pickMe) {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 6px 12px rgba(0, 0, 0, 0.28),
+      0 18px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.pickMe {
+  opacity: 0.6;
+  border-style: dashed;
+}
+
+.pickMine {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--success) 55%, transparent);
+}
+
+.pickDim {
+  opacity: 0.55;
+}
+
+.pickName {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pickState {
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+// ---------------------------------------------------------------------------
+// Reveal bar (playing)
+// ---------------------------------------------------------------------------
+
+.revealBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-4;
+  flex-wrap: wrap;
+  width: 100%;
+  padding-top: $sp-2;
+}
+
+.revealCount {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-dim);
+}
+
+.lockPip {
+  color: var(--success);
+  font-weight: 800;
+}
+
+.wait {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--ink-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+}
+
+// ---------------------------------------------------------------------------
+// Results (revealed)
+// ---------------------------------------------------------------------------
+
+.winnerCard {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: $r-xl;
+  padding: $sp-5;
+  width: 100%;
+  text-align: left;
+}
+
+.winnerEmoji {
+  font-size: 34px;
+}
+
+.winnerTitle {
+  @include display;
+  font-size: clamp(20px, 2.6vw, 28px);
+  font-weight: 700;
+}
+
+.winnerBody {
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin-top: 2px;
+}
+
+.rankList {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+  width: 100%;
+}
+
+.rankRow {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-3 $sp-4;
+  border: 1px solid var(--line);
+  border-radius: $r-lg;
+  background: var(--surface-2);
+
+  &.rankWinner {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface-2));
+  }
+}
+
+.rankPos {
+  @include mono;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-faint);
+  width: 22px;
+}
+
+.rankName {
+  font-weight: 700;
+  color: var(--ink);
+  flex: 1;
+}
+
+.rankCount {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-dim);
+}
+
+.pickReveal {
+  width: 100%;
+  text-align: left;
+}
+
+.pickRevealTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-faint);
+  margin-bottom: $sp-2;
+}
+
+.pickRevealList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-1;
+}
+
+.pickRevealRow {
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.pickRevealVoter {
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.pickRevealTarget {
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: $r-pill;
+  padding: 1px 8px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.roundNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.emptyTitle {
+  @include display;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.emptyBody {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+// ---------------------------------------------------------------------------
+// Players sidebar
+// ---------------------------------------------------------------------------
+
+.side {
+  @include panel;
+  padding: $sp-4;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+
+  @include media($bp-md) {
+    order: -1;
+  }
+}
+
+.sideTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sideCount {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-faint);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.playerList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-1;
+}
+
+.playerRow {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-2 $sp-1;
+  border-radius: $r-md;
+
+  &[data-status='disconnected'] {
+    opacity: 0.55;
+  }
+}
+
+.playerMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.playerName {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.you {
+  color: var(--accent-bright);
+  font-weight: 700;
+  margin-left: $sp-1;
+}
+
+.playerStatus {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.picked {
+  color: var(--success);
+  font-weight: 650;
+}
+
+.playerEmpty {
+  font-size: 13px;
+  color: var(--ink-faint);
+  padding: $sp-3 0;
+}
+
+.sideNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--line);
+  padding-top: $sp-3;
+}
+
+// ---------------------------------------------------------------------------
+// Entry screens
+// ---------------------------------------------------------------------------
+
+.entryCard {
+  @include panel;
+  padding: $sp-6;
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+  text-align: center;
+  align-items: center;
+}
+
+.entryEmoji {
+  font-size: 44px;
+}
+
+.entryTitle {
+  @include display;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.entrySub {
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.entryForm {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+  width: 100%;
+  text-align: left;
+}
+
+.entryNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.error {
+  font-size: 13px;
+  color: var(--danger, #e5484d);
+  font-weight: 650;
+}
+
+.gonePanel {
+  @include panel;
+  padding: $sp-7;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-3;
+  text-align: center;
+}
+
+.goneIcon {
+  font-size: 44px;
+}
+
+.goneTitle {
+  @include display;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.goneBody {
+  font-size: 14px;
+  color: var(--ink-faint);
+  margin-bottom: $sp-2;
+}
+
+.entering {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-3;
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

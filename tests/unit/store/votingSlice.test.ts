@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { snapshotReceived } from '@/store/actions';
-import reducer, { clearMyVote, resetVoting, setMyVote } from '@/store/slices/votingSlice';
+import reducer, { clearMySkipped, clearMyVote, resetVoting, setMySkipped, setMyVote } from '@/store/slices/votingSlice';
 import { makeParticipant, makeSnapshot } from '../../helpers/fixtures';
 
 describe('votingSlice', () => {
@@ -11,10 +11,12 @@ describe('votingSlice', () => {
     expect(state.story).toBeNull();
     expect(state.deckValues).toEqual([]);
     expect(state.votedIds).toEqual([]);
+    expect(state.skippedIds).toEqual([]);
     expect(state.everyoneHasVoted).toBe(false);
     expect(state.votes).toEqual({});
     expect(state.stats).toBeNull();
     expect(state.myVote).toBeNull();
+    expect(state.mySkipped).toBe(false);
   });
 
   it('setMyVote locks my card optimistically, clearMyVote rolls it back', () => {
@@ -22,6 +24,26 @@ describe('votingSlice', () => {
     expect(state.myVote).toBe('8');
     state = reducer(state, clearMyVote());
     expect(state.myVote).toBeNull();
+  });
+
+  it('setMySkipped locks my skip optimistically, clearMySkipped rolls it back', () => {
+    let state = reducer(undefined, setMySkipped());
+    expect(state.mySkipped).toBe(true);
+    state = reducer(state, clearMySkipped());
+    expect(state.mySkipped).toBe(false);
+  });
+
+  it('hydrates skippedIds from the snapshot (host skipped a round)', () => {
+    const snapshot = makeSnapshot({
+      status: 'voting',
+      votedIds: ['p2'],
+      skippedIds: ['p1'],
+      everyoneHasVoted: true,
+      participants: [makeParticipant({ id: 'p1', skipped: true }), makeParticipant({ id: 'p2' })],
+    });
+    const state = reducer(undefined, snapshotReceived(snapshot));
+    expect(state.skippedIds).toEqual(['p1']);
+    expect(state.everyoneHasVoted).toBe(true);
   });
 
   it('hydrates deck values from the room settings', () => {
@@ -92,6 +114,14 @@ describe('votingSlice', () => {
     expect(nextRound.roundId).toBe(2);
   });
 
+  it('clears my optimistic skip when a new round begins', () => {
+    const round1 = reducer(undefined, snapshotReceived(makeSnapshot({ roundId: 1, status: 'voting' })));
+    const skipped = reducer(round1, setMySkipped());
+    expect(skipped.mySkipped).toBe(true);
+    const nextRound = reducer(skipped, snapshotReceived(makeSnapshot({ roundId: 2, status: 'voting', votedIds: [], skippedIds: [] })));
+    expect(nextRound.mySkipped).toBe(false);
+  });
+
   it('clears my optimistic vote when the room returns to waiting (host pressed New)', () => {
     const revealed = reducer(undefined, snapshotReceived(makeSnapshot({ roundId: 1, status: 'revealed', votes: { me: '5' }, votedIds: ['me'] })));
     const voted = reducer(revealed, setMyVote('5'));
@@ -105,7 +135,7 @@ describe('votingSlice', () => {
 
   it('resetVoting returns to the initial state', () => {
     const state = reducer(
-      { phase: 'revealed', roundId: 2, story: { id: 'X', title: 'T', description: '' }, deckValues: ['1'], votedIds: ['a'], everyoneHasVoted: true, votes: { a: '1' }, stats: null, myVote: '1' },
+      { phase: 'revealed', roundId: 2, story: { id: 'X', title: 'T', description: '' }, deckValues: ['1'], votedIds: ['a'], skippedIds: ['b'], everyoneHasVoted: true, votes: { a: '1' }, stats: null, myVote: '1', mySkipped: true },
       resetVoting(),
     );
     expect(state).toEqual({
@@ -114,10 +144,12 @@ describe('votingSlice', () => {
       story: null,
       deckValues: [],
       votedIds: [],
+      skippedIds: [],
       everyoneHasVoted: false,
       votes: {},
       stats: null,
       myVote: null,
+      mySkipped: false,
     });
   });
 });

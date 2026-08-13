@@ -29,7 +29,7 @@ function PresenceText({ p, phase }: { p: Participant; phase: string }) {
     if (p.status === 'voted' || p.hasVoted) {
       return (
         <span className={styles.presence}>
-          <span aria-hidden="true">✓</span> Voted
+          <span aria-hidden="true">✓</span> {p.skipped ? 'Skipped' : 'Voted'}
         </span>
       );
     }
@@ -58,17 +58,20 @@ export default function ParticipantsPanel({ onRemove }: ParticipantsPanelProps) 
   const hostId = useAppSelector((s) => s.room.hostId);
   const phase = useAppSelector((s) => s.voting.phase);
   const votes = useAppSelector((s) => s.voting.votes);
+  const skippedIds = useAppSelector((s) => s.voting.skippedIds);
   const isHost = hostId === myId;
 
   const subText = (p: Participant) => {
     if (phase === 'revealed') {
-      return votes[p.id] !== undefined ? (
-        <>
-          Voted <span className={styles.valuePip}>{votes[p.id]}</span>
-        </>
-      ) : (
-        "Didn't vote"
-      );
+      if (votes[p.id] !== undefined) {
+        return (
+          <>
+            Voted <span className={styles.valuePip}>{votes[p.id]}</span>
+          </>
+        );
+      }
+      if (p.skipped || skippedIds.includes(p.id)) return 'Skipped';
+      return "Didn't vote";
     }
     return <PresenceText p={p} phase={phase} />;
   };

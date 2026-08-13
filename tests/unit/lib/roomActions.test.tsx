@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { requestNewRound, requestReveal, requestStart, requestVote } from '@/lib/roomActions';
+import { requestNewRound, requestReveal, requestSkip, requestStart, requestVote } from '@/lib/roomActions';
 import { makeStore } from '../../helpers/store';
 
 const { emitAckMock } = vi.hoisted(() => ({ emitAckMock: vi.fn() }));
@@ -67,6 +67,38 @@ describe('requestVote', () => {
     const store = makeStore({ voting: { phase: 'waiting' } } as never);
     requestVote(store.dispatch, store.getState, '8');
     expect(emitAckMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('requestSkip', () => {
+  beforeEach(() => {
+    emitAckMock.mockReset();
+    emitAckMock.mockResolvedValue({ ok: true });
+  });
+
+  it('locks the skip optimistically and sends vote:skip exactly once', async () => {
+    const store = votingStore();
+    requestSkip(store.dispatch);
+    expect(store.getState().voting.mySkipped).toBe(true);
+    requestSkip(store.dispatch); // double-click guard
+    await vi.waitFor(() => expect(emitAckMock).toHaveBeenCalledTimes(1));
+    expect(emitAckMock).toHaveBeenCalledWith('vote:skip', {});
+  });
+
+  it('keeps the skip state and stays quiet when the server reports already_voted', async () => {
+    emitAckMock.mockResolvedValue({ ok: false, error: 'already_voted' });
+    const store = votingStore();
+    await requestSkip(store.dispatch);
+    expect(store.getState().voting.mySkipped).toBe(true);
+    expect(store.getState().ui.toasts).toHaveLength(0);
+  });
+
+  it('rolls back the skip and warns on a genuine rejection', async () => {
+    emitAckMock.mockResolvedValue({ ok: false, error: 'not_host' });
+    const store = votingStore();
+    await requestSkip(store.dispatch);
+    expect(store.getState().voting.mySkipped).toBe(false);
+    expect(store.getState().ui.toasts[0]?.title).toBe('Could not skip');
   });
 });
 

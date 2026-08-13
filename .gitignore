@@ -5,10 +5,14 @@
 
 # next.js
 /.next/
+/.next-e2e/
 /out/
 
 # production
 /build
+
+# test output
+/test-results/
 
 # misc
 .DS_Store

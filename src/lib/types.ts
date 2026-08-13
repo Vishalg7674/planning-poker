@@ -27,6 +27,8 @@ export interface Participant {
   status: ParticipantStatus;
   /** Server-enforced: once true, this participant can never vote again. */
   hasVoted: boolean;
+  /** Host-only: they chose to skip this round instead of voting. */
+  skipped: boolean;
   joinedAt: number;
   hue: number;
 }
@@ -92,7 +94,9 @@ export interface Snapshot {
   participants: Participant[];
   status: RoomPhase;
   votedIds: string[];
-  /** True when every participant has cast a vote this round. */
+  /** Participants who skipped this round (host-only action) — done, no value. */
+  skippedIds: string[];
+  /** True when every participant has cast a vote (or skipped) this round. */
   everyoneHasVoted: boolean;
   /** Vote values — only populated once the round is revealed. */
   votes: Record<string, string>;

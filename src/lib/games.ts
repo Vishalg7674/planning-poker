@@ -89,7 +89,17 @@ const comingSoon = (
 
 export const GAMES: Game[] = [
   // --- 🧊 Icebreakers (1–15) -------------------------------------------------
-  comingSoon('most-likely-to', 'icebreakers', 'Most Likely To', 'Vote for the teammate most likely to do it — yes, that one.', '😂'),
+  {
+    id: 'most-likely-to',
+    name: 'Most Likely To',
+    category: 'icebreakers',
+    description: 'Vote for the teammate most likely to do it — yes, that one. Live now.',
+    icon: '😂',
+    status: 'live',
+    route: '/games/most-likely-to',
+    players: '3–20 players',
+    duration: '5 min',
+  },
   comingSoon('would-you-rather', 'icebreakers', 'Would You Rather', 'Tough picks, hot takes, zero right answers.', '🤔'),
   comingSoon('this-or-that', 'icebreakers', 'This or That', 'Pick a side and defend it for 10 seconds.', '⚖️'),
   comingSoon('two-truths-and-a-lie', 'icebreakers', 'Two Truths & a Lie', 'Spot the lie before the room votes you out.', '🕵️'),

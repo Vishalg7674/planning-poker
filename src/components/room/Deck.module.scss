@@ -207,3 +207,29 @@
   color: var(--success);
   font-weight: 800;
 }
+
+// Host-only "Skip this round" — sit the round out instead of voting. A single
+// quiet outline button so it never competes with the cards.
+.skipBtn {
+  @include button-reset;
+  @include focus-ring;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-dim);
+  border: 1px solid var(--line);
+  border-radius: $r-pill;
+  padding: $sp-2 $sp-4;
+  background: transparent;
+  transition: color $dur-fast $ease-out, border-color $dur-fast $ease-out, background $dur-fast $ease-out;
+
+  &:hover:not(:disabled) {
+    color: var(--ink);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

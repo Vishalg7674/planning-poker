@@ -12,13 +12,17 @@ export interface VotingState {
   story: Story | null;
   deckValues: string[];
   votedIds: string[];
-  /** True when every participant has voted — the host may then reveal. */
+  /** Participants who skipped this round (host-only) — done, but no value. */
+  skippedIds: string[];
+  /** True when every participant has voted (or skipped) — the host may reveal. */
   everyoneHasVoted: boolean;
   /** Vote values — only populated when the round is revealed. */
   votes: Record<string, string>;
   stats: Stats | null;
   /** The vote I have committed (optimistic, for the locked card animation). */
   myVote: string | null;
+  /** I chose to skip this round instead of voting (optimistic, host-only). */
+  mySkipped: boolean;
 }
 
 const initialState: VotingState = {
@@ -27,10 +31,12 @@ const initialState: VotingState = {
   story: null,
   deckValues: [],
   votedIds: [],
+  skippedIds: [],
   everyoneHasVoted: false,
   votes: {},
   stats: null,
   myVote: null,
+  mySkipped: false,
 };
 
 const votingSlice = createSlice({
@@ -45,6 +51,14 @@ const votingSlice = createSlice({
     clearMyVote: (state) => {
       state.myVote = null;
     },
+    /** Optimistic: my skip locks the moment I commit, before the round-trip. */
+    setMySkipped: (state) => {
+      state.mySkipped = true;
+    },
+    /** Roll back a rejected skip (rare — the server owns the lock). */
+    clearMySkipped: (state) => {
+      state.mySkipped = false;
+    },
     resetVoting: () => initialState,
   },
   extraReducers: (builder) => {
@@ -52,15 +66,17 @@ const votingSlice = createSlice({
       const s = action.payload;
       // A new round (roundId increments on every startVoting) or a fresh
       // waiting room (the host started a new story) must never carry my old
-      // optimistic vote into the next round — votes are per-round.
+      // optimistic vote/skip into the next round — both are per-round.
       if (state.roundId !== s.roundId || s.status === 'waiting') {
         state.myVote = null;
+        state.mySkipped = false;
       }
       state.phase = s.status;
       state.roundId = s.roundId ?? state.roundId;
       state.story = s.story ?? null;
       state.deckValues = deckValues(s.settings);
       state.votedIds = s.votedIds;
+      state.skippedIds = s.skippedIds ?? [];
       state.everyoneHasVoted = s.everyoneHasVoted;
       state.votes = s.votes;
       state.stats = s.stats;
@@ -68,5 +84,5 @@ const votingSlice = createSlice({
   },
 });
 
-export const { setMyVote, clearMyVote, resetVoting } = votingSlice.actions;
+export const { setMyVote, clearMyVote, setMySkipped, clearMySkipped, resetVoting } = votingSlice.actions;
 export default votingSlice.reducer;

@@ -15,7 +15,7 @@
  * @typedef {'gold' | 'purple' | 'blue' | 'green'} Accent
  * @typedef {'normal' | 'staggered' | 'dramatic'} RevealMode
  * @typedef {'full' | 'strong' | 'moderate' | 'large'} ConsensusLevel
- * @typedef {{ id: string, name: string, role: 'facilitator' | 'voter', status: ParticipantStatus, hasVoted: boolean, joinedAt: number, hue: number }} Participant
+ * @typedef {{ id: string, name: string, role: 'facilitator' | 'voter', status: ParticipantStatus, hasVoted: boolean, skipped: boolean, joinedAt: number, hue: number }} Participant
  * @typedef {{ count: number, mode: string, modeShare: number, unique: number, numeric: boolean, avg: number | null, median: number | null, spread: number | null, highest: number | null, lowest: number | null, range: number | null, level: ConsensusLevel, counts: Array<{ value: string, count: number }> }} RoomStats
  * @typedef {{ code: string, roundId: number, hostId: string | null, teamName: string, roomTitle: string, createdAt: number, settings: { deckId: DeckId, timerSec: number | null, accent: Accent, revealMode: RevealMode }, locked: boolean, participants: Map<string, Participant>, status: RoomStatus, votes: Record<string, string>, stats: RoomStats | null, story: { id: string, title: string, description: string } | null, timer: { durationSec: number, endsAt: number } | null, emptySince: number | null }} Room
  * @typedef {{ ok: true } | { ok: false, error: string, timerEnded?: boolean }} ActionResult
@@ -105,6 +105,7 @@ export function addParticipant(room, { name, role = 'voter', id } = {}) {
     role,
     status: 'connected', // 'connected' | 'voted' | 'disconnected'
     hasVoted: false,
+    skipped: false, // true when the host chose to skip this round instead of voting
     joinedAt: Date.now(),
     hue: hueFromString(name || 'Guest'),
   });
@@ -207,7 +208,8 @@ export function computeStats(values, deckId = DEFAULT_DECK) {
  */
 export function everyoneHasVoted(room) {
   const eligible = [...room.participants.values()].filter((p) => p.status !== 'disconnected');
-  return eligible.length > 0 && eligible.every((p) => room.votes[p.id] !== undefined);
+  // A skipped participant counts as done without contributing a vote value.
+  return eligible.length > 0 && eligible.every((p) => room.votes[p.id] !== undefined || p.skipped);
 }
 
 /**
@@ -218,6 +220,9 @@ export function everyoneHasVoted(room) {
 export function buildSnapshot(room) {
   const participants = [...room.participants.values()].map((p) => ({ ...p }));
   const votedIds = Object.keys(room.votes);
+  // Participants who skipped this round — treated as done for reveal, but
+  // they carry no vote value and never appear in the stats.
+  const skippedIds = participants.filter((p) => p.skipped).map((p) => p.id);
   return {
     code: room.code,
     roundId: room.roundId,
@@ -230,6 +235,7 @@ export function buildSnapshot(room) {
     participants,
     status: room.status,
     votedIds,
+    skippedIds,
     everyoneHasVoted: everyoneHasVoted(room),
     // Values only leave the server once the round is revealed.
     votes: room.status === 'revealed' ? { ...room.votes } : {},
@@ -261,6 +267,7 @@ export function startVoting(room, actorId, story) {
   room.story = sanitizeStory(story);
   for (const p of room.participants.values()) {
     p.hasVoted = false;
+    p.skipped = false;
     p.status = 'connected';
   }
   const sec = room.settings.timerSec;
@@ -308,6 +315,7 @@ export function startNewRound(room, actorId) {
   room.timer = null;
   for (const p of room.participants.values()) {
     p.hasVoted = false;
+    p.skipped = false;
     p.status = 'connected';
   }
   return { ok: true };
@@ -341,6 +349,35 @@ export function castVote(room, participantId, value) {
   room.votes[p.id] = v;
   p.hasVoted = true;
   p.status = 'voted';
+  return { ok: true };
+}
+
+/**
+ * Skip my vote (host-only). The host does not have to pick a card — skipping
+ * marks them as done for the round without contributing a value, so the
+ * reveal unlocks as soon as everyone else has voted. The skip is per-round:
+ * it resets when the next story starts, exactly like a vote.
+ *
+ * Mirrors castVote's guards: only while VOTING, only once, and a skip that
+ * lands after the timer hit zero closes the round.
+ * @param {Room} room
+ * @param {string} actorId
+ * @returns {ActionResult}
+ */
+export function skipVote(room, actorId) {
+  if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
+  const p = room.participants.get(actorId);
+  if (!p) return { ok: false, error: 'not_found' };
+  if (room.status === 'revealed') return { ok: false, error: 'revealed' };
+  if (room.status !== 'voting') return { ok: false, error: 'not_voting' };
+  if (p.hasVoted) return { ok: false, error: 'already_voted' };
+  if (room.timer && room.timer.endsAt <= Date.now()) {
+    room.status = 'ended';
+    return { ok: false, error: 'not_voting', timerEnded: true };
+  }
+  p.hasVoted = true;
+  p.status = 'voted';
+  p.skipped = true;
   return { ok: true };
 }
 
