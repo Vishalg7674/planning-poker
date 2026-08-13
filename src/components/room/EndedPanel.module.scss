@@ -42,3 +42,10 @@
   font-size: 14.5px;
   font-weight: 650;
 }
+
+.actions {
+  display: flex;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  justify-content: center;
+}

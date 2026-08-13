@@ -21,6 +21,8 @@ export default function Deck() {
   const myVote = useAppSelector((s) => s.voting.myVote);
   const myId = useAppSelector((s) => s.ui.myParticipantId);
   const votedIds = useAppSelector((s) => s.voting.votedIds);
+  const story = useAppSelector((s) => s.voting.story);
+  const roundId = useAppSelector((s) => s.voting.roundId);
   const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
 
   // Locked = I committed this session (optimistic) OR the server already has
@@ -55,10 +57,18 @@ export default function Deck() {
 
   return (
     <div className={styles.wrap}>
-      {phase === 'voting' && (
+      {(phase === 'voting' || phase === 'ended') && (
         <div className={styles.heading}>
-          <span className={styles.eyebrow}>Voting</span>
-          <h2 className={styles.choose}>Choose your estimate</h2>
+          <div className={styles.storyLine}>
+            {story?.id && <span className={styles.storyId}>{story.id}</span>}
+            <span className={styles.storyTitle}>{story?.title || `Round ${roundId}`}</span>
+          </div>
+          {phase === 'voting' && (
+            <>
+              <span className={styles.eyebrow}>Voting</span>
+              <h2 className={styles.choose}>Choose your estimate</h2>
+            </>
+          )}
         </div>
       )}
       <div className={cx(styles.deck, dense && styles.deckDense)} role="group" aria-label="Voting deck">

@@ -15,6 +15,7 @@ import {
   setLocked,
   setRevealMode,
   setTimerSec,
+  startNewRound,
   startVoting,
 } from '../../../server/room.mjs';
 
@@ -347,6 +348,26 @@ describe('startVoting', () => {
   it('keeps the timer null when Off', () => {
     expect(votingRoom(null).timer).toBeNull();
   });
+
+  it('stores a sanitized story and ships it in the snapshot', () => {
+    const room = createRoom({ hostName: 'Host' });
+    const res = startVoting(room, hostId(room), { id: 'PROJ-143', title: '  User Profile  ', description: 'As a user…' });
+    expect(res).toEqual({ ok: true });
+    expect(room.story).toEqual({ id: 'PROJ-143', title: 'User Profile', description: 'As a user…' });
+    expect(buildSnapshot(room).story).toEqual({ id: 'PROJ-143', title: 'User Profile', description: 'As a user…' });
+  });
+
+  it('clamps story fields and drops a story with no content', () => {
+    const room = createRoom({ hostName: 'Host' });
+    startVoting(room, hostId(room), { id: 'x'.repeat(80), title: 't'.repeat(120), description: 'd'.repeat(300) });
+    expect(room.story!.id).toHaveLength(32);
+    expect(room.story!.title).toHaveLength(80);
+    expect(room.story!.description).toHaveLength(200);
+    expect(createRoom({ hostName: 'H' }).story).toBeNull();
+    const room2 = createRoom({ hostName: 'Host' });
+    startVoting(room2, hostId(room2), { id: '   ', title: '', description: '   ' });
+    expect(room2.story).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -509,6 +530,90 @@ describe('reveal', () => {
     castVote(room, hostId(room), '5');
     reveal(room, hostId(room));
     expect(reveal(room, hostId(room))).toEqual({ ok: false, error: 'already_revealed' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// startNewRound — next story in the SAME room: round payload resets, the
+// room (code / host / participants / settings / lock) is untouched
+// ---------------------------------------------------------------------------
+
+describe('startNewRound', () => {
+  /** A room in REVEALED with 2 participants, a story and votes on the board. */
+  function finishedRoom(): { room: Room; graceId: string } {
+    const room = createRoom({ hostName: 'Host' });
+    room.settings.timerSec = 15;
+    const grace = addNamed(room, 'Grace');
+    startVoting(room, hostId(room), { id: 'PROJ-1', title: 'Password Reset' });
+    castVote(room, hostId(room), '5');
+    castVote(room, grace.id, '8');
+    room.timer!.endsAt = Date.now() - 1000; // timer expired after the votes landed
+    room.status = 'ended';
+    reveal(room, hostId(room));
+    expect(room.status).toBe('revealed');
+    return { room, graceId: grace.id };
+  }    it('resets the round payload back to WAITING for a fresh story', () => {
+    const { room } = finishedRoom();
+    expect(Object.keys(room.votes).length).toBe(2);
+    expect(room.stats).not.toBeNull();
+    expect(room.story).not.toBeNull();
+
+    const res = startNewRound(room, hostId(room));
+    expect(res).toEqual({ ok: true });
+    expect(room.status).toBe('waiting');
+    expect(room.votes).toEqual({});
+    expect(room.stats).toBeNull();
+    expect(room.story).toBeNull();
+    expect(room.timer).toBeNull();
+    for (const p of room.participants.values()) {
+      expect(p.hasVoted).toBe(false);
+      expect(p.status).toBe('connected');
+    }
+  });
+
+  it('keeps the room identity: code, roundId, host, participants, settings, lock', () => {
+    const { room, graceId } = finishedRoom();
+    const code = room.code;
+    const roundId = room.roundId;
+    const host = hostId(room);
+    const settings = { ...room.settings };
+    setLocked(room, hostId(room), true);
+
+    startNewRound(room, hostId(room));
+
+    expect(room.code).toBe(code);
+    expect(room.roundId).toBe(roundId); // next round's id is assigned by startVoting
+    expect(room.hostId).toBe(host);
+    expect(room.participants.size).toBe(2);
+    expect(room.participants.has(graceId)).toBe(true);
+    expect(room.settings).toEqual(settings);
+    expect(room.locked).toBe(true);
+  });
+
+  it('rejects a non-host actor', () => {
+    const { room, graceId } = finishedRoom();
+    expect(startNewRound(room, graceId)).toEqual({ ok: false, error: 'not_host' });
+    expect(room.status).toBe('revealed');
+  });
+
+  it('is idempotent: rejected while WAITING or VOTING (double-click / second tab)', () => {
+    const { room } = finishedRoom();
+    startNewRound(room, hostId(room));
+    // Now WAITING — a racing duplicate click must be rejected, so only one
+    // new round can ever be opened.
+    expect(startNewRound(room, hostId(room))).toEqual({ ok: false, error: 'in_progress' });
+    const voting = votingRoom();
+    expect(startNewRound(voting, hostId(voting))).toEqual({ ok: false, error: 'in_progress' });
+  });
+
+  it('can abandon an ENDED round (timer up) without a reveal', () => {
+    const room = votingRoom(10);
+    const grace = addNamed(room, 'Grace');
+    castVote(room, grace.id, '8');
+    room.status = 'ended';
+    expect(startNewRound(room, hostId(room))).toEqual({ ok: true });
+    expect(room.status).toBe('waiting');
+    expect(room.votes).toEqual({});
   });
 });
 

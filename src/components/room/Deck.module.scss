@@ -31,6 +31,33 @@
   letter-spacing: -0.01em;
 }
 
+// The story being estimated this round (or the round-number fallback).
+.storyLine {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-2;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.storyId {
+  @include mono;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 9px;
+  border-radius: $r-pill;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.storyTitle {
+  color: var(--ink-dim);
+}
+
 .deck {
   display: flex;
   flex-wrap: wrap;

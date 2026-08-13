@@ -37,6 +37,7 @@ export function makeSnapshot(over: Partial<Snapshot> = {}): Snapshot {
     everyoneHasVoted: false,
     votes: {},
     stats: null,
+    story: null,
     timer: null,
     ...over,
   };

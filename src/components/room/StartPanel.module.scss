@@ -198,3 +198,45 @@
   color: var(--ink-faint);
   max-width: 44ch;
 }
+
+// ---------------------------------------------------------------------------
+// Story form — optional metadata for the round about to start (host-only)
+// ---------------------------------------------------------------------------
+
+.story {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+  width: 100%;
+  max-width: 560px;
+  padding: $sp-5;
+  border: 1px solid var(--border);
+  border-radius: $r-lg;
+  background: var(--surface-soft);
+  text-align: left;
+  animation: modal-in $dur-base $ease-out both;
+}
+
+.storyEyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-bright);
+}
+
+.storyFields {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+}
+
+.storyIdInput {
+  @include mono;
+}
+
+.storyNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin: 0;
+}

@@ -101,11 +101,29 @@ Host locks or unlocks the room against new joiners. Allowed in any phase.
 
 Start the round. WAITING only.
 
-- **Payload**: `{}` (the timer comes from `room.settings`, not the payload)
+| Field   | Type   | Notes                                                   |
+| ------- | ------ | ------------------------------------------------------- |
+| `story` | object?| Optional `{ id?, title?, description? }` — trimmed + length-clamped server-side, broadcast to everyone in the next snapshot |
+
 - **Response**: `{ ok: true }`
 - **Failure**: `not_host` · `in_progress`
 - **Authorization**: host only
-- **Effect**: `WAITING → VOTING`; timer armed from settings; snapshot to all.
+- **Effect**: `WAITING → VOTING`; `roundId` increments (a fresh identity per
+  round); timer armed from settings; snapshot to all.
+
+### `room:newRound`
+
+Start the **next story in the same room**. Host only, from REVEALED or ENDED.
+
+- **Payload**: `{}`
+- **Response**: `{ ok: true }`
+- **Failure**: `not_host` · `in_progress` (while WAITING or VOTING — also
+  makes the action idempotent against double-clicks / racing host tabs)
+- **Authorization**: host only
+- **Effect**: `REVEALED|ENDED → WAITING`; `votes`, `stats`, `story` and
+  `timer` reset; every participant's `hasVoted`/`status` reset; the room
+  itself (code, host, participants, settings, lock, `roundId`) is untouched.
+  The next `voting:start` opens the new round with a fresh `roundId`.
 
 ### `vote:cast`
 
@@ -174,6 +192,7 @@ Emitted after every mutation. The full privacy-aware room state.
 ```jsonc
 {
   "code": "ABCDE",
+  "roundId": 2,            // increments per round — votes belong to roomId + roundId + participantId
   "hostId": "…",
   "teamName": "Frontend Team",
   "roomTitle": "Sprint 24 Planning",
@@ -189,9 +208,10 @@ Emitted after every mutation. The full privacy-aware room state.
   "status": "voting",
   "votedIds": [ "…" ],
   "everyoneHasVoted": false,
-  "votes": {},          // populated ONLY when status === "revealed"
-  "stats": null,        // populated ONLY when status === "revealed"
-  "timer": null         // or { "durationSec": 15, "endsAt": 1720000001000 }
+  "votes": {},            // populated ONLY when status === "revealed"
+  "stats": null,          // populated ONLY when status === "revealed"
+  "story": { "id": "PROJ-143", "title": "User Profile", "description": "…" },  // null in the waiting room
+  "timer": null           // or { "durationSec": 15, "endsAt": 1720000001000 }
 }
 ```
 

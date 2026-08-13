@@ -143,74 +143,6 @@
 .ConnectionPill_label__AdASd {
   line-height: 1;
 }
-/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/Celebration.module.scss ***!
-  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
-.Celebration_burst__naiZM {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  pointer-events: none;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-
-.Celebration_flash__0M7Jw {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(60% 50% at 50% 45%, rgba(var(--accent-rgb), 0.22), transparent 70%);
-  animation: Celebration_celebrate-flash__RScpP 1s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.Celebration_piece__MnQ2T {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  animation: Celebration_confetti-burst__iHjQW 1.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: var(--delay);
-}
-
-.Celebration_label__EiGPb {
-  font-family: "Fraunces", Georgia, "Times New Roman", serif;
-  font-optical-sizing: auto;
-  position: relative;
-  font-size: clamp(22px, 4vw, 34px);
-  font-weight: 700;
-  color: var(--accent-bright);
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
-  animation: Celebration_modal-in__UqFWF 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  animation-delay: 120ms;
-}
-
-.Celebration_close__rjSxK {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 10;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.15);
-  color: #fff;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
-}
-.Celebration_close__rjSxK:hover {
-  background: rgba(0, 0, 0, 0.25);
-  transform: scale(1.05);
-}
-.Celebration_close__rjSxK:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
 /*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/Button.module.scss ***!
   \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -727,6 +659,47 @@
   color: var(--ink-faint);
   max-width: 44ch;
 }
+
+.StartPanel_story__dNop4 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 560px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  text-align: left;
+  animation: StartPanel_modal-in__0bXrc 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.StartPanel_storyEyebrow__qWMha {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-bright);
+}
+
+.StartPanel_storyFields__XM8IR {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.StartPanel_storyIdInput__LsM9E {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.StartPanel_storyNote__eTsPS {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin: 0;
+}
 /*!**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/room/EndedPanel.module.scss ***!
   \**************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -772,6 +745,13 @@
   font-size: 14.5px;
   font-weight: 650;
 }
+
+.EndedPanel_actions__l9FiM {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
 /*!********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/room/Deck.module.scss ***!
   \********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
@@ -805,6 +785,35 @@
   font-size: clamp(22px, 2.6vw, 30px);
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+.Deck_storyLine__PqdJC {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.Deck_storyId__0rYvm {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 9px;
+  border-radius: 999px;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.Deck_storyTitle__JRy0K {
+  color: var(--ink-dim);
 }
 
 .Deck_deck__uea5z {
@@ -1118,6 +1127,35 @@
   .ResultsPanel_panel__p5LGE {
     padding: 16px;
   }
+}
+
+.ResultsPanel_storyLine__FeOck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.ResultsPanel_storyId__Uu1yU {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 9px;
+  border-radius: 999px;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.ResultsPanel_storyTitle__Fno__ {
+  color: var(--ink-dim);
 }
 
 .ResultsPanel_headline__Us0mT {
@@ -1467,9 +1505,16 @@
   font-size: 12.5px;
   color: var(--ink-faint);
   text-align: center;
+  margin: 0;
+}
+
+.ResultsPanel_footer___aTeb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
   border-top: 1px solid var(--border);
   padding-top: 16px;
-  margin: 0;
 }
 
 .ResultsPanel_emptyTitle__pEjto {
@@ -1830,6 +1875,55 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/room/RoomErrorBoundary.module.scss ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+.RoomErrorBoundary_fallback__nbsHL {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow-panel);
+  min-height: 60vh;
+  margin: 64px auto;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 64px;
+}
+
+.RoomErrorBoundary_emoji__GfboG {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.RoomErrorBoundary_title__rkWq7 {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-optical-sizing: auto;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.RoomErrorBoundary_body__531vE {
+  color: var(--ink-dim);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.RoomErrorBoundary_actions__YT15r {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.RoomErrorBoundary_homeLink__tsV_K {
+  text-decoration: none;
 }
 /*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./node_modules/next/dist/build/webpack/loaders/resolve-url-loader/index.js??ruleSet[1].rules[14].oneOf[7].use[4]!./node_modules/next/dist/compiled/sass-loader/cjs.js??ruleSet[1].rules[14].oneOf[7].use[5]!./src/components/Modal.module.scss ***!
@@ -2230,6 +2324,35 @@
   font-size: 15px;
   color: var(--ink-dim);
   letter-spacing: 0.08em;
+}
+
+.PresentationView_storyLine__QpBmO {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.PresentationView_storyId__svMhw {
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 12px;
+  border-radius: 999px;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.PresentationView_storyTitle__fQLq_ {
+  color: var(--ink-dim);
 }
 
 .PresentationView_headerActions__iL4OL {

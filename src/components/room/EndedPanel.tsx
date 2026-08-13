@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
+import { openModal } from '@/store/slices/uiSlice';
 import { requestReveal } from '@/lib/roomActions';
 import Button from '@/components/Button';
 import styles from './EndedPanel.module.scss';
@@ -33,9 +34,14 @@ export default function EndedPanel() {
 
       {isHost ? (
         <>
-          <Button variant="gold" size="lg" onClick={reveal} disabled={revealing}>
-            {revealing ? 'Revealing…' : 'Reveal Votes'}
-          </Button>
+          <div className={styles.actions}>
+            <Button variant="gold" size="lg" onClick={reveal} disabled={revealing}>
+              {revealing ? 'Revealing…' : 'Reveal Votes'}
+            </Button>
+            <Button variant="outline" size="lg" onClick={() => dispatch(openModal('newRound'))} disabled={revealing}>
+              + New Story
+            </Button>
+          </div>
           <p className={styles.note}>The cards flip face-up for everyone the moment you reveal.</p>
         </>
       ) : (

@@ -5,6 +5,7 @@ import { clearMyVote, setMyVote } from '@/store/slices/votingSlice';
 import { pushToast } from '@/store/slices/uiSlice';
 import { emitAck } from '@/lib/socket';
 import { friendlyError } from '@/lib/errors';
+import type { Story } from '@/lib/types';
 
 /**
  * Shared room actions. Every click + keyboard path for vote / reveal / start
@@ -19,6 +20,7 @@ import { friendlyError } from '@/lib/errors';
 
 let revealInFlight = false;
 let startInFlight = false;
+let newRoundInFlight = false;
 
 /**
  * Cast a vote. Optimistically locks my card, then talks to the server. A
@@ -73,11 +75,20 @@ export function requestReveal(dispatch: AppDispatch): Promise<boolean> {
     });
 }
 
-/** Start the round (host-only — the server enforces it). Idempotent like reveal. */
-export function requestStart(dispatch: AppDispatch): Promise<boolean> {
+/**
+ * Start the round (host-only — the server enforces it). Idempotent like reveal.
+ * An optional story rides along: `{ id, title, description }` captured by the
+ * waiting-room form. An empty story is omitted, keeping the payload identical
+ * to the pre-story protocol.
+ */
+export function requestStart(dispatch: AppDispatch, story?: Partial<Story> | null): Promise<boolean> {
   if (startInFlight) return Promise.resolve(false);
   startInFlight = true;
-  return emitAck<{ ok: boolean; error?: string }>('voting:start', {})
+  const payload =
+    story && (story.id?.trim() || story.title?.trim() || story.description?.trim())
+      ? { story: { id: story.id?.trim() ?? '', title: story.title?.trim() ?? '', description: story.description?.trim() ?? '' } }
+      : {};
+  return emitAck<{ ok: boolean; error?: string }>('voting:start', payload)
     .then((res) => {
       if (res?.ok) return true;
       dispatch(pushToast({ kind: 'error', title: 'Could not start', message: friendlyError(res?.error, 'The round could not be started.') }));
@@ -89,5 +100,40 @@ export function requestStart(dispatch: AppDispatch): Promise<boolean> {
     })
     .finally(() => {
       startInFlight = false;
+    });
+}
+
+export type NewRoundResult = 'ok' | 'rejected' | 'guarded';
+
+/**
+ * Start a brand-new round in the same room (host-only — the server enforces
+ * it). Guarded three ways against duplicate rounds: a module in-flight flag
+ * for the synchronous double-click, the live store phase for stale renders
+ * (must be REVEALED or ENDED), and the server itself rejects any call while
+ * the room is already WAITING/VOTING. Two host tabs racing each other can
+ * therefore only ever produce one new round.
+ *
+ * Result tri-state, so callers can tell a genuine server rejection (toast
+ * pushed here) apart from a guarded no-op like a second Continue click racing
+ * the first — that one must NOT produce an error toast, the round is already
+ * starting.
+ */
+export function requestNewRound(dispatch: AppDispatch, getState: () => RootState): Promise<NewRoundResult> {
+  const s = getState();
+  if (newRoundInFlight) return Promise.resolve('guarded');
+  if (s.voting.phase !== 'revealed' && s.voting.phase !== 'ended') return Promise.resolve('guarded');
+  newRoundInFlight = true;
+  return emitAck<{ ok: boolean; error?: string }>('room:newRound', {})
+    .then((res) => {
+      if (res?.ok) return 'ok' as const;
+      dispatch(pushToast({ kind: 'error', title: 'Could not start a new round', message: friendlyError(res?.error, 'The next story could not be started.') }));
+      return 'rejected' as const;
+    })
+    .catch(() => {
+      dispatch(pushToast({ kind: 'error', title: 'Offline', message: 'Could not reach the table.' }));
+      return 'rejected' as const;
+    })
+    .finally(() => {
+      newRoundInFlight = false;
     });
 }

@@ -60,10 +60,33 @@ state from it, so there are no incremental patch events to drift apart.
 
 - `status` → `voting`, votes cleared, every participant reset to
   `hasVoted: false`, `status: 'connected'`.
+- An optional `story` payload `{ id, title, description }` (trimmed + length
+  clamped server-side) is captured and broadcast with the next snapshot — the
+  UI shows it as the story being estimated, falling back to a `Round N`
+  label when skipped.
 - If the host picked a timer in the waiting room, `room.timer =
   { durationSec, endsAt: now + durationSec * 1000 }`; otherwise `null` (Off).
 - The 500 ms server sweep checks `endsAt`; when it passes, `status` → `ended`
   and a snapshot announces it.
+
+## New round (next story, same room)
+
+`room:newRound` (host only, from `REVEALED` or `ENDED`):
+
+- resets the round payload — `status` → `waiting`, `votes = {}`,
+  `stats = null`, `story = null`, `timer = null`, and every participant's
+  `hasVoted`/`status` back to `connected`;
+- preserves the room itself — code, `roundId` (the next start assigns it),
+  host, participants, settings, lock;
+- the ack + a fresh snapshot reach **every client**, so the whole table
+  returns to the waiting room together without a refresh;
+- rejected while WAITING or VOTING (`in_progress`), which makes it
+  idempotent — double-clicks and racing host tabs can't open two rounds;
+- the next `voting:start` begins the new round with a fresh `roundId`.
+
+A vote therefore always belongs to `roomId + roundId + participantId` —
+previous votes are cleared server-side and can never leak into the next
+story.
 
 ## Vote submission
 
@@ -82,10 +105,11 @@ state from it, so there are no incremental patch events to drift apart.
 
 The lock is **server state**, not UI: `room.votes[p.id] = value;
 p.hasVoted = true; p.status = 'voted'`. There is no client-side path to
-unlock, no revote event, no reset. The browser only renders the lock
-optimistically (`voting.myVote`) and rolls it back if the ack says no.
-Disconnecting and reconnecting does **not** bypass the lock — the server
-restores `status: 'voted'` for a participant who already cast.
+unlock, no revote event, no reset **within a round**. The browser only
+renders the lock optimistically (`voting.myVote`) and rolls it back if the
+ack says no. Disconnecting and reconnecting does **not** bypass the lock —
+the server restores `status: 'voted'` for a participant who already cast.
+Between rounds, `room:newRound` clears every lock for everyone at once.
 
 ## Participant status
 
@@ -129,9 +153,10 @@ triggers the celebration).
 ## Host controls
 
 Host-only actions that broadcast a snapshot: `voting:start`, `votes:reveal`,
-`room:settings` (timer + reveal mode), `room:lock`, `room:unlock`,
-`participant:remove`, `room:end`. All check `actorId === room.hostId`
-server-side; the UI merely hides the buttons for non-hosts.
+`room:newRound`, `room:settings` (timer + reveal mode), `room:lock`,
+`room:unlock`, `participant:remove`, `room:end`. All check
+`actorId === room.hostId` server-side; the UI merely hides the buttons for
+non-hosts.
 
 ## Disconnect
 
@@ -163,5 +188,5 @@ handlers call and the unit tests target directly:
 The client's job is presentation: it optimistically shows the lock, ticks the
 shared countdown, and renders snapshots. If a client misbehaves, the server
 rejects it — that is why the [socket E2E suite](../scripts/e2e.mjs) asserts
-rejections (`already_voted`, `not_host`, `not_all_voted`, `room_locked`, …)
-straight from the ack payloads.
+rejections (`already_voted`, `not_host`, `not_all_voted`, `room_locked`,
+`in_progress`, …) straight from the ack payloads.

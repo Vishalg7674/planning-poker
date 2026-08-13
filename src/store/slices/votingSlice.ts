@@ -1,11 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import type { RoomPhase, Stats } from '@/lib/types';
+import type { RoomPhase, Stats, Story } from '@/lib/types';
 import { deckValues } from '@/lib/decks';
 import { snapshotReceived } from '../actions';
 
 export interface VotingState {
-  /** waiting → voting → ended → revealed. One round per room. */
+  /** waiting → voting → ended → revealed, cycling per story in the room. */
   phase: RoomPhase;
+  /** Server-assigned identity of the current round — increments per story. */
+  roundId: number;
+  /** The story being estimated this round (null while waiting). */
+  story: Story | null;
   deckValues: string[];
   votedIds: string[];
   /** True when every participant has voted — the host may then reveal. */
@@ -19,6 +23,8 @@ export interface VotingState {
 
 const initialState: VotingState = {
   phase: 'waiting',
+  roundId: 0,
+  story: null,
   deckValues: [],
   votedIds: [],
   everyoneHasVoted: false,
@@ -44,7 +50,15 @@ const votingSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(snapshotReceived, (state, action) => {
       const s = action.payload;
+      // A new round (roundId increments on every startVoting) or a fresh
+      // waiting room (the host started a new story) must never carry my old
+      // optimistic vote into the next round — votes are per-round.
+      if (state.roundId !== s.roundId || s.status === 'waiting') {
+        state.myVote = null;
+      }
       state.phase = s.status;
+      state.roundId = s.roundId ?? state.roundId;
+      state.story = s.story ?? null;
       state.deckValues = deckValues(s.settings);
       state.votedIds = s.votedIds;
       state.everyoneHasVoted = s.everyoneHasVoted;

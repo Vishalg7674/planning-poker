@@ -33,7 +33,7 @@ flowchart TD
 | File             | Responsibility                                                        |
 | ---------------- | --------------------------------------------------------------------- |
 | `server/index.mjs` | Socket.io wiring, CORS, the `rooms` Map, snapshot broadcasts, the server-side countdown sweep, room expiry sweep, `room:end` teardown |
-| `server/room.mjs`  | Pure, unit-tested room logic: `createRoom`, `addParticipant`, `castVote`, `startVoting`, `reveal`, `setTimerSec`, `setRevealMode`, `setLocked`, `calculateConsensus`, `computeStats`, `buildSnapshot`, `everyoneHasVoted`, disconnect/promotion helpers |
+| `server/room.mjs`  | Pure, unit-tested room logic: `createRoom`, `addParticipant`, `castVote`, `startVoting`, `startNewRound`, `reveal`, `setTimerSec`, `setRevealMode`, `setLocked`, `calculateConsensus`, `computeStats`, `buildSnapshot`, `everyoneHasVoted`, disconnect/promotion helpers |
 
 `server/room.mjs` has zero I/O — it is plain functions over plain data, which
 is why it can be unit-tested directly (see `tests/unit/server/room.test.ts`).
@@ -70,7 +70,8 @@ treats `½` as `0.5` in statistics.
 
 ## Room lifecycle
 
-One round per room. The server state machine is:
+A room runs **many rounds** — one per story — while the room itself (code,
+host, participants, settings) never changes. The state machine is:
 
 ```mermaid
 stateDiagram-v2
@@ -79,19 +80,38 @@ stateDiagram-v2
     VOTING --> ENDED: timer reaches zero (server sweep)
     VOTING --> REVEALED: votes:reveal once everyone has voted
     ENDED --> REVEALED: votes:reveal (host only)
-    REVEALED --> [*]: room:end wipes the room
+    ENDED --> WAITING: room:newRound (host only, discards unrevealed votes)
+    REVEALED --> WAITING: room:newRound (host only)
+    WAITING --> [*]: room:end wipes the room
 ```
 
 - **WAITING** — participants join with just a name; nobody can vote; the host
-  picks the timer (Off by default) and reveal mode, can lock the room, and can
-  start. The lobby shows the table configuration (deck, timer, accent) plus a
-  QR code of the room URL.
+  picks the timer (Off by default) and reveal mode, can lock the room, enters
+  the optional story details, and can start. The lobby shows the table
+  configuration (deck, timer, accent) plus a QR code of the room URL.
 - **VOTING** — cards unlock. A vote locks the moment it lands; a second vote
   from the same participant is rejected. Vote *values* never leave the server.
 - **ENDED** — the server-side countdown hit zero; voting is closed; only the
-  host can reveal (values still hidden).
-- **REVEALED** — everyone sees every vote plus statistics; the round is closed
-  for good.
+  host can reveal (values still hidden) or abandon the round for the next
+  story (`room:newRound`).
+- **REVEALED** — everyone sees every vote plus statistics. The host can start
+  the next story with `room:newRound`: the round payload (votes, stats, story,
+  timer) resets and the room returns to WAITING — participants, seats, and
+  settings are untouched, and nobody needs a new link.
+
+### New round (`room:newRound`)
+
+Host-only, legal from **REVEALED** or **ENDED**. It resets `status` to
+`waiting`, clears `votes`, `stats`, `story` and `timer`, and resets every
+participant's `hasVoted`/`status` — the room itself is preserved. The next
+`voting:start` assigns the fresh `roundId` (sequential per room: 1, 2, 3, …),
+so a vote conceptually belongs to `roomId + roundId + participantId`.
+
+The operation is **idempotent by construction**: while the room is WAITING or
+VOTING it is rejected (`in_progress`), so a double-click or a second host tab
+can never open two rounds at once. Optional story metadata (`id`, `title`,
+`description` — clamped, trimmed) rides along on `voting:start` and is
+broadcast to every client in the next snapshot.
 
 ### Room lock
 
@@ -167,6 +187,7 @@ Every important action is validated server-side:
 | `voting:start`   | actor is the host **and** status is `WAITING`             | `not_host`, `in_progress` |
 | `vote:cast`      | status is `VOTING`, participant has not voted, timer alive, value on the room deck | `not_voting`, `already_voted`, `no_value`, `bad_value` |
 | `votes:reveal`   | actor is the host **and** status is `ENDED`, or `VOTING` + everyone voted | `not_host`, `not_all_voted`, `already_revealed`, `not_started` |
+| `room:newRound`   | actor is the host **and** status is `REVEALED` or `ENDED` | `not_host`, `in_progress` |
 | `room:settings`  | actor is the host **and** status is `WAITING` **and** timer ∈ {null, 10, 15, 30} **and** reveal mode ∈ {normal, staggered, dramatic} | `not_host`, `in_progress`, `bad_timer`, `bad_reveal_mode` |
 | `room:lock` / `room:unlock` | actor is the host (any phase)               | `not_host` |
 | `participant:remove` | actor is the host, target exists and is not the host | `not_host`, `cannot_remove`, `no_participant` |
@@ -220,6 +241,6 @@ lock because the server state is authoritative.
   is a separate read-only projection that joins as `role: 'screen'`.
 - The QR code is generated **locally** with `qrcode.react` (SVG, no external
   service) and encodes the room URL built from the room code.
-- `scripts/e2e.mjs` is a socket-level E2E suite (121 checks) that exercises
+- `scripts/e2e.mjs` is a socket-level E2E suite (~150 checks) that exercises
   the real server protocol without a browser; Playwright covers the UI on
   top.

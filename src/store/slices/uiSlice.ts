@@ -12,7 +12,7 @@ export interface Toast {
   message?: string;
 }
 
-export type ModalId = 'endSession' | 'removeParticipant' | 'roundResult';
+export type ModalId = 'endSession' | 'removeParticipant' | 'roundResult' | 'newRound';
 
 export interface UiState {
   theme: Theme;
@@ -78,6 +78,7 @@ const initialState: UiState = {
     endSession: false,
     removeParticipant: false,
     roundResult: false,
+    newRound: false,
   },
   toasts: [],
   celebrationTick: 0,

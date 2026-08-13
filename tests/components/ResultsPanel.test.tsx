@@ -24,16 +24,23 @@ const stats: Stats = {
   ],
 };
 
-function preload(over: { stats?: Stats | null; votes?: Record<string, string>; revealMode?: string; deckId?: string } = {}) {
-  const { stats: s = stats, votes = { a: '5', b: '8', c: '8' }, revealMode = 'staggered', deckId = 'fibonacci' } = over;
+function preload(over: { stats?: Stats | null; votes?: Record<string, string>; revealMode?: string; deckId?: string; myId?: string; story?: { id: string; title: string; description: string } | null } = {}) {
+  const {
+    stats: s = stats,
+    votes = { a: '5', b: '8', c: '8' },
+    revealMode = 'staggered',
+    deckId = 'fibonacci',
+    myId = 'a',
+    story = { id: 'PROJ-1', title: 'Password Reset', description: '' },
+  } = over;
   const participants = ['a', 'b', 'c', 'd'].map((id, i) =>
     makeParticipant({ id, name: `P${i}`, status: votes[id] ? 'voted' : 'connected', hasVoted: !!votes[id], joinedAt: i, hue: i * 10 }),
   );
   return {
     room: { hostId: 'a', settings: { deckId, timerSec: null, accent: 'gold', revealMode } },
-    voting: { phase: 'revealed', votes, stats: s, deckValues: [], votedIds: Object.keys(votes), everyoneHasVoted: true },
+    voting: { phase: 'revealed', roundId: 1, story, votes, stats: s, deckValues: [], votedIds: Object.keys(votes), everyoneHasVoted: true },
     participants: { list: participants },
-    ui: { myParticipantId: 'a' },
+    ui: { myParticipantId: myId },
   } as never;
 }
 
@@ -181,5 +188,26 @@ describe('ResultsPanel', () => {
       preloaded: preload({ stats: { ...stats, level: 'full', unique: 1, counts: [{ value: '8', count: 3 }] } }),
     });
     expect(store.getState().ui.celebrationTick).toBe(1);
+  });
+
+  it('shows which story the results belong to', () => {
+    renderWithStore(<ResultsPanel />, { preloaded: preload({ story: { id: 'PROJ-143', title: 'User Profile', description: '' } }) });
+    expect(screen.getByText('PROJ-143')).toBeInTheDocument();
+    expect(screen.getByText('User Profile')).toBeInTheDocument();
+  });
+
+  it('falls back to a round label when the story was skipped', () => {
+    renderWithStore(<ResultsPanel />, { preloaded: preload({ story: null }) });
+    expect(screen.getByText('Round 1')).toBeInTheDocument();
+  });
+
+  it('offers the host a + New Story action to start the next round', () => {
+    renderWithStore(<ResultsPanel />, { preloaded: preload() });
+    expect(screen.getByRole('button', { name: '+ New Story' })).toBeInTheDocument();
+  });
+
+  it('never shows the + New Story action to participants', () => {
+    renderWithStore(<ResultsPanel />, { preloaded: preload({ myId: 'b' }) });
+    expect(screen.queryByRole('button', { name: '+ New Story' })).not.toBeInTheDocument();
   });
 });

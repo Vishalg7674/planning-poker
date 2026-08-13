@@ -2,10 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store';
-import { triggerCelebration } from '@/store/slices/uiSlice';
+import { openModal, triggerCelebration } from '@/store/slices/uiSlice';
 import type { ConsensusLevel, Participant } from '@/lib/types';
 import { cardToNumber } from '@/lib/decks';
 import Avatar from '@/components/Avatar';
+import Button from '@/components/Button';
 import styles from './ResultsPanel.module.scss';
 import { cx } from '@/lib/cx';
 
@@ -42,6 +43,9 @@ export default function ResultsPanel() {
   const participants = useAppSelector((s) => s.participants.list);
   const myId = useAppSelector((s) => s.ui.myParticipantId);
   const revealMode = useAppSelector((s) => s.room.settings.revealMode);
+  const story = useAppSelector((s) => s.voting.story);
+  const roundId = useAppSelector((s) => s.voting.roundId);
+  const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
   const celebrated = useRef(false);
 
   // Confetti burst on full consensus — once per reveal. Big disagreement gets
@@ -77,6 +81,11 @@ export default function ResultsPanel() {
 
   return (
     <div className={styles.panel}>
+      <div className={styles.storyLine}>
+        {story?.id && <span className={styles.storyId}>{story.id}</span>}
+        <span className={styles.storyTitle}>{story?.title || `Round ${roundId}`}</span>
+      </div>
+
       <div className={styles.headline}>
         <span className={styles.consensusEmoji} aria-hidden="true">
           {consensus.emoji}
@@ -192,7 +201,14 @@ export default function ResultsPanel() {
         </div>
       </div>
 
-      <p className={styles.roundNote}>This round is closed — votes are final and the table can&rsquo;t vote again.</p>
+      <div className={styles.footer}>
+        <p className={styles.roundNote}>This round is closed — votes are final and the table can&rsquo;t vote again.</p>
+        {isHost && (
+          <Button variant="gold" size="md" onClick={() => dispatch(openModal('newRound'))}>
+            + New Story
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

@@ -96,7 +96,9 @@ export default function DocsPage() {
             <div className={styles.callout}>
               <strong>Core flow in one line:</strong> create a room → share the link → everyone joins with a name →
               host starts voting → votes lock the instant they land → reveal unlocks when everyone has voted (or the
-              timer ends the round) → everyone sees the votes, statistics and a consensus verdict.
+              timer ends the round) → everyone sees the votes, statistics and a consensus verdict → the host presses{' '}
+              <strong>+ New Story</strong> and the next round begins in the <strong>same room</strong> (same link, same
+              people — votes and results reset for everyone in real time).
             </div>
           </section>
 
@@ -240,7 +242,7 @@ export default function DocsPage() {
 │   │   ├── room/             # Deck, StartPanel, RevealBar, EndedPanel,
 │   │   │                     #   ResultsPanel, ParticipantsPanel, TimerBadge,
 │   │   │                     #   PresentationView, JoinForm, HostToolbar…
-│   │   ├── modals/           # EndSessionModal, RemoveParticipantModal, RoundResultModal
+│   │   ├── modals/           # EndSessionModal, NewRoundModal, RemoveParticipantModal, RoundResultModal
 │   │   ├── games/            # GameCatalog, GameCard, ComingSoonGame
 │   │   ├── providers.tsx     # Redux Provider + theme sync
 │   │   └── RealtimeBridge.tsx# the ONLY socket consumer → dispatches Redux actions
@@ -250,7 +252,7 @@ export default function DocsPage() {
 ├── server/
 │   ├── index.mjs             # Socket.io wiring, countdown, room expiry
 │   └── room.mjs              # pure, unit-tested room-state functions
-├── scripts/e2e.mjs           # socket-level E2E suite (122 checks)
+├── scripts/e2e.mjs           # socket-level E2E suite (~150 checks)
 ├── tests/                    # unit, components, e2e, helpers
 └── docs/                     # ARCHITECTURE, PRD, TRD, API, REALTIME, …`}</pre>
           </section>
@@ -294,6 +296,7 @@ export default function DocsPage() {
   everyoneHasVoted,
   votes,           // {} UNTIL revealed — then { participantId: value }
   stats,           // null UNTIL revealed — then computed statistics
+  story,           // { id, title, description } — set at round start, null while waiting
   timer,           // { durationSec, endsAt } or null
 }`}</pre>
             <div className={styles.callout} data-tone="warn">
@@ -352,7 +355,15 @@ export default function DocsPage() {
                   </td>
                   <td>client → ack</td>
                   <td>host only</td>
-                  <td>WAITING → VOTING. Clears the previous round, arms the optional timer.</td>
+                  <td>WAITING → VOTING. Assigns the new roundId, captures the optional story, arms the optional timer.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <Code>room:newRound</Code>
+                  </td>
+                  <td>client → ack</td>
+                  <td>host only</td>
+                  <td>Next story in the same room (from REVEALED or ENDED): votes/results/story reset, everyone returns to the waiting room together. Idempotent against double-clicks.</td>
                 </tr>
                 <tr>
                   <td>
@@ -443,13 +454,16 @@ export default function DocsPage() {
                 'Reveal unlocks (everyone voted, or timer ended)',
                 'Cards flip — votes, stats & consensus for all',
                 'Round-result modal for consensus / big disagreement',
-                'Discuss → host ends the session → room vanishes',
+                'Host presses + New Story → confirmation → the room returns to the waiting room',
+                'Next story (optional id / title / description) → Start Voting → fresh round for everyone',
+                '…repeat for every story → host ends the session → room vanishes',
               ]}
             />
             <p>
-              The product deliberately runs <strong>one round per room</strong> — no story queues, no revote, no
-              history. This keeps the state machine small enough to be provably correct, and matches the “privacy by
-              design” story: when the room ends, there is nothing left to revisit.
+              A room runs <strong>many rounds — one per story — in the same room</strong>. The URL, room code, host,
+              participants and settings never change; only the round payload (votes, results, reveal, story) resets,
+              synchronously, for everyone via the shared snapshot. There is no revote <em>within</em> a round and no
+              persisted history — the room is still in memory only and vanishes when it ends.
             </p>
           </section>
 
@@ -469,8 +483,8 @@ export default function DocsPage() {
                   <td>
                     <PhaseTag tone="idle">WAITING</PhaseTag>
                   </td>
-                  <td>Lobby. Host configures the table, shares the invite, locks if desired.</td>
-                  <td>✓ join, settings, lock, start · ✗ vote, reveal</td>
+                  <td>Lobby. Host configures the table, shares the invite, locks if desired, and can enter the next story (optional id / title / description).</td>
+                  <td>✓ join, settings, lock, story, start · ✗ vote, reveal</td>
                 </tr>
                 <tr>
                   <td>
@@ -490,8 +504,8 @@ export default function DocsPage() {
                   <td>
                     <PhaseTag tone="done">REVEALED</PhaseTag>
                   </td>
-                  <td>Everyone sees every vote + statistics + consensus. Round is closed for good.</td>
-                  <td>✓ view, discuss, end session · ✗ vote, reveal again</td>
+                  <td>Everyone sees every vote + statistics + consensus. The round is closed — the host can start the next story.</td>
+                  <td>✓ view, discuss, new round (host), end session · ✗ vote, reveal again</td>
                 </tr>
               </tbody>
             </table>
@@ -520,9 +534,10 @@ export default function DocsPage() {
                 participants panel shows <em>Voted / Thinking / Disconnected</em> only.
               </li>
               <li>
-                <strong>Double-action protection.</strong> Voting, reveal and start all funnel through shared helpers (
-                <Code>src/lib/roomActions.ts</Code>) that check live store state and in-flight flags, so double-clicks
-                and keyboard presses can never double-send. The server remains the final authority.
+                <strong>Double-action protection.</strong> Voting, reveal, start and “New Story” all funnel through
+                shared helpers (<Code>src/lib/roomActions.ts</Code>) that check live store state and in-flight flags, so
+                double-clicks and keyboard presses can never double-send — and the server rejects a second
+                <Code>room:newRound</Code> while the room is already waiting. The server remains the final authority.
               </li>
               <li>
                 <strong>Keyboard shortcuts.</strong> <Code>Space</Code> reveals (host, when legal) and{' '}
@@ -718,6 +733,7 @@ export default function DocsPage() {
             <p>Every host control is enforced server-side — a participant clicking around can’t do any of these:</p>
             <ul className={styles.list}>
               <li><strong>Start voting</strong> — only from the waiting room.</li>
+              <li><strong>+ New Story</strong> — after a round is revealed (or abandoned after the timer): resets votes/results and returns everyone to the waiting room in the same room. Participants can never trigger it.</li>
               <li><strong>Reveal votes</strong> — only once everyone (connected) has voted, or after the timer ends the round.</li>
               <li><strong>Pick timer / reveal mode</strong> — waiting room only; timer presets are exactly Off / 10 / 15 / 30 seconds.</li>
               <li><strong>Lock / unlock the room</strong> — refuses brand-new joiners while locked.</li>
@@ -810,12 +826,12 @@ export default function DocsPage() {
                   <td>
                     <Code>scripts/e2e.mjs</Code>
                   </td>
-                  <td>122 protocol checks against a live realtime server: join flows, locks, reveal gating, privacy, screen role, disconnected non-voters, consensus.</td>
+                  <td>~150 protocol checks against a live realtime server: join flows, locks, reveal gating, privacy, screen role, disconnected non-voters, consensus, multi-round (room:newRound) resets.</td>
                 </tr>
                 <tr>
                   <td>Browser E2E</td>
                   <td>Playwright</td>
-                  <td>Full multi-user flows with one browser context per user: create → join → vote → reveal → results → consensus modal, timers, locks, permissions, privacy, QR invite, presentation.</td>
+                  <td>Full multi-user flows with one browser context per user: create → join → vote → reveal → results → consensus modal, multi-story rounds (New Story, refresh mid-round), timers, locks, permissions, privacy, QR invite, presentation.</td>
                 </tr>
               </tbody>
             </table>
@@ -886,7 +902,7 @@ npm run dev:rt         # realtime server only
 npm test               # unit + component tests (Vitest, jsdom)
 npm run test:watch     # Vitest watch mode
 npm run test:coverage  # Vitest with coverage
-npm run test:realtime  # socket-level E2E suite (122 checks)
+npm run test:realtime  # socket-level E2E suite (~150 checks)
 npm run test:e2e       # Playwright browser E2E (starts its own servers)
 npm run lint           # ESLint
 npm run build          # lint + typecheck + production build

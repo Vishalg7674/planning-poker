@@ -37,6 +37,32 @@
   letter-spacing: 0.08em;
 }
 
+.storyLine {
+  margin-top: $sp-3;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  flex-wrap: wrap;
+  font-size: 18px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.storyId {
+  @include mono;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 12px;
+  border-radius: $r-pill;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.storyTitle {
+  color: var(--ink-dim);
+}
+
 .headerActions {
   display: flex;
   align-items: center;

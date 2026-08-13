@@ -7,6 +7,8 @@ describe('votingSlice', () => {
   it('has a sensible initial state', () => {
     const state = reducer(undefined, { type: '@@init' });
     expect(state.phase).toBe('waiting');
+    expect(state.roundId).toBe(0);
+    expect(state.story).toBeNull();
     expect(state.deckValues).toEqual([]);
     expect(state.votedIds).toEqual([]);
     expect(state.everyoneHasVoted).toBe(false);
@@ -69,13 +71,47 @@ describe('votingSlice', () => {
     expect(state.everyoneHasVoted).toBe(true);
   });
 
+  it('hydrates roundId and the story from the snapshot', () => {
+    const snapshot = makeSnapshot({
+      roundId: 3,
+      status: 'voting',
+      story: { id: 'PROJ-143', title: 'User Profile', description: 'As a user…' },
+    });
+    const state = reducer(undefined, snapshotReceived(snapshot));
+    expect(state.roundId).toBe(3);
+    expect(state.story).toEqual({ id: 'PROJ-143', title: 'User Profile', description: 'As a user…' });
+  });
+
+  it('clears my optimistic vote when a new round begins (roundId changes)', () => {
+    const round1 = reducer(undefined, snapshotReceived(makeSnapshot({ roundId: 1, status: 'voting' })));
+    const voted = reducer(round1, setMyVote('8'));
+    expect(voted.myVote).toBe('8');
+    // The host starts the next story: startVoting increments roundId → 2.
+    const nextRound = reducer(voted, snapshotReceived(makeSnapshot({ roundId: 2, status: 'voting', votedIds: [] })));
+    expect(nextRound.myVote).toBeNull();
+    expect(nextRound.roundId).toBe(2);
+  });
+
+  it('clears my optimistic vote when the room returns to waiting (host pressed New)', () => {
+    const revealed = reducer(undefined, snapshotReceived(makeSnapshot({ roundId: 1, status: 'revealed', votes: { me: '5' }, votedIds: ['me'] })));
+    const voted = reducer(revealed, setMyVote('5'));
+    expect(voted.myVote).toBe('5');
+    // room:newRound resets to WAITING with the SAME roundId — votes must still go.
+    const waiting = reducer(voted, snapshotReceived(makeSnapshot({ roundId: 1, status: 'waiting', votedIds: [], votes: {}, stats: null })));
+    expect(waiting.myVote).toBeNull();
+    expect(waiting.phase).toBe('waiting');
+    expect(waiting.votedIds).toEqual([]);
+  });
+
   it('resetVoting returns to the initial state', () => {
     const state = reducer(
-      { phase: 'revealed', deckValues: ['1'], votedIds: ['a'], everyoneHasVoted: true, votes: { a: '1' }, stats: null, myVote: '1' },
+      { phase: 'revealed', roundId: 2, story: { id: 'X', title: 'T', description: '' }, deckValues: ['1'], votedIds: ['a'], everyoneHasVoted: true, votes: { a: '1' }, stats: null, myVote: '1' },
       resetVoting(),
     );
     expect(state).toEqual({
       phase: 'waiting',
+      roundId: 0,
+      story: null,
       deckValues: [],
       votedIds: [],
       everyoneHasVoted: false,

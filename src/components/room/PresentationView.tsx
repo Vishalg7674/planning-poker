@@ -39,6 +39,8 @@ export default function PresentationView() {
   const hostId = useAppSelector((s) => s.room.hostId);
   const deckId = useAppSelector((s) => s.room.settings.deckId);
   const numeric = isNumericDeck(deckId);
+  const story = useAppSelector((s) => s.voting.story);
+  const roundId = useAppSelector((s) => s.voting.roundId);
 
   const start = () => {
     if (starting) return;
@@ -63,6 +65,12 @@ export default function PresentationView() {
             Room {code}
             {teamName && !roomTitle && <span> · {teamName}</span>}
           </p>
+          {phase !== 'waiting' && (
+            <p className={styles.storyLine}>
+              {story?.id && <span className={styles.storyId}>{story.id}</span>}
+              <span className={styles.storyTitle}>{story?.title || `Round ${roundId}`}</span>
+            </p>
+          )}
         </div>
         <div className={styles.headerActions}>
           {phase === 'voting' && timer && (

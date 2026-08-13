@@ -17,7 +17,7 @@
  * @typedef {'full' | 'strong' | 'moderate' | 'large'} ConsensusLevel
  * @typedef {{ id: string, name: string, role: 'facilitator' | 'voter', status: ParticipantStatus, hasVoted: boolean, joinedAt: number, hue: number }} Participant
  * @typedef {{ count: number, mode: string, modeShare: number, unique: number, numeric: boolean, avg: number | null, median: number | null, spread: number | null, highest: number | null, lowest: number | null, range: number | null, level: ConsensusLevel, counts: Array<{ value: string, count: number }> }} RoomStats
- * @typedef {{ code: string, roundId: number, hostId: string | null, teamName: string, roomTitle: string, createdAt: number, settings: { deckId: DeckId, timerSec: number | null, accent: Accent, revealMode: RevealMode }, locked: boolean, participants: Map<string, Participant>, status: RoomStatus, votes: Record<string, string>, stats: RoomStats | null, timer: { durationSec: number, endsAt: number } | null, emptySince: number | null }} Room
+ * @typedef {{ code: string, roundId: number, hostId: string | null, teamName: string, roomTitle: string, createdAt: number, settings: { deckId: DeckId, timerSec: number | null, accent: Accent, revealMode: RevealMode }, locked: boolean, participants: Map<string, Participant>, status: RoomStatus, votes: Record<string, string>, stats: RoomStats | null, story: { id: string, title: string, description: string } | null, timer: { durationSec: number, endsAt: number } | null, emptySince: number | null }} Room
  * @typedef {{ ok: true } | { ok: false, error: string, timerEnded?: boolean }} ActionResult
  */
 
@@ -82,6 +82,7 @@ export function createRoom({ hostName, teamName, roomTitle, deckId, accent, reve
     status: 'waiting', // 'waiting' | 'voting' | 'ended' | 'revealed'
     votes: {}, // participantId -> value (this round only)
     stats: null,
+    story: null, // { id, title, description } — set when the host starts a round
     timer: null, // {durationSec, endsAt}
     emptySince: null,
   };
@@ -233,6 +234,7 @@ export function buildSnapshot(room) {
     // Values only leave the server once the round is revealed.
     votes: room.status === 'revealed' ? { ...room.votes } : {},
     stats: room.status === 'revealed' ? room.stats : null,
+    story: room.story ? { ...room.story } : null,
     timer: room.timer ? { ...room.timer } : null,
   };
 }
@@ -240,23 +242,74 @@ export function buildSnapshot(room) {
 /**
  * Start the round. Only the host, only from WAITING. The timer is whatever
  * the host picked in the waiting room (Off = null).
+ *
+ * An optional `story` ({ id, title, description }) is captured and shipped to
+ * every client in the next snapshot — this is how a "new story" becomes part
+ * of the round without a separate event. Fields are trimmed + length-clamped.
  * @param {Room} room
  * @param {string} actorId
+ * @param {{ id?: string, title?: string, description?: string } | null} [story]
  * @returns {ActionResult}
  */
-export function startVoting(room, actorId) {
+export function startVoting(room, actorId, story) {
   if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
   if (room.status !== 'waiting') return { ok: false, error: 'in_progress' };
   room.roundId = (room.roundId || 0) + 1;
   room.status = 'voting';
   room.votes = {};
   room.stats = null;
+  room.story = sanitizeStory(story);
   for (const p of room.participants.values()) {
     p.hasVoted = false;
     p.status = 'connected';
   }
   const sec = room.settings.timerSec;
   room.timer = sec ? { durationSec: sec, endsAt: Date.now() + sec * 1000 } : null;
+  return { ok: true };
+}
+
+/**
+ * Clamp + trim a client-supplied story into a safe shape. Any empty string is
+ * normalized to '' — the UI falls back to a "Round N" label on its own.
+ * @param {{ id?: unknown, title?: unknown, description?: unknown } | null | undefined} story
+ * @returns {{ id: string, title: string, description: string } | null}
+ */
+function sanitizeStory(story) {
+  if (!story) return null;
+  const str = (v) => (typeof v === 'string' ? v.trim() : '');
+  const id = str(story.id).slice(0, 32);
+  const title = str(story.title).slice(0, 80);
+  const description = str(story.description).slice(0, 200);
+  if (!id && !title && !description) return null;
+  return { id, title, description };
+}
+
+/**
+ * Begin a brand-new round in the SAME room (host-only). The room — code, host,
+ * participants, settings, lock, deck — is preserved untouched; only the round
+ * payload resets: status returns to WAITING so the host can configure the next
+ * story and press Start Voting, which assigns the fresh roundId.
+ *
+ * Allowed from REVEALED (round finalized) and ENDED (timer up, unrevealed
+ * votes are abandoned). While the room is WAITING or VOTING this is rejected,
+ * which also makes the operation idempotent: a double-click or a second tab
+ * racing the first can never open two rounds.
+ * @param {Room} room
+ * @param {string} actorId
+ * @returns {ActionResult}
+ */
+export function startNewRound(room, actorId) {
+  if (actorId !== room.hostId) return { ok: false, error: 'not_host' };
+  if (room.status !== 'revealed' && room.status !== 'ended') return { ok: false, error: 'in_progress' };
+  room.status = 'waiting';
+  room.votes = {};
+  room.stats = null;
+  room.story = null;
+  room.timer = null;
+  for (const p of room.participants.values()) {
+    p.hasVoted = false;
+    p.status = 'connected';
+  }
   return { ok: true };
 }
 

@@ -29,6 +29,9 @@ Host sees who voted / who is still thinking (values stay hidden)
 Reveal unlocks when everyone has voted (or the timer ends the round)
       ↓
 Everyone sees every vote + average / median / mode / range / consensus
+      ↓
+Host presses + New Story → the next round begins in the SAME room
+      (same link, same people — votes, results and the reveal reset)
 ```
 
 ## Game catalog
@@ -55,7 +58,10 @@ Everyone sees every vote + average / median / mode / range / consensus
   room title, picks one of **five decks** (Fibonacci, Modified Fibonacci,
   Sequential, T-Shirt, Powers of 2) and an **accent color** (gold / purple /
   blue / green) that re-skins the whole table.
-- **One round per room** — no stories, no queues, no revote, no history.
+- **Multiple stories per room** — after a round is revealed the host starts
+  the next story in the same room (same URL, same participants); votes,
+  results and the reveal reset for everyone in real time. No revote *within*
+  a round, no history.
 - **Permanent vote lock, enforced on the server** — a second `vote:cast` from
   the same participant is rejected, period.
 - **Private until the reveal** — before the host reveals, nobody (not even the
@@ -76,9 +82,11 @@ Everyone sees every vote + average / median / mode / range / consensus
 - **Consensus verdict** — a deterministic server-computed level (full /
   strong / moderate / large) with a "worth discussing?" prompt on large
   disagreements, and a confetti celebration on full consensus.
-- **Host controls** — start, reveal, **remove a participant**, **lock/unlock
-  the room** (new joiners refused while locked), **presentation mode** for
-  TV/projector, and end the session. Every control is validated server-side.
+- **Host controls** — start, reveal, **+ New Story** (next round in the same
+  room, with an optional story id/title/description), **remove a
+  participant**, **lock/unlock the room** (new joiners refused while locked),
+  **presentation mode** for TV/projector, and end the session. Every control
+  is validated server-side.
 - **QR + sharing** — the lobby shows a locally-generated QR code of the room
   URL (no external service), a copy-invite button with a friendly message,
   and native Web Share on supported devices.

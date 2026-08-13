@@ -18,7 +18,7 @@ const PHASE_COPY: Record<RoomPhase, { title: string; sub: string }> = {
   waiting: { title: 'Waiting for the host…', sub: 'Voting hasn’t started yet.' },
   voting: { title: 'Voting in progress', sub: 'Pick a card — your vote locks in the moment you tap.' },
   ended: { title: 'Voting ended', sub: 'The reveal is coming up.' },
-  revealed: { title: 'Results', sub: 'One round, final answers.' },
+  revealed: { title: 'Results', sub: 'Round complete — final answers.' },
 };
 
 /**
@@ -43,6 +43,8 @@ export default function ScreenPage() {
   const timer = useAppSelector((s) => s.timer.timer);
   const remaining = useAppSelector((s) => s.timer.remaining);
   const timesUp = useAppSelector((s) => s.timer.timesUp);
+  const story = useAppSelector((s) => s.voting.story);
+  const roundId = useAppSelector((s) => s.voting.roundId);
 
   const joinedRef = useRef(false);
   const hadRoomRef = useRef(false);
@@ -139,6 +141,12 @@ export default function ScreenPage() {
             {phase === 'voting' ? 'Choose your estimate' : phase === 'waiting' ? 'Waiting room' : phase === 'ended' ? "Time's up" : 'Round complete'}
           </p>
           <h1 className={styles.statusTitle}>{copy.title}</h1>
+          {phase !== 'waiting' && (
+            <p className={styles.storyLine}>
+              {story?.id && <span className={styles.storyId}>{story.id}</span>}
+              <span className={styles.storyTitle}>{story?.title || `Round ${roundId}`}</span>
+            </p>
+          )}
           {phase !== 'voting' && <p className={styles.statusSub}>{copy.sub}</p>}
           {timer && (
             <div className={cx(styles.timer, styles[timerTone])}>

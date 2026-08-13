@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { requestReveal, requestStart, requestVote } from '@/lib/roomActions';
+import { requestNewRound, requestReveal, requestStart, requestVote } from '@/lib/roomActions';
 import { makeStore } from '../../helpers/store';
 
 const { emitAckMock } = vi.hoisted(() => ({ emitAckMock: vi.fn() }));
@@ -93,11 +93,66 @@ describe('requestReveal / requestStart', () => {
     expect(emitAckMock).toHaveBeenCalledWith('voting:start', {});
   });
 
+  it('rides the story details along with voting:start (trimmed)', async () => {
+    const store = makeStore();
+    await requestStart(store.dispatch, { id: 'PROJ-143', title: ' User Profile ', description: 'As a user…' });
+    expect(emitAckMock).toHaveBeenCalledWith('voting:start', {
+      story: { id: 'PROJ-143', title: 'User Profile', description: 'As a user…' },
+    });
+  });
+
+  it('omits the story from the payload when the form is empty', async () => {
+    const store = makeStore();
+    await requestStart(store.dispatch, { id: '   ', title: '', description: '' });
+    expect(emitAckMock).toHaveBeenCalledWith('voting:start', {});
+  });
+
   it('reveal surfaces a friendly message on rejection', async () => {
     emitAckMock.mockResolvedValue({ ok: false, error: 'not_all_voted' });
     const store = makeStore();
     const ok = await requestReveal(store.dispatch);
     expect(ok).toBe(false);
     expect(store.getState().ui.toasts[0]?.message).toContain('everyone has voted');
+  });
+});
+
+describe('requestNewRound', () => {
+  beforeEach(() => {
+    emitAckMock.mockReset();
+    emitAckMock.mockResolvedValue({ ok: true });
+  });
+
+  const revealedStore = () => makeStore({ voting: { phase: 'revealed' } } as never);
+
+  it('emits room:newRound once from a REVEALED room', async () => {
+    const store = revealedStore();
+    const result = await requestNewRound(store.dispatch, store.getState);
+    expect(result).toBe('ok');
+    expect(emitAckMock).toHaveBeenCalledWith('room:newRound', {});
+  });
+
+  it('guards a second rapid call (double-click) and reports guarded, not an error', async () => {
+    const store = revealedStore();
+    const first = requestNewRound(store.dispatch, store.getState);
+    const second = await requestNewRound(store.dispatch, store.getState);
+    expect(second).toBe('guarded');
+    await first;
+    expect(emitAckMock).toHaveBeenCalledTimes(1);
+    expect(store.getState().ui.toasts).toHaveLength(0); // no false error toast
+  });
+
+  it('does nothing while the room is VOTING (guarded)', async () => {
+    const store = makeStore({ voting: { phase: 'voting' } } as never);
+    const result = await requestNewRound(store.dispatch, store.getState);
+    expect(result).toBe('guarded');
+    expect(emitAckMock).not.toHaveBeenCalled();
+  });
+
+  it('reports rejected with a toast on a server rejection', async () => {
+    emitAckMock.mockResolvedValue({ ok: false, error: 'not_host' });
+    const store = revealedStore();
+    const result = await requestNewRound(store.dispatch, store.getState);
+    expect(result).toBe('rejected');
+    expect(store.getState().ui.toasts[0]?.title).toBe('Could not start a new round');
   });
 });

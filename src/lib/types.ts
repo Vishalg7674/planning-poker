@@ -11,7 +11,10 @@ export type Accent = 'gold' | 'purple' | 'blue' | 'green';
 /** How the reveal card-flip wave plays out. */
 export type RevealMode = 'normal' | 'staggered' | 'dramatic';
 
-/** One round per room. */
+/**
+ * Round lifecycle — a room runs many rounds: waiting → voting → ended →
+ * revealed, then the host starts the next story and it cycles again.
+ */
 export type RoomPhase = 'waiting' | 'voting' | 'ended' | 'revealed';
 
 /** Server-computed consensus verdict for a round's submitted votes. */
@@ -65,6 +68,14 @@ export interface TimerInfo {
   endsAt: number;
 }
 
+/** The story being estimated — optional metadata captured at round start. */
+export interface Story {
+  /** Optional ticket/key, e.g. "PROJ-143". */
+  id: string;
+  title: string;
+  description: string;
+}
+
 /** Full privacy-aware room state broadcast to clients after every mutation. */
 export interface Snapshot {
   code: string;
@@ -86,6 +97,8 @@ export interface Snapshot {
   /** Vote values — only populated once the round is revealed. */
   votes: Record<string, string>;
   stats: Stats | null;
+  /** The story being estimated this round — null in the waiting room. */
+  story: Story | null;
   timer: TimerInfo | null;
 }
 

@@ -51,10 +51,11 @@ worry that their estimate can be changed or "corrected" afterwards.
 Host:  Create Room (name, team, title, deck, accent) → Share link / QR
        → Wait for People → Pick timer + reveal mode (optional) → Start Voting
        → See who voted / who's thinking → Everyone voted (or time's up)
-       → Reveal → See results, statistics & consensus → Presentation mode if needed
-       → End room
+       → Reveal → See results, statistics & consensus → + New Story (same room)
+       → Enter the next story → Start Voting → … repeat for every story → End room
 Participant: Open link → Enter name → Join → See the team → Wait for host
        → Voting starts → Pick one card → Vote locked → Wait → Reveal → See results
+       → Next story starts automatically in the same tab (votes reset)
 ```
 
 ## Functional requirements
@@ -108,11 +109,25 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
 
 ### Voting
 - The host starts the round; everyone's cards unlock simultaneously.
-- Each participant can vote **exactly once**.
-- The vote is permanent: no change, no cancel, no revote.
+- Each participant can vote **exactly once** per round.
+- The vote is permanent within a round: no change, no cancel, no revote.
 - The selected card visually locks with a checkmark; all other cards disable.
 - The host sees a live `N / M voted` counter and per-participant
   *Voted / Thinking* presence (with animated thinking dots) — never values.
+
+### New story (multiple rounds per room)
+- After a round is **finalized** (revealed) — or abandoned after the timer
+  ended it — the host can press **+ New Story** to begin the next story in the
+  **same room**: same URL, same room code, same participants, same settings.
+- A confirmation dialog warns that votes/results reset for everyone.
+- The room returns to the waiting room, where the host may enter the next
+  story (optional **Story ID**, **Story Title**, **Description**) before
+  pressing Start Voting. Skipping the story labels the round `Round N`.
+- Everyone in the room is transitioned in real time via the shared snapshot —
+  no refresh, no new link, no rejoining.
+- Each round gets a sequential `roundId`; votes belong to
+  `roomId + roundId + participantId`, so no vote ever leaks into the next
+  story. Double-clicks / racing tabs cannot open two rounds (server-enforced).
 
 ### Presence
 - Per-participant presence: **Joined** (waiting), **Thinking** (voting),
@@ -212,6 +227,10 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
   table on a projector.
 - As a **participant**, I want to see the average, median, range and
   consensus so we can discuss the estimates meaningfully.
+- As a **host**, I want to start the next story in the same room so a whole
+  sprint's stories are estimated with one link and no re-invites.
+- As a **participant**, I want the next story to begin automatically (votes
+  reset) so I never have to rejoin or refresh between stories.
 - As a **host**, I want the room to vanish from memory when we're done so no
   session history lingers.
 
@@ -231,18 +250,17 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
   correct average/median/mode/highest/lowest/range/distribution/count plus a
   consensus verdict (T-Shirt rounds omit numeric stats).
 - A locked room refuses new joiners; the host can unlock it.
-- Rooms are in-memory only: no database, no login, no stories, no revote, no
-  history.
+- Rooms are in-memory only: no database, no login, no accounts, no history.
 
 ## Out of scope
 
 - Login / signup / accounts / email.
 - Database persistence or session history of any kind.
-- Stories, story queues, next/previous story, story titles or URLs.
-- Revote, vote editing, vote cancellation or reset.
+- Story queues, next/previous story navigation, or persisted backlog history
+  (each round carries only an optional story id/title/description).
+- Revote, vote editing, vote cancellation or reset within a round.
 - Discussion/chat features, consensus workflows, reactions.
 - Anonymous voting, spectator modes (beyond the read-only projector screen).
-- Multiple voting rounds per room (one round per room by design).
 - Custom deck editors, arbitrary timer values, custom accent themes.
 - Analytics dashboards or export of results.
 - Horizontal scaling / shared server state (see [DEPLOYMENT.md](DEPLOYMENT.md)).

@@ -1,8 +1,9 @@
 # Contributing to Reveal
 
 Thanks for helping with Reveal — a deliberately small planning poker app
-(no database, no accounts, one round per room). Keep changes aligned with
-that scope: **if it smells like Scrum tooling, it doesn't belong here.**
+(no database, no accounts, one room per session with many stories). Keep
+changes aligned with that scope: **if it smells like Scrum tooling, it
+doesn't belong here.**
 
 ---
 
@@ -51,7 +52,7 @@ src/
 server/
 ├── index.mjs             # Socket.io wiring, timers, room expiry (no business rules)
 └── room.mjs              # PURE room-state logic — the server rules, unit-tested
-scripts/e2e.mjs           # socket-level protocol suite (121 checks)
+scripts/e2e.mjs           # socket-level protocol suite (~150 checks)
 tests/                    # Vitest (unit + components) and Playwright (e2e)
 docs/                     # architecture, PRD, API, testing, deployment, …
 ```
@@ -78,8 +79,9 @@ and `index.mjs` only wires sockets to them.
   `voting`, `timer`, `ui`). Prefer selectors over deriving in components.
 - The **only** socket consumer is `src/components/RealtimeBridge.tsx`; it
   turns `snapshot` broadcasts into Redux actions. Don't add a second bridge.
-- Keep the state machine minimal: `WAITING → VOTING → (ENDED) → REVEALED`.
-  Don't introduce stories, rounds, revote, or vote editing.
+- Keep the state machine minimal: `WAITING → VOTING → (ENDED) → REVEALED →
+  WAITING` (`room:newRound`). Multiple rounds per room are supported; within
+  a round there is no revote and no vote editing.
 - Name socket events and errors with the existing vocabulary
   (`room:*`, `voting:*`, `vote:*`, `votes:*`, ack `{ ok, error }` codes).
 - If you change a **consensus threshold** or a **statistics rule**, update
@@ -158,7 +160,8 @@ Reviewers check the *rules*, not the prose:
 3. Are host-only actions guarded by `actorId === room.hostId`?
 4. Is the room-lock gate applied at join time, not only in the UI?
 5. Do deck/stats/consensus changes stay configuration- and data-driven?
-6. Does the change respect the single-round / no-revote product scope?
+6. Does the change respect the multi-round / no-revote-within-a-round
+   product scope (host-only `room:newRound`, server-validated)?
 7. Are tests asserting behavior, and do they fail if the rule regresses?
 
 ---

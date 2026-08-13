@@ -378,6 +378,66 @@ check('avg is 10.75', snap?.stats?.avg === 10.75);
 check('consensus is moderate (two votes, 50/50 split)', snap?.stats?.level === 'moderate', JSON.stringify(snap?.stats?.level));
 
 // ===========================================================================
+// New round — next story in the SAME room: round payload resets, room stays
+// ===========================================================================
+console.log('— new round: same room, fresh round —');
+const createdN = await emitAck(host, 'room:create', { hostName: 'Nia' });
+const codeN = createdN.code;
+const voterN = await emitAck(voter, 'room:join', { code: codeN, name: 'Oli' });
+check('Oli joins room N', voterN?.ok === true, JSON.stringify(voterN));
+
+await emitAck(host, 'voting:start', { story: { id: 'PROJ-1', title: 'Password Reset', description: 'First story.' } });
+snap = await hostSnap((s) => s.code === codeN && s.status === 'voting');
+check('room N round 1 voting', snap?.status === 'voting');
+check('story rides the start snapshot', snap?.story?.id === 'PROJ-1' && snap?.story?.title === 'Password Reset', JSON.stringify(snap?.story));
+check('round 1 id assigned', snap?.roundId === 1, JSON.stringify(snap?.roundId));
+check('no votes at start', snap?.votedIds?.length === 0);
+
+const newRoundWhileVoting = await emitAck(host, 'room:newRound', {});
+check('new round rejected while VOTING', newRoundWhileVoting?.ok === false && newRoundWhileVoting.error === 'in_progress', JSON.stringify(newRoundWhileVoting));
+
+await emitAck(host, 'vote:cast', { value: '5' });
+await emitAck(voter, 'vote:cast', { value: '8' });
+snap = await hostSnap((s) => s.code === codeN && s.votedIds?.length === 2);
+check('round 1 both voted', snap?.everyoneHasVoted === true);
+await emitAck(host, 'votes:reveal', {});
+snap = await voterSnap((s) => s.code === codeN && s.status === 'revealed');
+check('round 1 revealed', snap?.status === 'revealed');
+check('round 1 stats present', snap?.stats?.count === 2);
+
+const nonHostNewRound = await emitAck(voter, 'room:newRound', {});
+check('non-host cannot start a new round', nonHostNewRound?.ok === false && nonHostNewRound.error === 'not_host', JSON.stringify(nonHostNewRound));
+
+const newRoundRes = await emitAck(host, 'room:newRound', {});
+check('room:newRound ok from REVEALED', newRoundRes?.ok === true, JSON.stringify(newRoundRes));
+// Tight predicate: an older buffered WAITING snapshot (round 1's lobby) also
+// matches status === 'waiting', so pin roundId + participant count too.
+snap = await hostSnap((s) => s.code === codeN && s.status === 'waiting' && s.roundId === 1 && s.participants?.length === 2);
+check('status back to waiting', snap?.status === 'waiting');
+check('votes cleared', snap?.votedIds?.length === 0 && Object.keys(snap?.votes || {}).length === 0);
+check('stats cleared', snap?.stats === null);
+check('story cleared', snap?.story === null, JSON.stringify(snap?.story));
+check('timer cleared', snap?.timer === null);
+check('room code unchanged', snap?.code === codeN);
+check('roundId kept for the next start', snap?.roundId === 1, JSON.stringify(snap?.roundId));
+check('participants kept', snap?.participants?.length === 2);
+check('participant vote flags reset', snap?.participants?.every((p) => p.hasVoted === false && p.status === 'connected'));
+check('host unchanged', snap?.hostId === createdN.participantId);
+
+const dupNewRound = await emitAck(host, 'room:newRound', {});
+check('duplicate new round rejected (idempotent — no round 3 from a double click)', dupNewRound?.ok === false && dupNewRound.error === 'in_progress', JSON.stringify(dupNewRound));
+
+const startN2 = await emitAck(host, 'voting:start', { story: { id: 'PROJ-143', title: 'User Profile', description: 'Second story.' } });
+check('round 2 start ok', startN2?.ok === true, JSON.stringify(startN2));
+// Pin roundId + story so a stale round-1 VOTING snapshot can't satisfy this.
+snap = await voterSnap((s) => s.code === codeN && s.status === 'voting' && s.roundId === 2 && s.story?.title === 'User Profile');
+check('round 2 voting for everyone', snap?.status === 'voting');
+check('round 2 id increments', snap?.roundId === 2, JSON.stringify(snap?.roundId));
+check('round 2 story visible to everyone', snap?.story?.title === 'User Profile', JSON.stringify(snap?.story));
+check('round 2 starts empty', snap?.votedIds?.length === 0);
+check('round 1 votes not leaked', Object.keys(snap?.votes || {}).length === 0);
+
+// ===========================================================================
 // screen / projector role
 // ===========================================================================
 console.log('— screen / projector role —');

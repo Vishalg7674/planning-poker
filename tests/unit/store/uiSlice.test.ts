@@ -28,7 +28,7 @@ describe('uiSlice', () => {
     expect(state.myRole).toBe('voter');
     expect(state.connection).toBe('connecting');
     expect(state.toasts).toEqual([]);
-    expect(state.modals).toEqual({ endSession: false, removeParticipant: false, roundResult: false });
+    expect(state.modals).toEqual({ endSession: false, removeParticipant: false, roundResult: false, newRound: false });
   });
 
   it('setMyIdentity marks me as joined', () => {

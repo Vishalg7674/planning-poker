@@ -6,14 +6,18 @@
  * the room Map, snapshot broadcasts, the server-authoritative countdown, and
  * room expiry. When the process restarts, every room is gone.
  *
- * One round per room: WAITING → VOTING → ENDED → REVEALED.
+ * Multi-round rooms: WAITING → VOTING → ENDED → REVEALED, then back to
+ * WAITING via room:newRound (host-only) — the same room, same code, same
+ * participants, brand-new round.
  *
  *  - WAITING   participants join; nobody can vote; the host can start.
  *  - VOTING    votes lock in the moment they land; the host can reveal as
  *              soon as EVERYONE has voted (or waits for the timer if one runs).
  *  - ENDED     the server-side timer reached zero; votes are closed; only the
  *              host can reveal. Vote values are still private.
- *  - REVEALED  everyone sees every vote + statistics. Round is closed for good.
+ *  - REVEALED  everyone sees every vote + statistics. The host can then start
+ *              the next story with room:newRound (votes/results reset, the
+ *              room itself is untouched).
  *
  * Protocol is intentionally simple: the server broadcasts a full `snapshot`
  * of the room after every mutation, and the client hydrates its Redux slices
@@ -29,6 +33,7 @@ import {
   addParticipant,
   buildSnapshot,
   startVoting,
+  startNewRound,
   castVote,
   reveal,
   setTimerSec,
@@ -172,11 +177,28 @@ io.on('connection', (socket) => {
   // -------------------------------------------------------------------------
   // Start — only the host, and only while the room is still WAITING.
   // The timer is whatever the host picked in the waiting room (Off = null).
+  // An optional story payload ({ id, title, description }) rides along and is
+  // broadcast to every client with the next snapshot.
   // -------------------------------------------------------------------------
-  socket.on('voting:start', (_payload, ack) => {
+  socket.on('voting:start', (payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ack?.({ ok: false, error: 'not_host' });
-    const res = startVoting(room, socket.data.participantId);
+    const res = startVoting(room, socket.data.participantId, payload?.story);
+    if (!res.ok) return ack?.(res);
+    ack?.({ ok: true });
+    emitSnapshot(room);
+  });
+
+  // -------------------------------------------------------------------------
+  // New round — host-only, from REVEALED or ENDED. Resets the round payload
+  // (votes, results, reveal, story) back to WAITING while the room itself —
+  // code, host, participants, settings — is preserved. Server-side guards
+  // make it idempotent: a second call while WAITING/VOTING is rejected.
+  // -------------------------------------------------------------------------
+  socket.on('room:newRound', (_payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ack?.({ ok: false, error: 'not_host' });
+    const res = startNewRound(room, socket.data.participantId);
     if (!res.ok) return ack?.(res);
     ack?.({ ok: true });
     emitSnapshot(room);

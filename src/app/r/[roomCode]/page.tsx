@@ -22,6 +22,7 @@ import { useRoomShortcuts } from '@/components/room/useShortcuts';
 import EndSessionModal from '@/components/modals/EndSessionModal';
 import RemoveParticipantModal from '@/components/modals/RemoveParticipantModal';
 import RoundResultModal from '@/components/modals/RoundResultModal';
+import NewRoundModal from '@/components/modals/NewRoundModal';
 import PresentationView from '@/components/room/PresentationView';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setMyIdentity, pushToast, closeModal } from '@/store/slices/uiSlice';
@@ -165,7 +166,7 @@ export default function RoomPage() {
   }
 
   // ------------------------------------------------------------------
-  // The room — one round: waiting → voting → ended → revealed
+  // The room — rounds cycle: waiting → voting → ended → revealed → waiting…
   // ------------------------------------------------------------------
   if (presentation) {
     return (
@@ -173,6 +174,7 @@ export default function RoomPage() {
         <div className={styles.room} data-accent={accent}>
           <PresentationView />
           <RoundResultModal open={modals.roundResult} onClose={() => dispatch(closeModal('roundResult'))} />
+          <NewRoundModal open={modals.newRound} onClose={() => dispatch(closeModal('newRound'))} />
         </div>
       </RoomErrorBoundary>
     );
@@ -267,6 +269,7 @@ export default function RoomPage() {
         }}
       />
         <RoundResultModal open={modals.roundResult} onClose={() => dispatch(closeModal('roundResult'))} />
+        <NewRoundModal open={modals.newRound} onClose={() => dispatch(closeModal('newRound'))} />
       </div>
     </RoomErrorBoundary>
   );

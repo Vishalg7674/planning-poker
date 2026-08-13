@@ -95,7 +95,8 @@ export default function CreatePage() {
         <div className={styles.panel}>
           <h1 className={styles.h1}>Create Room</h1>
           <p className={styles.sub}>
-            One round, one vote each. Configure the table below, share the link, and your team just needs a name to join.
+            One vote each per story, one room for the whole session. Configure the table below, share the link, and your
+            team just needs a name to join — when a story is done, the host starts the next one right here.
           </p>
 
           {/* eslint-disable-next-line react-hooks/refs -- handleSubmit wraps an async handler that reads a ref guard against same-tick double submits; the rule cannot trace ref usage through react-hook-form's wrapper. */}

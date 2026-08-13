@@ -38,7 +38,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
 | `/games`                 | Full catalog page (reuses `GameCatalog`); optional `?cat=<category>` preselects a filter |
 | `/games/[gameId]`        | Dynamic game page — `live` games `redirect()` to their real route; `coming-soon` games render the shared placeholder; unknown ids 404 |
 | `/create`                | Room creation form: name (required), team name, room title, deck picker, accent picker → navigates to `/r/<CODE>` |
-| `/r/[roomCode]`          | The room: waiting → voting → ended → revealed, plus the participant side panel |
+| `/r/[roomCode]`          | The room: waiting → voting → ended → revealed → waiting (next story via `room:newRound`), plus the participant side panel |
 | `/r/[roomCode]/screen`   | Read-only projector view (joins the socket as `role: 'screen'`) |
 
 ### Components (`src/components`)
@@ -59,7 +59,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
   (presence + count + remove control), `TimerBadge`, `HostToolbar` (end
   session, presentation toggle), `JoinForm` (incl. locked-room error), hook
   `useShortcuts` (Space = reveal, 1–9 = vote).
-- Modals (`src/components/modals`): `EndSessionModal`, `RemoveParticipantModal`.
+- Modals (`src/components/modals`): `EndSessionModal`, `NewRoundModal`
+  (confirm the next story), `RemoveParticipantModal`.
 - `providers.tsx` — Redux `Provider` + theme sync; `RealtimeBridge.tsx` — the
   socket → Redux bridge.
 
@@ -95,8 +96,8 @@ See [STATE_MANAGEMENT.md](STATE_MANAGEMENT.md). Five slices: `room`,
 - `server/room.mjs` — the pure state machine and rules (unit-tested):
   `genCode`, `createRoom`, `addParticipant`, `hueFromString`,
   `calculateConsensus`, `computeStats`, `everyoneHasVoted`, `buildSnapshot`,
-  `startVoting`, `castVote`, `reveal`, `setTimerSec`, `setRevealMode`,
-  `setLocked`, `removeParticipant`, `disconnectParticipant`,
+  `startVoting`, `startNewRound`, `castVote`, `reveal`, `setTimerSec`,
+  `setRevealMode`, `setLocked`, `removeParticipant`, `disconnectParticipant`,
   `promoteHostIfNeeded`.
 - Rooms are identified by a 5-character code from
   `ABCDEFGHJKMNPQRSTUVWXYZ23456789`.
@@ -104,9 +105,12 @@ See [STATE_MANAGEMENT.md](STATE_MANAGEMENT.md). Five slices: `room`,
 ## State machine
 
 ```
-WAITING → VOTING → (ENDED) → REVEALED
+WAITING → VOTING → (ENDED) → REVEALED → WAITING  (room:newRound, host only)
 ```
 
+A room runs many rounds — one per story — while the room itself never
+changes. `room:newRound` resets the round payload (votes/stats/story/timer)
+and returns to WAITING; the next `voting:start` assigns the fresh `roundId`.
 See [ARCHITECTURE.md — Room lifecycle](ARCHITECTURE.md#room-lifecycle).
 
 ## Deck architecture
@@ -179,8 +183,9 @@ across 9 categories (`CATEGORIES`), each game a plain data entry:
   locked: boolean;                  // host-only; refuses brand-new joiners
   participants: Map<string, Participant>;
   status: 'waiting' | 'voting' | 'ended' | 'revealed';
-  votes: Record<string, string>;    // participantId -> card value
+  votes: Record<string, string>;    // participantId -> card value (this round only)
   stats: Stats | null;              // computed at reveal
+  story: { id: string; title: string; description: string } | null;  // set at startVoting, cleared by room:newRound
   timer: { durationSec: number; endsAt: number } | null;
   emptySince: number | null;
 }
@@ -219,6 +224,7 @@ across 9 categories (`CATEGORIES`), each game a plain data entry:
   everyoneHasVoted: boolean;
   votes: Record<string, string>;    // {} unless status === 'revealed'
   stats: Stats | null;              // null unless status === 'revealed'
+  story: Story | null;              // null in the waiting room
   timer: TimerInfo | null;
 }
 ```
@@ -256,7 +262,8 @@ Moderate / ⚡ Large, celebrates full consensus with confetti, and shows a
 | `room:settings`     | Client → Server  | Host sets timer and/or reveal mode (waiting only) | `{ timerSec?, revealMode? }` | `{ ok } \| { ok: false, error }` |
 | `room:lock`         | Client → Server  | Host locks the room (any phase)           | `{}`                           | `{ ok } \| { ok: false, error }` |
 | `room:unlock`       | Client → Server  | Host unlocks the room                     | `{}`                           | `{ ok } \| { ok: false, error }` |
-| `voting:start`      | Client → Server  | Host starts the round                     | `{}`                           | `{ ok } \| { ok: false, error }` |
+| `voting:start`      | Client → Server  | Host starts the round                     | `{ story?: { id?, title?, description? } }` | `{ ok } \| { ok: false, error }` |
+| `room:newRound`     | Client → Server  | Host starts the next story in the same room (from REVEALED/ENDED) | `{}` | `{ ok } \| { ok: false, error }` |
 | `vote:cast`         | Client → Server  | Submit a (final) vote                     | `{ value }`                    | `{ ok } \| { ok: false, error }` |
 | `votes:reveal`      | Client → Server  | Host reveals the round                    | `{}`                           | `{ ok } \| { ok: false, error }` |
 | `participant:remove`| Client → Server  | Host removes a participant                | `{ participantId }`            | `{ ok } \| { ok: false, error }` |
