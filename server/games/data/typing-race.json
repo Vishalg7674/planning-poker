@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Type this exactly: The quick brown fox jumps over the lazy dog.", "answerText": "the quick brown fox jumps over the lazy dog" },
+    { "text": "Type this exactly: How vexingly quick daft zebras jump!", "answerText": "how vexingly quick daft zebras jump" },
+    { "text": "Type this exactly: Sphinx of black quartz, judge my vow.", "answerText": "sphinx of black quartz, judge my vow" },
+    { "text": "Type this exactly: Two driven jocks help fax my big quiz.", "answerText": "two driven jocks help fax my big quiz" },
+    { "text": "Type this exactly: Pack my box with five dozen liquor jugs.", "answerText": "pack my box with five dozen liquor jugs" },
+    { "text": "Type this exactly: The five boxing wizards jump quickly.", "answerText": "the five boxing wizards jump quickly" },
+    { "text": "Type this exactly: Bright vixens jump; dozy fowl quack.", "answerText": "bright vixens jump; dozy fowl quack" },
+    { "text": "Type this exactly: Jackdaws love my big sphinx of quartz.", "answerText": "jackdaws love my big sphinx of quartz" },
+    { "text": "Type this exactly: Quick wafting zephyrs vex bold Jim.", "answerText": "quick wafting zephyrs vex bold jim" },
+    { "text": "Type this exactly: All questions asked by five watched experts amaze the judge.", "answerText": "all questions asked by five watched experts amaze the judge" },
+    { "text": "Type this exactly: The jay, pig, fox, zebra and my wolves quack.", "answerText": "the jay, pig, fox, zebra and my wolves quack" },
+    { "text": "Type this exactly: Crazy Fredericka bought many very exquisite opal jewels.", "answerText": "crazy fredericka bought many very exquisite opal jewels" }
+  ]
+}

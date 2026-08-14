@@ -1,0 +1,23 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    { "text": "Which planet is known as the Red Planet?", "options": ["Mars", "Venus", "Jupiter", "Mercury"], "answer": 0 },
+    { "text": "What is the largest ocean on Earth?", "options": ["Atlantic", "Indian", "Pacific", "Arctic"], "answer": 2 },
+    { "text": "Which country invented pizza as we know it?", "options": ["Greece", "Italy", "France", "Spain"], "answer": 1 },
+    { "text": "How many continents are there?", "options": ["5", "6", "7", "8"], "answer": 2 },
+    { "text": "Which animal is the fastest land animal?", "options": ["Lion", "Cheetah", "Horse", "Greyhound"], "answer": 1 },
+    { "text": "What is the capital of Japan?", "options": ["Osaka", "Kyoto", "Tokyo", "Nagoya"], "answer": 2 },
+    { "text": "Which element has the chemical symbol 'O'?", "options": ["Gold", "Osmium", "Oxygen", "Oganesson"], "answer": 2 },
+    { "text": "Who painted the Mona Lisa?", "options": ["Michelangelo", "Raphael", "Da Vinci", "Van Gogh"], "answer": 2 },
+    { "text": "What is the longest river in the world?", "options": ["Amazon", "Nile", "Yangtze", "Mississippi"], "answer": 1 },
+    { "text": "Which country is home to the kangaroo?", "options": ["Brazil", "Australia", "South Africa", "India"], "answer": 1 },
+    { "text": "How many players are on a soccer team?", "options": ["9", "10", "11", "12"], "answer": 2 },
+    { "text": "Which is the largest planet in our solar system?", "options": ["Saturn", "Neptune", "Jupiter", "Earth"], "answer": 2 },
+    { "text": "What year did humans first land on the Moon?", "options": ["1959", "1965", "1969", "1975"], "answer": 2 },
+    { "text": "Which language is spoken in Brazil?", "options": ["Spanish", "Portuguese", "French", "Italian"], "answer": 1 },
+    { "text": "How many colors are in a rainbow?", "options": ["5", "6", "7", "8"], "answer": 2 },
+    { "text": "Which famous scientist developed the theory of relativity?", "options": ["Newton", "Einstein", "Hawking", "Bohr"], "answer": 1 },
+    { "text": "What is the smallest prime number?", "options": ["0", "1", "2", "3"], "answer": 2 },
+    { "text": "Which country has the most time zones?", "options": ["USA", "Russia", "China", "France"], "answer": 3 }
+  ]
+}

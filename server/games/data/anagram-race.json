@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Anagram: RIGET",
+      "options": [
+        "TIGER",
+        "TIRES",
+        "TOWER",
+        "TULIP"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Anagram: NAOIP",
+      "options": [
+        "PILOT",
+        "PIETA",
+        "PIANO",
+        "PIVOT"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Anagram: RVIER",
+      "options": [
+        "RACER",
+        "RIDER",
+        "RIVER",
+        "ROVER"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Anagram: LODCU",
+      "options": [
+        "FLOUR",
+        "CLOTH",
+        "GLOVE",
+        "CLOUD"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Anagram: MOTRS",
+      "options": [
+        "STORM",
+        "STORY",
+        "STORK",
+        "SWARM"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Anagram: RABED",
+      "options": [
+        "BOARD",
+        "BRAND",
+        "BREAD",
+        "BEARD"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Anagram: GRAEP",
+      "options": [
+        "GRASP",
+        "GROPE",
+        "GRAPE",
+        "GRATE"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Anagram: HEPES",
+      "options": [
+        "SHEET",
+        "SHELF",
+        "SHEEP",
+        "SHINE"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Anagram: TWORE",
+      "options": [
+        "WORTH",
+        "THROW",
+        "TOWER",
+        "TWEET"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Anagram: HITGL",
+      "options": [
+        "RIGHT",
+        "LIGHT",
+        "TIGHT",
+        "FIGHT"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Anagram: NUSDO",
+      "options": [
+        "FOUND",
+        "SOUNDS",
+        "SOUND",
+        "ROUND"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Anagram: RHTEA",
+      "options": [
+        "THEIR",
+        "THREE",
+        "HEART",
+        "EARTH"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Anagram: YENHO",
+      "options": [
+        "HONEY",
+        "HONED",
+        "MONEY",
+        "HONOR"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Anagram: OMELN",
+      "options": [
+        "MELON",
+        "LEMUR",
+        "LILAC",
+        "LEMON"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Anagram: IPTUL",
+      "options": [
+        "TULIP",
+        "TOTAL",
+        "TUNA",
+        "TULSA"
+      ],
+      "answer": 0
+    }
+  ]
+}

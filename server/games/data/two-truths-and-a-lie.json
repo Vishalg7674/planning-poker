@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Share two truths and one lie about your work life. The room votes on the best liar." },
+    { "text": "Two truths and a lie about your hobbies. Keep the lie sneaky." },
+    { "text": "Two truths and one lie about your travel history." },
+    { "text": "Two truths and a lie about your food habits." },
+    { "text": "Two truths and one lie about your pets (real or imagined)." },
+    { "text": "Two truths and a lie about your first job." },
+    { "text": "Two truths and one lie about your sleep schedule." },
+    { "text": "Two truths and a lie about your music taste." },
+    { "text": "Two truths and one lie about your coding journey." },
+    { "text": "Two truths and a lie about your team." },
+    { "text": "Two truths and one lie about your dream job." },
+    { "text": "Two truths and a lie about your childhood." }
+  ]
+}

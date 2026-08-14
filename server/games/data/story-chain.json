@@ -1,0 +1,15 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Add the next line to the team's adventure: 'We opened the sprint planning doc and…'" },
+    { "text": "Next line: 'The client said 'surprise us'… so we did.'" },
+    { "text": "Next line: 'The demo went perfectly. Too perfectly…'" },
+    { "text": "Next line: 'It was the last deploy before the holiday…'" },
+    { "text": "Next line: 'The post-mortem was being written by the code itself…'" },
+    { "text": "Next line: 'Our mascot escaped the logo and started running the standup…'" },
+    { "text": "Next line: 'The recruitment ad said 'no drama'. The interviews disagreed…'" },
+    { "text": "Next line: 'One late-night commit changed everything…'" },
+    { "text": "Next line: 'The office dog got promoted to tech lead…'" },
+    { "text": "Next line: 'We shipped it. Then the reviews came in…'" }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Which country invented paper?",
+      "options": [
+        "Greece",
+        "Egypt",
+        "China",
+        "India"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the tallest mountain in the world?",
+      "options": [
+        "Denali",
+        "Kangchenjunga",
+        "Everest",
+        "K2"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "How many players are on a rugby union team?",
+      "options": [
+        "13",
+        "15",
+        "14",
+        "16"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which artist painted 'The Scream'?",
+      "options": [
+        "Salvador Dalí",
+        "Pablo Picasso",
+        "Edvard Munch",
+        "Gustav Klimt"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the currency of Switzerland?",
+      "options": [
+        "Franc",
+        "Euro",
+        "Krone",
+        "Pound"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which planet has the Great Red Spot?",
+      "options": [
+        "Saturn",
+        "Neptune",
+        "Mars",
+        "Jupiter"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "In chess, which piece can only move diagonally?",
+      "options": [
+        "Queen",
+        "Knight",
+        "Bishop",
+        "Rook"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Who wrote 'The Origin of Species'?",
+      "options": [
+        "Charles Darwin",
+        "Louis Pasteur",
+        "Gregor Mendel",
+        "Alfred Wallace"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "What is the largest island in the world?",
+      "options": [
+        "Greenland",
+        "Madagascar",
+        "New Guinea",
+        "Borneo"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which of these is a prime number?",
+      "options": [
+        "117",
+        "99",
+        "97",
+        "91"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What does 'www' stand for?",
+      "options": [
+        "World Web Wide",
+        "World Wide Web",
+        "Wide Web World",
+        "Web World Wide"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "How many years are in a century?",
+      "options": [
+        "100",
+        "50",
+        "200",
+        "150"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which country hosted the 2016 Summer Olympics?",
+      "options": [
+        "United Kingdom",
+        "China",
+        "Brazil",
+        "Japan"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the largest internal organ of the human body?",
+      "options": [
+        "Liver",
+        "Lung",
+        "Kidney",
+        "Heart"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which is the longest word in the English dictionary?",
+      "options": [
+        "Supercalifragilisticexpialidocious",
+        "Floccinaucinihilipilification",
+        "Pneumonoultramicroscopicsilicovolcanoconiosis",
+        "Antidisestablishmentarianism"
+      ],
+      "answer": 2
+    }
+  ]
+}

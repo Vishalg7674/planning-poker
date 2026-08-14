@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Which option is valid JavaScript that doubles a number?",
+      "options": [
+        "function n => n * 2 double",
+        "const double = (n) => n * 2;",
+        "const n * 2 = (n) => double;",
+        "double = (n) => const n * 2;"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which option is a valid function that greets a name?",
+      "options": [
+        "function greet(name) { return 'Hi ' + name; }",
+        "'Hi ' + name function greet { return }",
+        "function { return 'Hi ' + name; }(name)",
+        "greet(name) function { return 'Hi '; }"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which option is valid code that logs 0, 1 and 2?",
+      "options": [
+        "for (let i = 3; i > 0; i++) { console.log(i); }",
+        "for (let i = 0; i < 3; i++) { console.log(i); }",
+        "for (let i = 0; i < 3; i--) { console.log(i); }",
+        "for (i = 0; i < 3) { console.log(i); }"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which option correctly swaps two variables?",
+      "options": [
+        "a = b; b = a;",
+        "let t = a; a = b; b = t;",
+        "let t = a; b = a; a = t;",
+        "a = b; let t = a; b = t;"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which option is valid JSON?",
+      "options": [
+        "{name: 'Ada'}",
+        "{name: Ada}",
+        "{\"name\": \"Ada\"}",
+        "{'name': 'Ada'}"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which option defines a Python function?",
+      "options": [
+        "def greet(name) { return 'Hi ' + name }",
+        "greet = def(name): 'Hi ' + name",
+        "function greet(name) { return 'Hi ' + name }",
+        "def greet(name):\n    return 'Hi ' + name"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which option is a valid git command to commit?",
+      "options": [
+        "git -m commit 'message'",
+        "git commit message",
+        "commit git -m",
+        "git commit -m 'message'"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which option is a valid React component?",
+      "options": [
+        "function App() { return <div>Hi</div>; }",
+        "function App() => <div>Hi</div>;",
+        "<div>Hi</div> function App()",
+        "function App { return <div>Hi</div>; }"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which option is a valid SQL statement?",
+      "options": [
+        "SELECT name; FROM users",
+        "SELECT; name FROM users",
+        "SELECT name FROM users;",
+        "SELECT name FROM; users"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which option is a valid object literal?",
+      "options": [
+        "{ name = 'Ada', age = 36 }",
+        "{ name: 'Ada', age: 36 }",
+        "{ 'name', 'Ada', 'age', 36 }",
+        "{ name: Ada, age: 36 }"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which option is a valid CSS rule?",
+      "options": [
+        "color: red .btn { }",
+        ".btn color: red;",
+        "{ .btn: red; color }",
+        ".btn { color: red; }"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which option is a valid HTML anchor tag?",
+      "options": [
+        "<a>Home</a href>",
+        "<a href=\"/\">Home",
+        "<a href=\"/\" /Home>",
+        "<a href=\"/\">Home</a>"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which option is a valid import of a default export?",
+      "options": [
+        "import 'module' x;",
+        "import { x } from 'module';",
+        "import x from 'module';",
+        "const x = require x;"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which option is a valid way to log the length of an array?",
+      "options": [
+        "console.log(arr.len)",
+        "console.log(arr.length)",
+        "console.log(length.arr)",
+        "console.log(arr.length())"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which option is a valid conditional check in Python?",
+      "options": [
+        "if x > 5 {",
+        "if (x > 5) {",
+        "when x > 5:",
+        "if x > 5:"
+      ],
+      "answer": 3
+    }
+  ]
+}

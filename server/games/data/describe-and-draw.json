@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Describe a picture so clearly that a teammate could draw it and get it right." },
+    { "text": "Give a description of your desk setup for a teammate to draw." },
+    { "text": "Describe the office pet (real or imaginary) in drawable detail." },
+    { "text": "Describe a famous landmark using only geometry." },
+    { "text": "Describe a character from a book as precisely as you can." },
+    { "text": "Describe a scene from your favorite movie so a teammate can draw it." },
+    { "text": "Describe 'productivity' as an object." },
+    { "text": "Describe your morning commute (if it's a drawing, it's interesting)." },
+    { "text": "Describe the ideal team lunch spread for a drawing." },
+    { "text": "Describe a machine that turns procrastination into work." },
+    { "text": "Describe a creature that lives under your desk." },
+    { "text": "Describe a poster for the 'greatest team meeting ever'." }
+  ]
+}

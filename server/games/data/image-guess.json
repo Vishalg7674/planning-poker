@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "A macro photo: a dewdrop balanced on a green blade.",
+      "options": [
+        "A leaf vein",
+        "Grass",
+        "A spider web",
+        "A lens"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A blurry night shot of a round red glow.",
+      "options": [
+        "A brake light",
+        "A traffic light",
+        "A fire alarm",
+        "A sunset"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A black-and-white photo of a spiral staircase.",
+      "options": [
+        "A spiral staircase",
+        "A tornado",
+        "A conch shell",
+        "A fingerprint"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A photo of a wooden stick with a pink marshmallow on top.",
+      "options": [
+        "A popsicle",
+        "A toothbrush",
+        "A marshmallow on a stick",
+        "A candle"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "An aerial photo of a maze of tall hedges.",
+      "options": [
+        "A cornfield",
+        "A circuit board",
+        "A city grid",
+        "A hedge maze"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A close-up of a honeycomb dripping with honey.",
+      "options": [
+        "A waffle",
+        "A honeycomb",
+        "A pinecone",
+        "A shower sponge"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A silhouette of a cat against a bright window.",
+      "options": [
+        "A fox",
+        "A cat",
+        "A rabbit",
+        "A dog"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A photo of a steaming white mug on a wooden table.",
+      "options": [
+        "A cup of coffee",
+        "A candle",
+        "A humidifier",
+        "A bowl of soup"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A close-up of a keyboard with one key highlighted.",
+      "options": [
+        "A calculator",
+        "A piano",
+        "A typewriter",
+        "A keyboard"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A photo of a paper airplane caught mid-flight.",
+      "options": [
+        "A kite",
+        "A paper airplane",
+        "A drone",
+        "A bird"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A shot of a lighthouse beam cutting through fog.",
+      "options": [
+        "A searchlight",
+        "A flashlight",
+        "A car headlight",
+        "A lighthouse"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A macro photo of a snowflake on a dark glove.",
+      "options": [
+        "A piece of lace",
+        "A starfish",
+        "A snowflake",
+        "A slice of lemon"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A photo of a row of colorful umbrellas in the rain.",
+      "options": [
+        "Flowers",
+        "Mushrooms",
+        "Balloons",
+        "Umbrellas"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "An overhead shot of a pizza with one slice missing.",
+      "options": [
+        "A cake",
+        "A pie",
+        "A clock",
+        "A pizza"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A photo of a bicycle leaning against a brick wall.",
+      "options": [
+        "A bicycle",
+        "A scooter",
+        "A motorcycle",
+        "A wheelbarrow"
+      ],
+      "answer": 0
+    }
+  ]
+}

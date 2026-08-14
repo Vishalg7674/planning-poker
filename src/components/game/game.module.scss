@@ -54,24 +54,6 @@
   color: var(--accent-ink);
 }
 
-.copyBtn {
-  @include button-reset;
-  @include focus-ring;
-  font-size: 15px;
-  color: var(--ink-dim);
-  border: 1px solid var(--line);
-  border-radius: $r-md;
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-
-  &:hover {
-    color: var(--ink);
-    border-color: var(--accent);
-  }
-}
-
 .headerRight {
   display: flex;
   align-items: center;
@@ -168,6 +150,25 @@
   max-width: 52ch;
 }
 
+.or {
+  @include display;
+  font-size: clamp(18px, 2.4vw, 24px);
+  font-weight: 700;
+  color: var(--ink-dim);
+}
+
+.resultsPrompt {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--ink);
+  max-width: 56ch;
+
+  em {
+    font-style: italic;
+    color: var(--accent-bright);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Invite (waiting room)
 // ---------------------------------------------------------------------------
@@ -219,6 +220,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: $sp-2;
   padding: $sp-4 $sp-3;
   cursor: pointer;
@@ -259,6 +261,14 @@
   font-size: 15px;
   font-weight: 700;
   color: var(--ink);
+  text-align: center;
+}
+
+.optionLetter {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
 }
 
 .pickState {
@@ -267,6 +277,102 @@
   color: var(--ink-faint);
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+// ---------------------------------------------------------------------------
+// Choice cards (playing)
+// ---------------------------------------------------------------------------
+
+.choiceRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: $sp-4;
+  align-items: stretch;
+  width: 100%;
+  max-width: 720px;
+
+  @include media($bp-sm) {
+    grid-template-columns: 1fr;
+    gap: $sp-3;
+  }
+}
+
+.choiceCard {
+  @include button-reset;
+  @include focus-ring;
+  @include card-surface;
+  @include paper-grain;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-3;
+  padding: $sp-6 $sp-4;
+  cursor: pointer;
+  min-height: 150px;
+  @include motion((transform, box-shadow, opacity), $dur-base, $ease-snap);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-4px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 6px 12px rgba(0, 0, 0, 0.28),
+      0 18px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.choiceLetter {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--ink-faint);
+}
+
+.choiceText {
+  font-size: clamp(17px, 2.2vw, 22px);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.choiceMine {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--success) 55%, transparent);
+}
+
+.orBadge {
+  @include display;
+  align-self: center;
+  font-size: 16px;
+  font-weight: 800;
+  font-style: italic;
+  color: var(--ink-faint);
+  text-transform: lowercase;
+}
+
+// ---------------------------------------------------------------------------
+// Estimate (playing)
+// ---------------------------------------------------------------------------
+
+.estimateRow {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.estimateInput {
+  max-width: 220px;
 }
 
 // ---------------------------------------------------------------------------
@@ -305,6 +411,7 @@
   display: inline-flex;
   align-items: center;
   gap: $sp-2;
+  max-width: 52ch;
 }
 
 // ---------------------------------------------------------------------------
@@ -381,6 +488,60 @@
   color: var(--ink-dim);
 }
 
+.splitBars {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+  width: 100%;
+  max-width: 560px;
+}
+
+.splitRow {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+}
+
+.splitLetter {
+  @include mono;
+  font-size: 14px;
+  font-weight: 800;
+  width: 18px;
+  color: var(--ink-dim);
+}
+
+.splitTrack {
+  flex: 1;
+  height: 22px;
+  border-radius: $r-pill;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.splitFill {
+  height: 100%;
+  border-radius: $r-pill;
+  @include motion(width, $dur-slow, $ease-out);
+}
+
+.fillWin {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent));
+}
+
+.fillLoss {
+  background: linear-gradient(90deg, #6b7280, #4b5563);
+}
+
+.splitMeta {
+  @include mono;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  min-width: 74px;
+  text-align: right;
+}
+
 .pickReveal {
   width: 100%;
   text-align: left;
@@ -399,13 +560,13 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: $sp-1;
+  gap: $sp-2;
 }
 
 .pickRevealRow {
   display: flex;
   align-items: center;
-  gap: $sp-2;
+  gap: $sp-3;
   font-size: 13px;
   color: var(--ink-dim);
 }
@@ -413,6 +574,7 @@
 .pickRevealVoter {
   font-weight: 650;
   color: var(--ink);
+  min-width: 96px;
 }
 
 .pickRevealTarget {
@@ -421,6 +583,26 @@
   background: var(--accent);
   border-radius: $r-pill;
   padding: 1px 8px;
+}
+
+.choiceTag {
+  border-radius: $r-pill;
+  padding: 2px 10px;
+  font-weight: 650;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tagRight {
+  color: #04260f;
+  background: #46d07b;
+}
+
+.tagWrong {
+  color: #3b0a0a;
+  background: #f07070;
 }
 
 .footer {
@@ -435,6 +617,14 @@
 .roundNote {
   font-size: 12px;
   color: var(--ink-faint);
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .emptyTitle {

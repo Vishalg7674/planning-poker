@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Write a tagline for 'Meetings: The App'." },
+    { "text": "A tagline for a coffee brand called 'Deadline'." },
+    { "text": "Write a tagline for a company that makes sticky notes." },
+    { "text": "A tagline for 'Email Zero', a service that deletes your inbox." },
+    { "text": "Write a tagline for a fitness tracker that only tracks naps." },
+    { "text": "A tagline for a VPN called 'Obfuscate'." },
+    { "text": "Write a tagline for the world's most honest productivity app." },
+    { "text": "A tagline for a standup-comedy streaming service." },
+    { "text": "Write a tagline for a snack brand for developers." },
+    { "text": "A tagline for a calendar app that cancels your meetings." },
+    { "text": "Write a tagline for a search engine for office gossip." },
+    { "text": "A tagline for a keyboard that fixes your typos silently." }
+  ]
+}

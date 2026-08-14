@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Describe a scene for your team to draw. Be vivid — and drawable." },
+    { "text": "Give one-line instructions to draw the office mascot." },
+    { "text": "Describe something from your childhood for the team to draw." },
+    { "text": "Describe the perfect workspace in one sentence." },
+    { "text": "Give instructions to draw your favorite emoji, without naming it." },
+    { "text": "Describe a fictional creature for the team to draw." },
+    { "text": "Describe the view from your desk (real or imagined)." },
+    { "text": "Give one line to draw the team's spirit animal." },
+    { "text": "Describe a food so the team can draw it." },
+    { "text": "Describe your dream vacation scene in one sentence." },
+    { "text": "Give instructions to draw 'chaos' as a picture." },
+    { "text": "Describe the last meme you saw so the team can draw it." }
+  ]
+}

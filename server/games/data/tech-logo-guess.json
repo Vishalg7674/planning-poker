@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "A blue whale.",
+      "options": [
+        "GitLab",
+        "GitHub",
+        "Kubernetes",
+        "Docker"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A small blue bird.",
+      "options": [
+        "Slack",
+        "Twitter",
+        "LinkedIn",
+        "Facebook"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "An orange square with a white 'G'.",
+      "options": [
+        "Google",
+        "Go",
+        "GitLab",
+        "GitHub"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A green hexagonal node.",
+      "options": [
+        "Node.js",
+        "Hexo",
+        "Meteor",
+        "D3"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A blue atom with orbiting electrons.",
+      "options": [
+        "React",
+        "Electron",
+        "Atom",
+        "Redux"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A green robot head.",
+      "options": [
+        "Firefox",
+        "Linux",
+        "Android",
+        "Chrome"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A yellow diamond with a black 'V'.",
+      "options": [
+        "Vite",
+        "VS Code",
+        "Vim",
+        "Vue"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A blue shield with a white 'K'.",
+      "options": [
+        "Kotlin",
+        "Koa",
+        "Kubernetes",
+        "Kafka"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A red-orange crab.",
+      "options": [
+        "Rust",
+        "C++",
+        "Go",
+        "Java"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A black upward triangle.",
+      "options": [
+        "Heroku",
+        "Netlify",
+        "AWS",
+        "Vercel"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A colorful hashtag shape.",
+      "options": [
+        "Teams",
+        "Discord",
+        "WhatsApp",
+        "Slack"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A blue square with white 'TS'.",
+      "options": [
+        "JavaScript",
+        "Python",
+        "CoffeeScript",
+        "TypeScript"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A white cloud on a dark blue background.",
+      "options": [
+        "AWS",
+        "Google Cloud",
+        "Cloudflare",
+        "Azure"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A yellow lightning bolt.",
+      "options": [
+        "Slack",
+        "Stripe",
+        "Zapier",
+        "Twilio"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A blue square with a white 'N' built from layered blocks.",
+      "options": [
+        "Node.js",
+        "Netlify",
+        "NestJS",
+        "Next.js"
+      ],
+      "answer": 1
+    }
+  ]
+}

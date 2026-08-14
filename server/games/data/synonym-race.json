@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "A synonym for 'happy'.",
+      "options": [
+        "Joyful",
+        "Sleepy",
+        "Hungry",
+        "Angry"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A synonym for 'fast'.",
+      "options": [
+        "Loud",
+        "Quick",
+        "Heavy",
+        "Slow"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A synonym for 'big'.",
+      "options": [
+        "Tiny",
+        "Small",
+        "Short",
+        "Large"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'begin'.",
+      "options": [
+        "Stop",
+        "End",
+        "Pause",
+        "Start"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'smart'.",
+      "options": [
+        "Clever",
+        "Clumsy",
+        "Silly",
+        "Dull"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A synonym for 'quiet'.",
+      "options": [
+        "Silent",
+        "Chatty",
+        "Loud",
+        "Noisy"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A synonym for 'difficult'.",
+      "options": [
+        "Easy",
+        "Simple",
+        "Light",
+        "Hard"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'beautiful'.",
+      "options": [
+        "Plain",
+        "Boring",
+        "Ugly",
+        "Gorgeous"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'brave'.",
+      "options": [
+        "Timid",
+        "Shy",
+        "Fearful",
+        "Courageous"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'angry'.",
+      "options": [
+        "Happy",
+        "Calm",
+        "Furious",
+        "Relaxed"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A synonym for 'weird'.",
+      "options": [
+        "Normal",
+        "Common",
+        "Usual",
+        "Strange"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'ancient'.",
+      "options": [
+        "Fresh",
+        "Modern",
+        "New",
+        "Old"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'wealthy'.",
+      "options": [
+        "Needy",
+        "Poor",
+        "Broke",
+        "Rich"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A synonym for 'bright'.",
+      "options": [
+        "Dim",
+        "Shiny",
+        "Dull",
+        "Dark"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A synonym for 'laugh'.",
+      "options": [
+        "Frown",
+        "Giggle",
+        "Sigh",
+        "Cry"
+      ],
+      "answer": 1
+    }
+  ]
+}

@@ -17,6 +17,13 @@ describe('game registry', () => {
     expect(GAMES).toHaveLength(110);
   });
 
+  it('ships every game live — no coming-soon placeholders remain', () => {
+    for (const g of GAMES) {
+      expect(g.status, g.id).toBe('live');
+    }
+    expect(LIVE_GAMES).toHaveLength(110);
+  });
+
   it('has the exact expected per-category distribution', () => {
     const counts: Record<string, number> = {
       icebreakers: 15,
@@ -57,22 +64,30 @@ describe('game registry', () => {
     }
   });
 
-  it('marks the shipped games as live, pointing at the real implementations', () => {
-    expect(LIVE_GAMES).toHaveLength(2);
-    const ids = LIVE_GAMES.map((g) => g.id);
-    expect(ids).toContain('planning-poker');
-    expect(ids).toContain('most-likely-to');
+  it('marks the flagship games live, pointing at the real implementations', () => {
     const poker = getGame('planning-poker')!;
     expect(poker.status).toBe('live');
     expect(poker.route).toBe('/create');
     const mlt = getGame('most-likely-to')!;
     expect(mlt.status).toBe('live');
     expect(mlt.route).toBe('/games/most-likely-to');
+    const wyr = getGame('would-you-rather')!;
+    expect(wyr.status).toBe('live');
+    expect(wyr.route).toBe('/games/would-you-rather');
+    const tot = getGame('this-or-that')!;
+    expect(tot.status).toBe('live');
+    expect(tot.route).toBe('/games/this-or-that');
+    const quiz = getGame('team-trivia')!;
+    expect(quiz.status).toBe('live');
+    expect(quiz.route).toBe('/games/team-trivia');
+    const caption = getGame('caption-this')!;
+    expect(caption.status).toBe('live');
+    expect(caption.route).toBe('/games/caption-this');
   });
 
-  it('routes every coming-soon game to its placeholder page', () => {
-    for (const g of GAMES.filter((x) => x.status === 'coming-soon')) {
-      expect(g.route).toBe(`/games/${g.id}`);
+  it('routes every game to its page', () => {
+    for (const g of GAMES) {
+      expect(g.route, g.id).toBe(g.id === 'planning-poker' ? '/create' : `/games/${g.id}`);
     }
   });
 

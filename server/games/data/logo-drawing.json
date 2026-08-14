@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Recreate the world's most famous logo from memory — describe it in words." },
+    { "text": "Describe how you'd draw a tech company logo using only shapes." },
+    { "text": "What would a logo for 'Team Chaos' look like?" },
+    { "text": "Describe a logo that's just a circle and a swoosh, but make it iconic." },
+    { "text": "Invent a logo for the world's most boring app." },
+    { "text": "Describe a logo that looks like a happy accident." },
+    { "text": "What logo would represent 'it works on my machine'?" },
+    { "text": "Describe a minimalist logo that says everything with one line." },
+    { "text": "Invent a mascot logo for your team." },
+    { "text": "Describe a logo that would win an award for being confusing." },
+    { "text": "What would the logo of 'meetings that could have been emails' look like?" },
+    { "text": "Describe a retro 90s-style logo for a modern product." }
+  ]
+}

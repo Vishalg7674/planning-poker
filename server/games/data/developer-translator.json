@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Translate 'it works on my machine' into business speak." },
+    { "text": "Translate 'we need to refactor this' into something a PM won't question." },
+    { "text": "Translate 'that's a quick fix' into an honest sentence." },
+    { "text": "Translate 'the build is failing' into a calm status update." },
+    { "text": "Translate 'I'll get to your review after lunch' into developer truth." },
+    { "text": "Translate 'it's a known issue' for a client call." },
+    { "text": "Translate 'can you just add a field?' into what it actually costs." },
+    { "text": "Translate 'the tests pass' into the full story." },
+    { "text": "Translate 'we can make it work' into a realistic timeline." },
+    { "text": "Translate 'it's not a bug, it's a feature' for the changelog." },
+    { "text": "Translate 'let's just ship it' into a proper risk statement." },
+    { "text": "Translate 'I'm almost done' into a standup-friendly update." }
+  ]
+}

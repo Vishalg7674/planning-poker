@@ -1,0 +1,23 @@
+{
+  "kind": "options",
+  "prompts": [
+    { "text": "Pick a side:", "options": ["Coffee", "Tea"] },
+    { "text": "Pick a side:", "options": ["Mountains", "Beach"] },
+    { "text": "Pick a side:", "options": ["Cats", "Dogs"] },
+    { "text": "Pick a side:", "options": ["City life", "Country life"] },
+    { "text": "Pick a side:", "options": ["Early bird", "Night owl"] },
+    { "text": "Pick a side:", "options": ["Summer", "Winter"] },
+    { "text": "Pick a side:", "options": ["Tabs over spaces", "Spaces over tabs"] },
+    { "text": "Pick a side:", "options": ["Working from home", "Working from the office"] },
+    { "text": "Pick a side:", "options": ["Movie night", "Game night"] },
+    { "text": "Pick a side:", "options": ["Savoury", "Sweet"] },
+    { "text": "Pick a side:", "options": ["Planned", "Spontaneous"] },
+    { "text": "Pick a side:", "options": ["Loud music", "Silence"] },
+    { "text": "Pick a side:", "options": ["Window seat", "Aisle seat"] },
+    { "text": "Pick a side:", "options": ["Stand-up meeting", "Written update"] },
+    { "text": "Pick a side:", "options": ["Python", "JavaScript"] },
+    { "text": "Pick a side:", "options": ["Keyboard shortcuts", "Mouse clicks"] },
+    { "text": "Pick a side:", "options": ["Sandwich", "Burger"] },
+    { "text": "Pick a side:", "options": ["Sunrise", "Sunset"] }
+  ]
+}

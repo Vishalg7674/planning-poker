@@ -1,0 +1,11 @@
+{
+  "kind": "options",
+  "prompts": [
+    { "text": "How are you really doing today?", "options": ["🔥", "😊", "🙂", "😐", "😴", "😭"] },
+    { "text": "How's the sprint going for you?", "options": ["🚀", "👍", "🙃", "😅", "🥱", "😵"] },
+    { "text": "Pick the emoji that matches your week:", "options": ["🏆", "😎", "🤯", "😤", "🫠", "🌧️"] },
+    { "text": "How's your energy level right now?", "options": ["⚡", "🔋", "🥉", "🪫", "☕", "😴"] },
+    { "text": "What's your current mood?", "options": ["😁", "😌", "🤔", "😬", "🙁", "🤒"] },
+    { "text": "How are we feeling about today's meetings?", "options": ["😍", "🙂", "😐", "😬", "🙄", "😱"] }
+  ]
+}

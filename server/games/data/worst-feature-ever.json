@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Design the worst feature you could add to a note-taking app." },
+    { "text": "Invent a terrible feature for a calendar app." },
+    { "text": "Add the worst possible feature to a video call app." },
+    { "text": "Design a feature that would ruin a ride-sharing app." },
+    { "text": "Invent a terrible addition to a music streaming app." },
+    { "text": "What's the worst feature to add to a messaging app?" },
+    { "text": "Design a feature that makes a fitness tracker worse." },
+    { "text": "Invent the worst feature for a weather app." },
+    { "text": "Add a terrible feature to your company's actual product." },
+    { "text": "Design a feature that would ruin a food delivery app." },
+    { "text": "Invent the worst feature for a password manager." },
+    { "text": "What's the most annoying feature you could add to email?" }
+  ]
+}

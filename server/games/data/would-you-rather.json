@@ -1,0 +1,25 @@
+{
+  "kind": "options",
+  "prompts": [
+    { "text": "Would you rather…", "options": ["always be 10 minutes early", "always be 10 minutes late"] },
+    { "text": "Would you rather…", "options": ["have a photographic memory", "be able to forget anything on demand"] },
+    { "text": "Would you rather…", "options": ["only speak in emojis for a week", "only speak in corporate buzzwords for a week"] },
+    { "text": "Would you rather…", "options": ["never have to sleep again", "be able to sleep anywhere, instantly"] },
+    { "text": "Would you rather…", "options": ["lose the ability to say “no”", "lose the ability to say “yes”"] },
+    { "text": "Would you rather…", "options": ["work from a beach with bad wifi", "work from an office with perfect wifi"] },
+    { "text": "Would you rather…", "options": ["be great at small talk", "be great at silence"] },
+    { "text": "Would you rather…", "options": ["never attend another meeting", "never write another email"] },
+    { "text": "Would you rather…", "options": ["always know the weather", "always know the traffic"] },
+    { "text": "Would you rather…", "options": ["have your inbox always empty", "have your calendar always free"] },
+    { "text": "Would you rather…", "options": ["be the funniest person in the room", "be the smartest person in the room"] },
+    { "text": "Would you rather…", "options": ["travel anywhere for free", "eat anywhere for free"] },
+    { "text": "Would you rather…", "options": ["give presentations with zero nerves", "do code reviews with zero drama"] },
+    { "text": "Would you rather…", "options": ["live without coffee", "live without the internet"] },
+    { "text": "Would you rather…", "options": ["be known for your punctuality", "be known for your work"] },
+    { "text": "Would you rather…", "options": ["get 2 hours of deep work every day", "get 4 hours of shallow work every day"] },
+    { "text": "Would you rather…", "options": ["always remember people's names", "always remember people's birthdays"] },
+    { "text": "Would you rather…", "options": ["never be stuck in traffic again", "never be stuck in a queue again"] },
+    { "text": "Would you rather…", "options": ["have the best excuse for everything", "have the best stories for everything"] },
+    { "text": "Would you rather…", "options": ["be the first to know everything", "be the last to care about anything"] }
+  ]
+}

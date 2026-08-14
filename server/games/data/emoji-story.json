@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Tell a story about your week using only emojis." },
+    { "text": "Describe your ideal workday as a string of emojis." },
+    { "text": "Tell the story of your last project in 8 emojis or fewer." },
+    { "text": "Describe the office vibe right now with emojis." },
+    { "text": "Tell a mini-story: 'from coffee to deadline' using emojis." },
+    { "text": "Describe your team in one emoji sentence." },
+    { "text": "Tell the story of the last bug you fixed using only emojis." },
+    { "text": "Describe your weekend plans as an emoji story." },
+    { "text": "Tell a story about the office dog (real or imaginary) in emojis." },
+    { "text": "Describe the last meeting you survived, emoji-style." },
+    { "text": "Tell a story about 'Friday' that ends in an emoji plot twist." },
+    { "text": "Describe your dream vacation as an emoji sequence." }
+  ]
+}

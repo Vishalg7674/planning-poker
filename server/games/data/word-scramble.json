@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Unscramble: PLPAE",
+      "options": [
+        "PLANE",
+        "APPLE",
+        "PLATE",
+        "PAPER"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Unscramble: NAANBA",
+      "options": [
+        "CANADA",
+        "BANZAI",
+        "CABANA",
+        "BANANA"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Unscramble: RIHCA",
+      "options": [
+        "CHAIN",
+        "CHAIR",
+        "CHOIR",
+        "CHART"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Unscramble: KOYMNE",
+      "options": [
+        "MONKEY",
+        "DONKEY",
+        "MONEY",
+        "HOCKEY"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Unscramble: KTOPSDE",
+      "options": [
+        "POSTED",
+        "STOPPED",
+        "KEYPADS",
+        "DESKTOP"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Unscramble: BOARKDEY",
+      "options": [
+        "BROADWAY",
+        "KEYBOARD",
+        "BOOKKEEP",
+        "BARKODE"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Unscramble: TAIRGU",
+      "options": [
+        "GUITAR",
+        "TRAUMA",
+        "TURBAN",
+        "GOURMET"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Unscramble: ZIPAZ",
+      "options": [
+        "ZIPPO",
+        "PIAZZA",
+        "PASTA",
+        "PIZZA"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Unscramble: WNODIW",
+      "options": [
+        "WIDNOW",
+        "WINNOW",
+        "WIDOWS",
+        "WINDOW"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Unscramble: CEFIOF",
+      "options": [
+        "EFFECT",
+        "COFFEE",
+        "OFFICE",
+        "COFFIN"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Unscramble: RINNOMG",
+      "options": [
+        "MOORING",
+        "MORNING",
+        "MORPHIN",
+        "GNOMING"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Unscramble: LJENUG",
+      "options": [
+        "JUNGLE",
+        "JIGGLE",
+        "JUGGLE",
+        "JANGLE"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Unscramble: WOBRAIN",
+      "options": [
+        "BRAWNIO",
+        "ROWBARN",
+        "RAINBOW",
+        "BROWNIE"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Unscramble: EFCFOE",
+      "options": [
+        "FOCUS",
+        "COFFEE",
+        "COFFIN",
+        "OFFICE"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Unscramble: NRBIDAYT",
+      "options": [
+        "DAYBRIT",
+        "BIRTHDAY",
+        "BRANDITY",
+        "TRIBANDY"
+      ],
+      "answer": 1
+    }
+  ]
+}

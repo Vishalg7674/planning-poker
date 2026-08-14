@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "What is the capital of France? (Answer as incorrectly as possible.)" },
+    { "text": "What does HTTP stand for? Be confidently wrong." },
+    { "text": "How many planets are in the solar system? Worst answer wins." },
+    { "text": "What is the tallest mountain in the world? Be creative." },
+    { "text": "Who wrote the play Hamlet? Get it as wrong as you can." },
+    { "text": "What year did the web browser debut? Invent a date." },
+    { "text": "What is the speed of light? Any wrong number is fair game." },
+    { "text": "Which ocean is the largest? (There is no wrong answer that isn't funny.)" },
+    { "text": "What does a compiler do? Define it terribly." },
+    { "text": "Who is credited with inventing the light bulb? Pick anyone but the usual suspect." },
+    { "text": "What is the largest organ of the human body? Wrong is fine." },
+    { "text": "What comes after Tuesday? Overthink it." }
+  ]
+}

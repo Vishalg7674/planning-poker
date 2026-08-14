@@ -1,0 +1,23 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    { "text": "Which one doesn't belong?", "options": ["Python", "Java", "React", "Ruby"], "answer": 2 },
+    { "text": "Which one doesn't belong?", "options": ["Cat", "Dog", "Lion", "Keyboard"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Monday", "Tuesday", "Friday", "January"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Red", "Green", "Blue", "Square"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Sprint", "Backlog", "Standup", "Salsa"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["HTML", "CSS", "JavaScript", "MySQL"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Apple", "Banana", "Carrot", "Orange"], "answer": 2 },
+    { "text": "Which one doesn't belong?", "options": ["Git", "GitHub", "GitLab", "Coffee"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Guitar", "Piano", "Drums", "Sandwich"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["HTTP", "FTP", "SSH", "TACO"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Spring", "Summer", "Winter", "Weekend"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Frontend", "Backend", "DevOps", "Office chair"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Rice", "Pasta", "Bread", "Pizza dough raw"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Array", "Object", "Function", "Ceiling fan"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Tennis", "Soccer", "Basketball", "Chess clock"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Windows", "Linux", "macOS", "Firewall"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Duck", "Chicken", "Goose", "Toaster"], "answer": 3 },
+    { "text": "Which one doesn't belong?", "options": ["Celsius", "Fahrenheit", "Kelvin", "Oven timer"], "answer": 3 }
+  ]
+}

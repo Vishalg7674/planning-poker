@@ -1,0 +1,23 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    { "text": "What is 12 × 8?", "options": ["86", "96", "106", "88"], "answer": 1 },
+    { "text": "What is 144 ÷ 12?", "options": ["10", "11", "12", "14"], "answer": 2 },
+    { "text": "What is 7²?", "options": ["14", "42", "49", "56"], "answer": 2 },
+    { "text": "What is 25% of 80?", "options": ["16", "18", "20", "24"], "answer": 2 },
+    { "text": "What is 3⁴?", "options": ["12", "27", "64", "81"], "answer": 3 },
+    { "text": "What is 99 + 199?", "options": ["288", "298", "300", "308"], "answer": 1 },
+    { "text": "What is 1000 − 456?", "options": ["544", "554", "556", "564"], "answer": 0 },
+    { "text": "What is 5! (5 factorial)?", "options": ["60", "100", "120", "125"], "answer": 2 },
+    { "text": "What is 2⁸?", "options": ["128", "256", "512", "1024"], "answer": 1 },
+    { "text": "What is 15 × 15?", "options": ["200", "215", "225", "250"], "answer": 2 },
+    { "text": "What is 72 ÷ 9?", "options": ["6", "7", "8", "9"], "answer": 2 },
+    { "text": "What is 11²?", "options": ["111", "121", "122", "131"], "answer": 1 },
+    { "text": "What is 30 + 40 × 2?", "options": ["140", "110", "100", "120"], "answer": 1 },
+    { "text": "What is 9 × 7?", "options": ["56", "63", "64", "72"], "answer": 1 },
+    { "text": "What is 0.5 × 1000?", "options": ["50", "100", "500", "5000"], "answer": 2 },
+    { "text": "What is 13 + 27 − 5?", "options": ["33", "35", "36", "38"], "answer": 1 },
+    { "text": "What is 4³?", "options": ["16", "32", "48", "64"], "answer": 3 },
+    { "text": "What is 100 ÷ 4?", "options": ["20", "25", "40", "50"], "answer": 1 }
+  ]
+}

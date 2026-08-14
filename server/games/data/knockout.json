@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "What is the capital of Italy?",
+      "options": [
+        "Milan",
+        "Naples",
+        "Venice",
+        "Rome"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which element is represented by 'Fe'?",
+      "options": [
+        "Fluorine",
+        "Iron",
+        "Francium",
+        "Fermium"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "How many continents are there?",
+      "options": [
+        "Seven",
+        "Five",
+        "Eight",
+        "Six"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Who wrote 'Pride and Prejudice'?",
+      "options": [
+        "Emily Brontë",
+        "Jane Austen",
+        "Mary Shelley",
+        "Charlotte Brontë"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "What is the largest mammal?",
+      "options": [
+        "Blue whale",
+        "Hippopotamus",
+        "Giraffe",
+        "African elephant"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which country is known as the Land of the Rising Sun?",
+      "options": [
+        "Japan",
+        "Thailand",
+        "South Korea",
+        "China"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "What is the square root of 144?",
+      "options": [
+        "11",
+        "14",
+        "10",
+        "12"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which gas makes up most of Earth's atmosphere?",
+      "options": [
+        "Argon",
+        "Oxygen",
+        "Nitrogen",
+        "Carbon dioxide"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the largest bone in the human body?",
+      "options": [
+        "Pelvis",
+        "Tibia",
+        "Humerus",
+        "Femur"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which planet has the largest rings?",
+      "options": [
+        "Neptune",
+        "Uranus",
+        "Saturn",
+        "Jupiter"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "In which year did the Titanic sink?",
+      "options": [
+        "1915",
+        "1920",
+        "1912",
+        "1905"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the national animal of Australia?",
+      "options": [
+        "Platypus",
+        "Kangaroo",
+        "Koala",
+        "Emu"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "How many teeth does an adult human have?",
+      "options": [
+        "32",
+        "30",
+        "28",
+        "34"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which artist sculpted 'David'?",
+      "options": [
+        "Donatello",
+        "Michelangelo",
+        "Leonardo da Vinci",
+        "Raphael"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "What is the currency of Mexico?",
+      "options": [
+        "Real",
+        "Peso",
+        "Sol",
+        "Colón"
+      ],
+      "answer": 1
+    }
+  ]
+}

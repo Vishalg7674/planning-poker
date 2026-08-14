@@ -1,0 +1,23 @@
+{
+  "kind": "estimate",
+  "prompts": [
+    { "text": "How many jelly beans fit in a standard 1L jar?", "answer": 450, "unit": "jelly beans" },
+    { "text": "How many people have walked on the Moon?", "answer": 12, "unit": "people" },
+    { "text": "How many planets are in our solar system?", "answer": 8, "unit": "planets" },
+    { "text": "How many squares are on a chessboard?", "answer": 64, "unit": "squares" },
+    { "text": "How many minutes does it take light from the Sun to reach Earth?", "answer": 8, "unit": "minutes" },
+    { "text": "How many books are in the Harry Potter series?", "answer": 7, "unit": "books" },
+    { "text": "How many time zones does the world have?", "answer": 24, "unit": "time zones" },
+    { "text": "How many days are in a leap year?", "answer": 366, "unit": "days" },
+    { "text": "How many chambers does the human heart have?", "answer": 4, "unit": "chambers" },
+    { "text": "How many letters are in the English alphabet?", "answer": 26, "unit": "letters" },
+    { "text": "How many strings does a violin have?", "answer": 4, "unit": "strings" },
+    { "text": "How many faces does a cube have?", "answer": 6, "unit": "faces" },
+    { "text": "How many Olympic rings are there?", "answer": 5, "unit": "rings" },
+    { "text": "How many days are in the longest month?", "answer": 31, "unit": "days" },
+    { "text": "How many digits does a US phone number have?", "answer": 10, "unit": "digits" },
+    { "text": "How many Grand Slam tennis tournaments are there in a year?", "answer": 4, "unit": "tournaments" },
+    { "text": "How many days does it take Mercury to orbit the Sun?", "answer": 88, "unit": "days" },
+    { "text": "How many megabytes are in a gigabyte?", "answer": 1024, "unit": "MB" }
+  ]
+}

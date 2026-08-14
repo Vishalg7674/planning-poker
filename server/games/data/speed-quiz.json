@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "What is the fastest land animal?",
+      "options": [
+        "Cheetah",
+        "Lion",
+        "Horse",
+        "Ostrich"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which planet has the shortest day?",
+      "options": [
+        "Mars",
+        "Earth",
+        "Jupiter",
+        "Saturn"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which of these is a prime number?",
+      "options": [
+        "57",
+        "51",
+        "53",
+        "63"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "In which year did the first iPhone launch?",
+      "options": [
+        "2011",
+        "2007",
+        "2005",
+        "2009"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "What is the largest mammal?",
+      "options": [
+        "Hippo",
+        "Giraffe",
+        "Blue Whale",
+        "Elephant"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the chemical symbol for gold?",
+      "options": [
+        "Ag",
+        "Go",
+        "Gd",
+        "Au"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "How many sides does a hexagon have?",
+      "options": [
+        "5",
+        "8",
+        "6",
+        "7"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What does RAM stand for?",
+      "options": [
+        "Rapid Access Memory",
+        "Real Application Memory",
+        "Random Access Memory",
+        "Read And Modify"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the capital of Australia?",
+      "options": [
+        "Perth",
+        "Sydney",
+        "Melbourne",
+        "Canberra"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "How many zeros are in a million?",
+      "options": [
+        "7",
+        "6",
+        "5",
+        "9"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which is the longest river in the world?",
+      "options": [
+        "Mississippi",
+        "Amazon",
+        "Yangtze",
+        "Nile"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which country has the most people?",
+      "options": [
+        "United States",
+        "China",
+        "Indonesia",
+        "India"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "What is the boiling point of water at sea level?",
+      "options": [
+        "100°C",
+        "110°C",
+        "90°C",
+        "120°C"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "How many players are on a basketball team on the court?",
+      "options": [
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which of these is a keyboard shortcut to copy?",
+      "options": [
+        "Ctrl + C",
+        "Ctrl + X",
+        "Ctrl + V",
+        "Ctrl + P"
+      ],
+      "answer": 0
+    }
+  ]
+}

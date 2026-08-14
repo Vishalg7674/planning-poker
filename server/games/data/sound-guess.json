@@ -1,0 +1,17 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    { "text": "🔊 *ding-dong* — what sound is that?", "options": ["Doorbell", "Microwave", "Alarm clock"], "answer": 0 },
+    { "text": "🔊 *meep meep* — what is it?", "options": ["A bird", "A car horn", "A phone"], "answer": 1 },
+    { "text": "🔊 *ring ring* — what sound is this?", "options": ["Phone", "Doorbell", "Cash register"], "answer": 0 },
+    { "text": "🔊 *tick tock* — what is it?", "options": ["A clock", "A keyboard", "A train"], "answer": 0 },
+    { "text": "🔊 *vroom vroom* — what sound is this?", "options": ["An engine", "A vacuum", "A plane"], "answer": 0 },
+    { "text": "🔊 *beep boop* — what is it?", "options": ["A robot", "A cat", "A whistle"], "answer": 0 },
+    { "text": "🔊 *knock knock* — what sound is this?", "options": ["Someone at the door", "A woodpecker", "Typing"], "answer": 0 },
+    { "text": "🔊 *click clack* — what is it?", "options": ["A keyboard", "High heels", "Castanets"], "answer": 0 },
+    { "text": "🔊 *ding* — what sound is this?", "options": ["A microwave", "A bell", "A notification"], "answer": 0 },
+    { "text": "🔊 *whoosh* — what is it?", "options": ["Wind", "A slide", "A train"], "answer": 0 },
+    { "text": "🔊 *buzz* — what sound is this?", "options": ["A bee", "A fly", "A mosquito"], "answer": 0 },
+    { "text": "🔊 *pop* — what is it?", "options": ["A balloon", "A firework", "A cork"], "answer": 0 }
+  ]
+}

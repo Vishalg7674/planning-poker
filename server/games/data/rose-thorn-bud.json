@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Share your rose (a win), thorn (a struggle), and bud (something you look forward to)." },
+    { "text": "Your rose: something that went well this week. One line." },
+    { "text": "Your thorn: something that didn't go as planned. One line." },
+    { "text": "Your bud: something you're excited about. One line." },
+    { "text": "Rose, thorn, bud — but keep all three in one sentence." },
+    { "text": "Rose: a small victory from today." },
+    { "text": "Thorn: the thing that's quietly annoying you." },
+    { "text": "Bud: the next thing on your calendar you're looking forward to." },
+    { "text": "Rose, thorn, bud — team edition: one win, one issue, one hope for the team." },
+    { "text": "Rose: a moment that made you smile this week." },
+    { "text": "Thorn: a blocker you're wrestling with." },
+    { "text": "Bud: a possibility you're curious about." }
+  ]
+}

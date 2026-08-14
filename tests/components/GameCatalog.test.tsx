@@ -13,7 +13,11 @@ describe('GameCatalog', () => {
     // The shipped games carry a LIVE badge.
     expect(screen.getByText('Planning Poker')).toBeInTheDocument();
     expect(screen.getByText('Most Likely To')).toBeInTheDocument();
-    expect(screen.getAllByText('LIVE')).toHaveLength(2);
+    expect(screen.getByText('Would You Rather')).toBeInTheDocument();
+    expect(screen.getByText('This or That')).toBeInTheDocument();
+    expect(screen.getByText('Team Trivia')).toBeInTheDocument();
+    // Every catalog game is live now.
+    expect(screen.getAllByText('LIVE')).toHaveLength(GAME_COUNT);
   });
 
   it('filters instantly by search', async () => {

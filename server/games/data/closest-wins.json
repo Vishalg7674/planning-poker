@@ -1,0 +1,23 @@
+{
+  "kind": "estimate",
+  "prompts": [
+    { "text": "How many countries are in Europe?", "answer": 44, "unit": "countries" },
+    { "text": "How many bones does the adult human body have?", "answer": 206, "unit": "bones" },
+    { "text": "What is the speed of light in km/s?", "answer": 299792, "unit": "km/s" },
+    { "text": "How many teeth does an adult human have?", "answer": 32, "unit": "teeth" },
+    { "text": "How many weeks are in a year?", "answer": 52, "unit": "weeks" },
+    { "text": "How many continents are there?", "answer": 7, "unit": "continents" },
+    { "text": "How many moons does Mars have?", "answer": 2, "unit": "moons" },
+    { "text": "How many seconds are in a day?", "answer": 86400, "unit": "seconds" },
+    { "text": "How many keys does a standard piano have?", "answer": 88, "unit": "keys" },
+    { "text": "How many elements are on the periodic table?", "answer": 118, "unit": "elements" },
+    { "text": "How many hearts does an octopus have?", "answer": 3, "unit": "hearts" },
+    { "text": "How many stars are on the US flag?", "answer": 50, "unit": "stars" },
+    { "text": "How many strings does a standard guitar have?", "answer": 6, "unit": "strings" },
+    { "text": "How many minutes is a standard football (soccer) match?", "answer": 90, "unit": "minutes" },
+    { "text": "How many colors are in a standard box of crayons?", "answer": 64, "unit": "crayons" },
+    { "text": "How many days does it take the Moon to orbit Earth?", "answer": 27, "unit": "days" },
+    { "text": "How many legs does an adult insect have?", "answer": 6, "unit": "legs" },
+    { "text": "How many countries share a border with Brazil?", "answer": 10, "unit": "countries" }
+  ]
+}

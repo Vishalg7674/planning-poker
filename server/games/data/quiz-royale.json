@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Which country is the largest by area?",
+      "options": [
+        "United States",
+        "Canada",
+        "Russia",
+        "China"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the capital of Canada?",
+      "options": [
+        "Vancouver",
+        "Montreal",
+        "Toronto",
+        "Ottawa"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "How many minutes are in a full day?",
+      "options": [
+        "1,240",
+        "1,560",
+        "1,320",
+        "1,440"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which is the only continent without a desert?",
+      "options": [
+        "Europe",
+        "South America",
+        "Antarctica",
+        "Australia"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "What is the smallest bone in the human body?",
+      "options": [
+        "Stapes",
+        "Femur",
+        "Patella",
+        "Coccyx"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Who developed the World Wide Web?",
+      "options": [
+        "Bill Gates",
+        "Steve Jobs",
+        "Tim Berners-Lee",
+        "Vint Cerf"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which language has the most native speakers?",
+      "options": [
+        "English",
+        "Spanish",
+        "Hindi",
+        "Mandarin"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "What does 'USB' stand for?",
+      "options": [
+        "Unified System Bus",
+        "Universal System Board",
+        "Universal Serial Bus",
+        "United Serial Bus"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which animal sleeps standing up?",
+      "options": [
+        "Rabbit",
+        "Horse",
+        "Dog",
+        "Cat"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "What is the national sport of Japan?",
+      "options": [
+        "Kendo",
+        "Judo",
+        "Sumo",
+        "Karate"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "How many bones does a baby have at birth?",
+      "options": [
+        "206",
+        "270",
+        "350",
+        "300"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which planet has the most moons?",
+      "options": [
+        "Uranus",
+        "Saturn",
+        "Jupiter",
+        "Neptune"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "What year did the Berlin Wall fall?",
+      "options": [
+        "1987",
+        "1989",
+        "1988",
+        "1990"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which is the hardest natural substance?",
+      "options": [
+        "Granite",
+        "Titanium",
+        "Quartz",
+        "Diamond"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "How many time zones are there in the world?",
+      "options": [
+        "40",
+        "32",
+        "24",
+        "38"
+      ],
+      "answer": 0
+    }
+  ]
+}

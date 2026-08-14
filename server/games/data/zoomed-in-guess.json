@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "An extreme close-up: a maze of orange ridges and bumps.",
+      "options": [
+        "A sponge",
+        "A brain",
+        "An orange peel",
+        "A pineapple skin"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Tiny repeating hexagons with a drop of liquid in the middle.",
+      "options": [
+        "A honeycomb",
+        "A tile floor",
+        "A basketball",
+        "A circuit board"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A pattern of tiny holes across a soft gray surface.",
+      "options": [
+        "A shower sponge",
+        "A golf ball",
+        "A strawberry",
+        "A slice of bread"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Rows of tiny white squares on a dark background.",
+      "options": [
+        "A window grid",
+        "A city skyline at night",
+        "A keyboard",
+        "A chessboard"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A velvety green surface with a single dewdrop.",
+      "options": [
+        "A leaf",
+        "A frog",
+        "A golf course",
+        "A felt table"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Black-and-white parallel ridges that loop back on themselves.",
+      "options": [
+        "A fingerprint",
+        "A vinyl record",
+        "Wood grain",
+        "Corduroy fabric"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A close-up of a soft yellow surface dotted with tiny bumps.",
+      "options": [
+        "A basketball",
+        "A sponge",
+        "An orange",
+        "A golf ball"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Tiny red spheres clustered together on a stem.",
+      "options": [
+        "Cherries",
+        "Tomatoes",
+        "Cranberries",
+        "Raspberries"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "A silvery surface with a tiny circular depression in the center.",
+      "options": [
+        "A button",
+        "A lens",
+        "A record",
+        "A coin"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Blue-white zigzag stripes on a dark background.",
+      "options": [
+        "A zebra",
+        "A storm drain",
+        "Lightning",
+        "A barcode"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A fuzzy brown surface with two small dark holes.",
+      "options": [
+        "A coconut",
+        "A teddy bear",
+        "A kiwi",
+        "A walnut"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "A grid of tiny lights glowing green on a dark board.",
+      "options": [
+        "A theater marquee",
+        "A traffic light",
+        "A circuit board",
+        "A starry sky"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A white foam ring with a golden-brown center.",
+      "options": [
+        "A cinnamon roll",
+        "A donut",
+        "A bagel",
+        "A lifebuoy"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Tiny golden fibers woven tightly together.",
+      "options": [
+        "A towel",
+        "A rope",
+        "A mop",
+        "A hairbrush"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "A close-up of a dark surface covered in perfectly round dimples.",
+      "options": [
+        "A golf ball",
+        "An orange",
+        "A basketball",
+        "A waffle"
+      ],
+      "answer": 0
+    }
+  ]
+}

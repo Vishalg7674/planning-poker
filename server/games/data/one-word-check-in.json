@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Describe your week in one word." },
+    { "text": "One word for how you're feeling right now." },
+    { "text": "One word for your energy level today." },
+    { "text": "One word for your current focus." },
+    { "text": "One word that sums up your Monday." },
+    { "text": "One word for your weekend." },
+    { "text": "One word for the team's vibe today." },
+    { "text": "One word for your coffee status." },
+    { "text": "One word for what you need right now." },
+    { "text": "One word for your current project." },
+    { "text": "One word for this sprint." },
+    { "text": "One word for your state of mind." }
+  ]
+}

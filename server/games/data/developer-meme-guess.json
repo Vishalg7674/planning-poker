@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "'It works on my machine' really means…",
+      "options": [
+        "The code is perfect",
+        "It probably breaks on yours",
+        "It's deployed",
+        "It's ready for production"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The usual reply to 'it works on my machine' is…",
+      "options": [
+        "It's a browser issue",
+        "I can't reproduce it",
+        "Add a console.log",
+        "Restart your computer"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The '99 little bugs in the code' song ends with…",
+      "options": [
+        "127 little bugs in the code",
+        "The file gets deleted",
+        "A rewrite in Rust",
+        "Ship it anyway"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The meme about senior devs and searching is…",
+      "options": [
+        "Senior devs never google",
+        "Senior devs google too — they just google better",
+        "Senior devs memorize everything",
+        "Senior devs wrote Google"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "'It's not a bug, it's a feature' implies…",
+      "options": [
+        "Ship it faster",
+        "There is no bug",
+        "The code is clean",
+        "The bug is being marketed as intentional"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The 'works in my container' meme means…",
+      "options": [
+        "Containers are magic",
+        "It works locally so it must work in prod",
+        "It's a config issue",
+        "Docker fixes everything"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "'There are only 10 types of people…' is a joke about…",
+      "options": [
+        "Decimal",
+        "Python vs Java",
+        "Binary",
+        "Developer types"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "'I'll just add one more dependency' usually ends with…",
+      "options": [
+        "A tree of 400 packages",
+        "Better performance",
+        "A faster build",
+        "Fewer bugs"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The 'real programmers' joke ends with…",
+      "options": [
+        "They don't use IDEs",
+        "They use Vim",
+        "They write tests",
+        "They write in binary"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "'It compiled, ship it!' is a joke about…",
+      "options": [
+        "The tests pass",
+        "The code is reviewed",
+        "The build is green",
+        "The code might still be broken"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "'Have you tried turning it off and on again?' is the #1 answer to…",
+      "options": [
+        "Standup updates",
+        "Any tech support question",
+        "Stack Overflow questions",
+        "Code review comments"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The 'I'm not a robot' CAPTCHA meme jokes about…",
+      "options": [
+        "AI replacing developers",
+        "Proving you're not a robot",
+        "Password managers",
+        "Robots taking jobs"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "'There's no place like 127.0.0.1' is a joke about…",
+      "options": [
+        "localhost being home",
+        "The cloud",
+        "A favorite IP",
+        "DNS servers"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "'It's not a bug, it's an undocumented feature' pairs best with…",
+      "options": [
+        "The code review",
+        "The release notes",
+        "The QA report",
+        "The standup"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The 'works on my machine' certified badge is…",
+      "options": [
+        "A LinkedIn skill",
+        "A Stack Overflow badge",
+        "A GitHub achievement",
+        "A meme, not a real badge"
+      ],
+      "answer": 3
+    }
+  ]
+}

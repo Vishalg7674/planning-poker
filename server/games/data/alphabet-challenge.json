@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Name a work thing starting with 'A'." },
+    { "text": "Name a food starting with 'B' — as interesting as possible." },
+    { "text": "Name a hobby starting with 'C'." },
+    { "text": "Name a place starting with 'D'." },
+    { "text": "Name a movie starting with 'E'." },
+    { "text": "Name a team name starting with 'F'." },
+    { "text": "Name an animal starting with 'G'." },
+    { "text": "Name a country starting with 'H'." },
+    { "text": "Name a game starting with 'I'." },
+    { "text": "Name a song starting with 'J'." },
+    { "text": "Name a city starting with 'K'." },
+    { "text": "Name a book starting with 'L'." }
+  ]
+}

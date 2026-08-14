@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Start a chain: a word ending in 'A' — your best next link?" },
+    { "text": "A chain word that starts with 'T' — make it clever." },
+    { "text": "Next link in the chain, starting with 'N'." },
+    { "text": "Your chain word starting with 'E'." },
+    { "text": "A chain link starting with 'R' — impress the table." },
+    { "text": "Your word starting with 'S' to keep the chain alive." },
+    { "text": "Chain link starting with 'L'." },
+    { "text": "Your word starting with 'C' — bonus points for long ones." },
+    { "text": "A chain word starting with 'P'." },
+    { "text": "Your link starting with 'D'." },
+    { "text": "A chain word starting with 'M' — no repeats allowed." },
+    { "text": "Your chain word starting with 'B'." }
+  ]
+}

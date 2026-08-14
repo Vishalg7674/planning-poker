@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "C_T — a small furry pet",
+      "options": [
+        "A",
+        "I",
+        "E",
+        "O"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "D_G — a loyal animal friend",
+      "options": [
+        "A",
+        "E",
+        "I",
+        "O"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "P_G — a farm animal with a curly tail",
+      "options": [
+        "E",
+        "I",
+        "A",
+        "O"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "B_G — what you carry groceries in",
+      "options": [
+        "E",
+        "A",
+        "I",
+        "O"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "H_T — what you wear on your head",
+      "options": [
+        "E",
+        "A",
+        "I",
+        "O"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "B_D — where you sleep at night",
+      "options": [
+        "O",
+        "A",
+        "E",
+        "I"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "F_X — a clever forest animal",
+      "options": [
+        "A",
+        "E",
+        "I",
+        "O"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "M_P — what you use to find your way",
+      "options": [
+        "O",
+        "I",
+        "A",
+        "E"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "L_G — a chunk of a tree",
+      "options": [
+        "A",
+        "I",
+        "O",
+        "E"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "N_T — what a fisherman casts",
+      "options": [
+        "O",
+        "I",
+        "E",
+        "A"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "P_N — what you fry eggs in",
+      "options": [
+        "O",
+        "I",
+        "A",
+        "E"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "R_D — the color of a fire engine",
+      "options": [
+        "O",
+        "I",
+        "E",
+        "A"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "S_X — a number between five and seven",
+      "options": [
+        "I",
+        "E",
+        "A",
+        "O"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "W_N — what the winner does",
+      "options": [
+        "O",
+        "I",
+        "E",
+        "A"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "J_M — what you spread on toast",
+      "options": [
+        "A",
+        "E",
+        "O",
+        "I"
+      ],
+      "answer": 0
+    }
+  ]
+}

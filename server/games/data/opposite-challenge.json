@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "The opposite of 'hot'.",
+      "options": [
+        "Cold",
+        "Spicy",
+        "Warm",
+        "Boiling"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The opposite of 'day'.",
+      "options": [
+        "Afternoon",
+        "Night",
+        "Noon",
+        "Morning"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The opposite of 'happy'.",
+      "options": [
+        "Sad",
+        "Joyful",
+        "Excited",
+        "Cheerful"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The opposite of 'up'.",
+      "options": [
+        "High",
+        "Over",
+        "Above",
+        "Down"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The opposite of 'start'.",
+      "options": [
+        "Finish",
+        "Open",
+        "Begin",
+        "Launch"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The opposite of 'buy'.",
+      "options": [
+        "Get",
+        "Order",
+        "Purchase",
+        "Sell"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The opposite of 'strong'.",
+      "options": [
+        "Sturdy",
+        "Tough",
+        "Mighty",
+        "Weak"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The opposite of 'young'.",
+      "options": [
+        "New",
+        "Fresh",
+        "Junior",
+        "Old"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The opposite of 'laugh'.",
+      "options": [
+        "Smile",
+        "Chuckle",
+        "Giggle",
+        "Cry"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The opposite of 'always'.",
+      "options": [
+        "Constantly",
+        "Never",
+        "Eternally",
+        "Forever"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The opposite of 'open'.",
+      "options": [
+        "Ajar",
+        "Unlocked",
+        "Closed",
+        "Wide"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The opposite of 'win'.",
+      "options": [
+        "Lose",
+        "Prevail",
+        "Triumph",
+        "Succeed"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The opposite of 'fast'.",
+      "options": [
+        "Swift",
+        "Slow",
+        "Rapid",
+        "Quick"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The opposite of 'dark'.",
+      "options": [
+        "Gloomy",
+        "Shadowy",
+        "Light",
+        "Dim"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The opposite of 'remember'.",
+      "options": [
+        "Memorize",
+        "Recall",
+        "Forget",
+        "Replay"
+      ],
+      "answer": 2
+    }
+  ]
+}

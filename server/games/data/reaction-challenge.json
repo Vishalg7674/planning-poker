@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "React fast: type the word 'GO' the moment you see this prompt.", "answerText": "go" },
+    { "text": "Type 'STOP' as quickly as you can.", "answerText": "stop" },
+    { "text": "First to type 'SPRINT' wins the round. Go!", "answerText": "sprint" },
+    { "text": "Type 'COFFEE' — fastest fingers win.", "answerText": "coffee" },
+    { "text": "Type 'SHIP IT' — speed matters.", "answerText": "ship it" },
+    { "text": "Type 'PING' faster than anyone.", "answerText": "ping" },
+    { "text": "Type 'DONE' the moment you're ready.", "answerText": "done" },
+    { "text": "Type 'NEXT' — don't hesitate.", "answerText": "next" },
+    { "text": "Type 'LGTM' as fast as you can.", "answerText": "lgtm" },
+    { "text": "Type 'HURRY' — the round depends on it.", "answerText": "hurry" },
+    { "text": "Type 'FAST' — show no mercy.", "answerText": "fast" },
+    { "text": "Type 'NOW' the instant you read this.", "answerText": "now" }
+  ]
+}

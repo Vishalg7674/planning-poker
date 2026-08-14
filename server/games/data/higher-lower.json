@@ -1,0 +1,125 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "The Eiffel Tower is 330 m tall. Is the Statue of Liberty higher or lower?",
+      "options": [
+        "Higher",
+        "Lower"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Is the Atlantic Ocean's area higher or lower than 100 million km²?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Is the average human body temperature higher or lower than 38°C?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the average distance from Earth to Mars higher or lower than 150 million km?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Is a day on Venus (243 Earth days) higher or lower than 200 Earth days?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Is the number of bones in an adult human higher or lower than in a newborn (300)?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the top speed of a Formula 1 car higher or lower than 300 km/h?",
+      "options": [
+        "Higher",
+        "Lower"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the resting heart rate of an adult higher or lower than 100 bpm?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the number of letters in 'supercalifragilisticexpialidocious' higher or lower than 30?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Is the number of continents higher or lower than 5?",
+      "options": [
+        "Higher",
+        "Lower"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the number of teeth in an adult human mouth higher or lower than 36?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the number of cards in a standard deck higher or lower than 50?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Is the number of seconds in a day higher or lower than 80,000?",
+      "options": [
+        "Higher",
+        "Lower"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the population of the United States higher or lower than 500 million?",
+      "options": [
+        "Lower",
+        "Higher"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Is the height of the Great Pyramid of Giza higher or lower than 200 m?",
+      "options": [
+        "Higher",
+        "Lower"
+      ],
+      "answer": 1
+    }
+  ]
+}

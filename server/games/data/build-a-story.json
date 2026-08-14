@@ -1,0 +1,15 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Vote on the best next beat for a story about a startup that runs on spreadsheets." },
+    { "text": "Propose the next plot twist for a detective story set in an office." },
+    { "text": "Suggest the best villain origin story for a rogue to-do list app." },
+    { "text": "Propose the next chapter: 'The hackathon winners woke up with a strange new skill…'" },
+    { "text": "What should happen next in the saga of the team that lost the Wi-Fi password?" },
+    { "text": "Propose the ending for a story that begins 'It all started with a merge conflict'." },
+    { "text": "Suggest the next obstacle for heroes trying to launch a rocket made of office chairs." },
+    { "text": "Propose a twist for a story about a sentient elevator." },
+    { "text": "What happens after 'the Q3 launch was saved by a very specific Excel formula'?" },
+    { "text": "Propose the next scene in a movie about a team that outsmarts a hostile AI calendar." }
+  ]
+}

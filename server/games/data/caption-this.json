@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "A cat sitting on a keyboard, arms outstretched like it's conducting an orchestra." },
+    { "text": "Your team's group chat after someone deploys to production on a Friday." },
+    { "text": "A tiny dog wearing sunglasses on a skateboard, cruising past a fire hydrant." },
+    { "text": "The office fridge: one sad carton of milk and a wilting salad from last week." },
+    { "text": "A squirrel standing on two legs, holding an acorn like it's about to give a toast." },
+    { "text": "The 'meeting could have been an email' stare across the table." },
+    { "text": "A penguin in a business suit carrying a briefcase through a blizzard." },
+    { "text": "Someone's camera-on moment where they forgot the blur was off." },
+    { "text": "A goldfish doing a dramatic slow-motion dive into a bowl of cereal." },
+    { "text": "The standup where everyone says 'no blockers' but someone's code is on fire." },
+    { "text": "A baby goat standing on the back of a sheep, surveying its kingdom." },
+    { "text": "That screenshot from the screenshare that became a meme instantly." }
+  ]
+}

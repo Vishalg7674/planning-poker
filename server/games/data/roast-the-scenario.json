@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Roast the 9 AM standup." },
+    { "text": "Roast the person who says 'let me play devil's advocate' in every meeting." },
+    { "text": "Roast the endless 'quick sync' that turns into an hour." },
+    { "text": "Roast the meeting that could have been a Slack message." },
+    { "text": "Roast the onboarding doc written in 2019 that no one updated." },
+    { "text": "Roast the group chat that pings 47 times about lunch." },
+    { "text": "Roast the calendar invite sent at 5 PM for an 8 AM meeting." },
+    { "text": "Roast the shared drive with 14 versions of 'final_final_v2'." },
+    { "text": "Roast the projector that only works when you're 10 minutes late." },
+    { "text": "Roast the 'quick question' that arrives right as you sit down to focus." },
+    { "text": "Roast the office thermostat arguments." },
+    { "text": "Roast the intern's first pull request titled 'stuff'." }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Its flag is a red circle on a white background.",
+      "options": [
+        "Switzerland",
+        "Japan",
+        "South Korea",
+        "China"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Home of the kangaroo and the koala.",
+      "options": [
+        "South Africa",
+        "Brazil",
+        "Australia",
+        "New Zealand"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Its flag has a single red maple leaf.",
+      "options": [
+        "Canada",
+        "Finland",
+        "Greenland",
+        "Denmark"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Pasta, pizza and the Colosseum.",
+      "options": [
+        "Portugal",
+        "Spain",
+        "Italy",
+        "Greece"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The Great Pyramid of Giza stands here.",
+      "options": [
+        "Egypt",
+        "Israel",
+        "Jordan",
+        "Saudi Arabia"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Home of the Eiffel Tower.",
+      "options": [
+        "Netherlands",
+        "Switzerland",
+        "France",
+        "Belgium"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The Statue of Liberty welcomes you to its harbor.",
+      "options": [
+        "Canada",
+        "United States",
+        "United Kingdom",
+        "Mexico"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Home of the giant panda.",
+      "options": [
+        "Japan",
+        "China",
+        "Vietnam",
+        "India"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Samba, Carnival and the Amazon rainforest.",
+      "options": [
+        "Argentina",
+        "Brazil",
+        "Colombia",
+        "Mexico"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Its flag is the Union Jack.",
+      "options": [
+        "New Zealand",
+        "United Kingdom",
+        "Fiji",
+        "Australia"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Its flag is red with a white crescent moon and star.",
+      "options": [
+        "Turkey",
+        "Algeria",
+        "Pakistan",
+        "Tunisia"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The Taj Mahal is one of its wonders.",
+      "options": [
+        "Nepal",
+        "Iran",
+        "Pakistan",
+        "India"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Its flag is three vertical stripes: green, white and orange.",
+      "options": [
+        "Italy",
+        "Ireland",
+        "India",
+        "Ivory Coast"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Famous for its fjords and northern lights.",
+      "options": [
+        "Sweden",
+        "Iceland",
+        "Norway",
+        "Finland"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Sushi, samurai and Mount Fuji.",
+      "options": [
+        "Thailand",
+        "China",
+        "South Korea",
+        "Japan"
+      ],
+      "answer": 3
+    }
+  ]
+}

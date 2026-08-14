@@ -1,0 +1,19 @@
+{
+  "kind": "teammate",
+  "prompts": [
+    "Which teammate would say \"it works on my machine\"?",
+    "Who would describe their day as \"a vibe, honestly\"?",
+    "Who says \"one more thing…\" before a 20-minute monologue?",
+    "Who would say \"did someone already fix this?\" before checking git?",
+    "Who greets the team with \"alright, legends\" every single morning?",
+    "Who would call a merge conflict \"an adventure\"?",
+    "Who says \"I'll just do it quickly\" and then disappears for three hours?",
+    "Who would name a branch \"final_v2_actually_done_for_real\"?",
+    "Who says \"that's a tomorrow problem\" every Friday?",
+    "Who would ask \"does anyone else hear that noise?\" during a deep-focus block?",
+    "Who declares \"ship it\" without looking at the UI?",
+    "Who says \"per my last email\" out loud, unironically?",
+    "Who would describe their weekend as \"productive chaos\"?",
+    "Who says \"small bug, tiny fix\" before a full rewrite?"
+  ]
+}

@@ -34,10 +34,10 @@ describe('GameCard', () => {
     expect(screen.getByText('LIVE')).toBeInTheDocument();
   });
 
-  it('marks a coming-soon game and links to its placeholder page', () => {
+  it('marks a live game and links to its real route', () => {
     render(<GameCard game={soon} />);
-    const card = screen.getByRole('link', { name: /Coming soon/ });
+    const card = screen.getByRole('link', { name: /Play now/ });
     expect(card).toHaveAttribute('href', '/games/fastest-finger');
-    expect(screen.getByText('COMING SOON')).toBeInTheDocument();
+    expect(screen.getByText('LIVE')).toBeInTheDocument();
   });
 });

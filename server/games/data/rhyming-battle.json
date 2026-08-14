@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Write a rhyme about the weather." },
+    { "text": "A rhyme about coffee (or tea, if you're feeling rebellious)." },
+    { "text": "Write a rhyme about meetings." },
+    { "text": "A rhyme about the weekend." },
+    { "text": "Write a rhyme about bugs in code." },
+    { "text": "A rhyme about lunch." },
+    { "text": "Write a rhyme about deadlines." },
+    { "text": "A rhyme about your favorite snack." },
+    { "text": "Write a rhyme about Monday." },
+    { "text": "A rhyme about the office pet." },
+    { "text": "Write a rhyme about working from home." },
+    { "text": "A rhyme about the last deploy." }
+  ]
+}

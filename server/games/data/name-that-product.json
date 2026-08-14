@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Invent a product name that sounds expensive but is useless." },
+    { "text": "Name a fake app for 'organizing your life' — make it oddly specific." },
+    { "text": "Invent a name for a startup that turns meetings into podcasts." },
+    { "text": "Name a product that fixes your Wi-Fi with sheer confidence." },
+    { "text": "Invent a brand name for a coffee that promises productivity." },
+    { "text": "Name the next big thing in desk toys." },
+    { "text": "Invent a name for an AI that does your chores — and your job." },
+    { "text": "Name a gadget for people who hate gadgets." },
+    { "text": "Invent a name for a service that delivers snacks to meetings." },
+    { "text": "Name a fake social platform for teams that hate socializing." },
+    { "text": "Invent a product name that includes the word 'sync'." },
+    { "text": "Name the app your team actually needs but no one has built." }
+  ]
+}

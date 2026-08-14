@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "The most upvoted question of all time on Stack Overflow is about…",
+      "options": [
+        "Undoing 'git add' before commit",
+        "How to exit Vim",
+        "Sorting a dictionary by value",
+        "How to center a div"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The classic answer to 'How do I center a div?' is…",
+      "options": [
+        "float: center",
+        "align: center",
+        "margin: 0 auto",
+        "display: block-center"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The legendary 'How to exit Vim' answer starts with…",
+      "options": [
+        "Just restart",
+        "Close the terminal",
+        "Type 'exit'",
+        "Press Esc, then :q!"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Why is '==' different from '===' in JavaScript?",
+      "options": [
+        "=== is always faster",
+        "=== only works on numbers",
+        "== coerces types, === does not",
+        "== is always false"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "A question closed as a duplicate gets…",
+      "options": [
+        "A link to the canonical question",
+        "A bounty",
+        "Deleted forever",
+        "A downvote penalty"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The 'Good Question' badge is earned by…",
+      "options": [
+        "Editing 100 posts",
+        "Asking 10 questions",
+        "Getting an accepted answer",
+        "Getting 25 upvotes on a question"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "'Please provide the code you've tried' is a common…",
+      "options": [
+        "Comment asking for a minimal reproducible example",
+        "Spam filter",
+        "Auto-delete rule",
+        "Site bug"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "What does 'TL;DR' mean in answers?",
+      "options": [
+        "To Learn; Do Research",
+        "The Longest Debug Report",
+        "Too Long; Didn't Read",
+        "Total Lines; Data Ratio"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The most duplicated question on the site is about…",
+      "options": [
+        "Sorting arrays",
+        "Importing CSS",
+        "Looping in JS",
+        "Centering a div"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "How do you mark an answer as solving your problem?",
+      "options": [
+        "Upvote it",
+        "Star it",
+        "Comment 'thanks'",
+        "Click the green checkmark"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "What happens to a question that's already been asked?",
+      "options": [
+        "It gets flagged as a duplicate",
+        "It gets a bounty",
+        "It gets pinned",
+        "It's automatically deleted"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The reputation needed to upvote answers is…",
+      "options": [
+        "50",
+        "100",
+        "1",
+        "15"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "What is a 'minimal, reproducible example' best for?",
+      "options": [
+        "Winning a bounty",
+        "Impress the moderator",
+        "Avoiding the close queue",
+        "Getting a useful answer fast"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which of these gets a question closed fastest?",
+      "options": [
+        "Spelling errors",
+        "Posted on a weekend",
+        "Too short",
+        "Too broad"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "What do you call a user with 200,000+ reputation?",
+      "options": [
+        "Stack Champion",
+        "Grand Master",
+        "Legendary",
+        "Overflow Wizard"
+      ],
+      "answer": 2
+    }
+  ]
+}

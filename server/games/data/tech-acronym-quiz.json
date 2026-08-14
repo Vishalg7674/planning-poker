@@ -1,0 +1,23 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    { "text": "What does 'API' stand for?", "options": ["Application Programming Interface", "Advanced Program Integration", "Automated Protocol Interface", "Application Process Index"], "answer": 0 },
+    { "text": "What does 'SQL' stand for?", "options": ["Structured Query Language", "Simple Question Language", "Sequential Query Logic", "Standard Query List"], "answer": 0 },
+    { "text": "What does 'CSS' stand for?", "options": ["Cascading Style Sheets", "Computer Style System", "Creative Style Syntax", "Coded Style Sheets"], "answer": 0 },
+    { "text": "What does 'DNS' stand for?", "options": ["Domain Name System", "Digital Network Service", "Data Name Server", "Domain Navigation System"], "answer": 0 },
+    { "text": "What does 'HTTP' stand for?", "options": ["HyperText Transfer Protocol", "High Tech Transfer Process", "HyperText Transmission Platform", "Host Transfer Protocol"], "answer": 0 },
+    { "text": "What does 'SSH' stand for?", "options": ["Secure Shell", "System Shell Host", "Secure Server Handler", "Socket Shell Hub"], "answer": 0 },
+    { "text": "What does 'CI' stand for in CI/CD?", "options": ["Continuous Integration", "Code Injection", "Continuous Interface", "Compiled Iteration"], "answer": 0 },
+    { "text": "What does 'IDE' stand for?", "options": ["Integrated Development Environment", "Interface Design Engine", "Internal Debug Editor", "Input Development Engine"], "answer": 0 },
+    { "text": "What does 'JSON' stand for?", "options": ["JavaScript Object Notation", "Java Script Output Name", "Just Simple Object Network", "JavaScript Optimized Notation"], "answer": 0 },
+    { "text": "What does 'URL' stand for?", "options": ["Uniform Resource Locator", "Universal Reference Link", "Unique Resource Label", "Uniform Route Locator"], "answer": 0 },
+    { "text": "What does 'VPN' stand for?", "options": ["Virtual Private Network", "Very Private Node", "Virtual Protocol Node", "Verified Public Network"], "answer": 0 },
+    { "text": "What does 'RAM' stand for?", "options": ["Random Access Memory", "Read Access Module", "Rapid Application Memory", "Random Allocation Memory"], "answer": 0 },
+    { "text": "What does 'GPU' stand for?", "options": ["Graphics Processing Unit", "General Processing Unit", "Graphical Power Unit", "Global Processing Utility"], "answer": 0 },
+    { "text": "What does 'SaaS' stand for?", "options": ["Software as a Service", "System as a Server", "Software and Security", "Server as a Service"], "answer": 0 },
+    { "text": "What does 'UI' stand for?", "options": ["User Interface", "Universal Input", "User Integration", "Unique Interface"], "answer": 0 },
+    { "text": "What does 'UX' stand for?", "options": ["User Experience", "Universal Exchange", "User Extension", "Unique Experience"], "answer": 0 },
+    { "text": "What does 'AWS' stand for?", "options": ["Amazon Web Services", "Automated Web System", "Advanced Web Solutions", "Amazon Wide System"], "answer": 0 },
+    { "text": "What does 'QA' stand for?", "options": ["Quality Assurance", "Quick Action", "Query Analysis", "Quality Assessment"], "answer": 0 }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Pitch a startup so absurd it just might work. One line." },
+    { "text": "Invent a fake startup that disrupts something that shouldn't be disrupted." },
+    { "text": "Create a startup idea for AI that solves an imaginary problem." },
+    { "text": "Pitch a food delivery startup with a terrible twist." },
+    { "text": "Invent a fake SaaS product with a name that's a pun." },
+    { "text": "Pitch a startup for a market of exactly one person." },
+    { "text": "Create a fake crypto project with a silly name." },
+    { "text": "Invent a startup that automates something you love doing manually." },
+    { "text": "Pitch a coworking space with a bizarre theme." },
+    { "text": "Invent a fake productivity startup that promises the opposite." },
+    { "text": "Create a startup that charges people for free things." },
+    { "text": "Pitch a fake social network for an unusual community." }
+  ]
+}

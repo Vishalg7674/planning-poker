@@ -4,7 +4,9 @@ import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
 import ThemeToggle from '@/components/ThemeToggle';
 import ComingSoonGame from '@/components/games/ComingSoonGame';
+import GameRoom from '@/components/game/GameRoom';
 import { getGame, getCategory } from '@/lib/games';
+import { getGameConfig } from '@/lib/gameConfig';
 import styles from './placeholder.module.scss';
 
 interface GamePageProps {
@@ -26,7 +28,13 @@ export default async function GamePage({ params }: GamePageProps) {
   const game = getGame(gameId);
   if (!game) notFound();
 
-  // Live games are real — send players to the actual implementation.
+  // Engine-backed live games render through the shared GameRoom — one
+  // component, driven by src/lib/gameConfig.ts + server JSON data.
+  if (game.status === 'live' && getGameConfig(gameId)) {
+    return <GameRoom gameId={gameId} />;
+  }
+
+  // Planning poker has its own dedicated page at /create.
   if (game.status === 'live') redirect(game.route);
 
   const category = getCategory(game.category);

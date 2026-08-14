@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "What's the first word that comes to mind when you hear 'meeting'?" },
+    { "text": "First word for 'deadline'." },
+    { "text": "What do you associate with 'coffee'?" },
+    { "text": "First word for 'Monday'." },
+    { "text": "What does 'code' make you think of?" },
+    { "text": "First word for 'Friday'." },
+    { "text": "What comes to mind for 'office'?" },
+    { "text": "First word for 'deploy'." },
+    { "text": "What do you associate with 'lunch'?" },
+    { "text": "First word for 'weekend'." },
+    { "text": "What does 'productivity' make you think of?" },
+    { "text": "First word for 'remote'." }
+  ]
+}

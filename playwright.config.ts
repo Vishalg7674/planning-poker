@@ -46,9 +46,19 @@ export default defineConfig({
   webServer: [
     {
       // 1) The in-memory Socket.io realtime server.
+      // RATE_LIMIT_DISABLED: the specs create several rooms per run from one
+      // IP — the Phase 0 buckets (5 creates/min) would reject them. The
+      // limiter itself is covered by unit tests (tests/unit/server/rateLimit.test.ts).
+      // SOCKET_ORIGIN: the app is served on WEB_PORT, so that (not the server
+      // default of localhost:3000) is the origin allowed to open WebSockets.
       command: 'node server/index.mjs',
       port: REALTIME_PORT,
-      env: { ...process.env, SOCKET_PORT: String(REALTIME_PORT) },
+      env: {
+        ...process.env,
+        SOCKET_PORT: String(REALTIME_PORT),
+        SOCKET_ORIGIN: `http://localhost:${WEB_PORT}`,
+        RATE_LIMIT_DISABLED: '1',
+      },
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,
     },

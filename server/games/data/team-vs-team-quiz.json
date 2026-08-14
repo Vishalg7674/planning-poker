@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Which country won the 2022 FIFA World Cup?",
+      "options": [
+        "Germany",
+        "Brazil",
+        "France",
+        "Argentina"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "How many rings are on the Olympic flag?",
+      "options": [
+        "Five",
+        "Six",
+        "Seven",
+        "Four"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Who holds the record for the most Olympic gold medals?",
+      "options": [
+        "Carl Lewis",
+        "Usain Bolt",
+        "Michael Phelps",
+        "Larisa Latynina"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which city hosted the first modern Olympics?",
+      "options": [
+        "London",
+        "Athens",
+        "Rome",
+        "Paris"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "In which year did World War II end?",
+      "options": [
+        "1944",
+        "1943",
+        "1946",
+        "1945"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Who was the first President of the United States?",
+      "options": [
+        "Thomas Jefferson",
+        "John Adams",
+        "George Washington",
+        "Benjamin Franklin"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Which empire built the Colosseum?",
+      "options": [
+        "Greek",
+        "Egyptian",
+        "Roman",
+        "Ottoman"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the national sport of the United States?",
+      "options": [
+        "American Football",
+        "Basketball",
+        "Hockey",
+        "Baseball"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which country has the most World Cup titles?",
+      "options": [
+        "Germany",
+        "Brazil",
+        "Argentina",
+        "Italy"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Who discovered penicillin?",
+      "options": [
+        "Alexander Fleming",
+        "Marie Curie",
+        "Joseph Lister",
+        "Louis Pasteur"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which ancient wonder was located in Alexandria?",
+      "options": [
+        "The Colossus",
+        "The Hanging Gardens",
+        "The Lighthouse",
+        "The Pyramids"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "How many players are on a standard soccer team?",
+      "options": [
+        "11",
+        "10",
+        "12",
+        "9"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which wall divided Berlin during the Cold War?",
+      "options": [
+        "The Berlin Wall",
+        "The Iron Curtain",
+        "Hadrian's Wall",
+        "The Great Wall"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Who was the first woman to win a Nobel Prize?",
+      "options": [
+        "Marie Curie",
+        "Rosa Parks",
+        "Mother Teresa",
+        "Ada Lovelace"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Which country invented the game of basketball?",
+      "options": [
+        "United States",
+        "Canada",
+        "Australia",
+        "England"
+      ],
+      "answer": 0
+    }
+  ]
+}

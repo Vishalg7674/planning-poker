@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Describe yourself in exactly one sentence. Don't use your name." },
+    { "text": "Describe a hidden talent without saying what it is." },
+    { "text": "Describe your role on the team without saying your job title." },
+    { "text": "Give a clue about something you love, without naming it." },
+    { "text": "Describe your typical Friday afternoon, vaguely enough to be anyone." },
+    { "text": "Share one thing that's true about you that the team probably doesn't know." },
+    { "text": "Describe your desk setup without mentioning any brand." },
+    { "text": "Give a hint about your favorite snack, without naming it." },
+    { "text": "Describe your energy at 9 AM in one vivid sentence." },
+    { "text": "Describe what you'd do with a surprise day off, without naming the activity." },
+    { "text": "Give a clue about the last thing you binge-watched." },
+    { "text": "Describe your morning routine in exactly one sentence." }
+  ]
+}

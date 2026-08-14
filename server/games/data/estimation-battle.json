@@ -1,0 +1,20 @@
+{
+  "kind": "estimate",
+  "prompts": [
+    { "text": "How many seconds are in a week?", "answer": 604800, "unit": "seconds" },
+    { "text": "How many liters of water does the average human body contain?", "answer": 42, "unit": "liters" },
+    { "text": "What percentage of Earth's surface is covered by water?", "answer": 71, "unit": "%" },
+    { "text": "How many McDonald's restaurants are there in the world?", "answer": 40000, "unit": "restaurants" },
+    { "text": "How many airports are there in the United States?", "answer": 14000, "unit": "airports" },
+    { "text": "How many words are in the English language (roughly)?", "answer": 600000, "unit": "words" },
+    { "text": "How many seconds does light take to travel from the Sun to Earth?", "answer": 500, "unit": "seconds" },
+    { "text": "How many elements occur naturally on Earth?", "answer": 94, "unit": "elements" },
+    { "text": "How tall is the Eiffel Tower in meters?", "answer": 330, "unit": "meters" },
+    { "text": "How many teeth does a shark have at any one time?", "answer": 50, "unit": "teeth" },
+    { "text": "How many bones are in a human hand?", "answer": 27, "unit": "bones" },
+    { "text": "How many steps does the average person take per day?", "answer": 7000, "unit": "steps" },
+    { "text": "How many languages are spoken in the world?", "answer": 7000, "unit": "languages" },
+    { "text": "How many cups of coffee are drunk worldwide every day?", "answer": 2500000000, "unit": "cups" },
+    { "text": "How many countries does the equator pass through?", "answer": 13, "unit": "countries" }
+  ]
+}

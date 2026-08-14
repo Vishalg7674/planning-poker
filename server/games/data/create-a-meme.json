@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Write the punchline for a meme about 'deploying on a Friday'." },
+    { "text": "Top text for a meme of a very confused developer." },
+    { "text": "Write the bottom text for: 'me trying to explain my job at a family dinner'." },
+    { "text": "Caption a meme about the eternal 'it's not a bug, it's a feature'." },
+    { "text": "Write the text for a meme about meetings that could be emails." },
+    { "text": "Punchline for a meme about refactoring." },
+    { "text": "Caption a meme about the difference between estimates and reality." },
+    { "text": "Write a meme line about working from home." },
+    { "text": "Caption a meme about the group project where you did everything." },
+    { "text": "Write the text for a meme about software updates." },
+    { "text": "Caption a meme about coffee and code." },
+    { "text": "Write a meme punchline about 'one more line of code'." }
+  ]
+}

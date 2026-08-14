@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "Memorize: A, 7, K, Q. The host will hide it — what was the third item?", "answerText": "k" },
+    { "text": "Memorize: blue, red, green, yellow. What was the second color?", "answerText": "red" },
+    { "text": "Memorize: 42, 17, 8. What was the first number?", "answerText": "42" },
+    { "text": "Memorize: sprint, retro, planning, review. Which came third?", "answerText": "planning" },
+    { "text": "Memorize: coffee, tea, juice, water. What was the last drink?", "answerText": "water" },
+    { "text": "Memorize: alpha, beta, gamma. What was the middle letter?", "answerText": "beta" },
+    { "text": "Memorize: 1, 1, 2, 3, 5. What came after 3?", "answerText": "5" },
+    { "text": "Memorize: dev, qa, pm, ux. Which role was second?", "answerText": "qa" },
+    { "text": "Memorize: sun, moon, star. Which one was first?", "answerText": "sun" },
+    { "text": "Memorize: jira, slack, zoom, drive. What was third?", "answerText": "zoom" },
+    { "text": "Memorize: 3, 6, 9, 12. What came after 9?", "answerText": "12" },
+    { "text": "Memorize: apple, banana, cherry. What was the middle fruit?", "answerText": "banana" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "kind": "estimate",
+  "prompts": [
+    { "text": "How many minutes does the average meeting last?", "answer": 45, "unit": "minutes" },
+    { "text": "What percentage of your day do you spend in meetings?", "answer": 30, "unit": "%" },
+    { "text": "How many unread emails do you have right now?", "answer": 150, "unit": "emails" },
+    { "text": "How many messages does your team send per day?", "answer": 200, "unit": "messages" },
+    { "text": "How many minutes does your commute take?", "answer": 30, "unit": "minutes" },
+    { "text": "How many browser tabs do you have open right now?", "answer": 15, "unit": "tabs" },
+    { "text": "How many passwords do you think you have?", "answer": 40, "unit": "passwords" },
+    { "text": "How many hours per week do you spend on video calls?", "answer": 8, "unit": "hours" },
+    { "text": "How many cups of coffee does your team drink per day?", "answer": 25, "unit": "cups" },
+    { "text": "How many days is your team's typical sprint?", "answer": 14, "unit": "days" },
+    { "text": "How many sticky notes are on your desk right now?", "answer": 12, "unit": "notes" },
+    { "text": "How many notifications do you clear per day?", "answer": 30, "unit": "notifications" },
+    { "text": "How many times do you check your phone per hour?", "answer": 10, "unit": "times" },
+    { "text": "How many hours of deep work do you get per week?", "answer": 15, "unit": "hours" },
+    { "text": "How many meetings could this team cut per week without anyone noticing?", "answer": 3, "unit": "meetings" }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    { "text": "Which error do you get when a file isn't found?", "options": ["TypeError", "FileNotFoundError", "SyntaxError", "PermissionError"], "answer": 1 },
+    { "text": "Which error means you tried to use something before defining it?", "options": ["ValueError", "IndexError", "NameError", "KeyError"], "answer": 2 },
+    { "text": "Which error do you get for 1 / 0 in Python?", "options": ["ValueError", "ZeroDivisionError", "MathError", "OverflowError"], "answer": 1 },
+    { "text": "Which error means a list index is out of range?", "options": ["KeyError", "ValueError", "IndexError", "TypeError"], "answer": 2 },
+    { "text": "Which error do you get when a dict key doesn't exist?", "options": ["IndexError", "KeyError", "NameError", "AttributeError"], "answer": 1 },
+    { "text": "Which error means the syntax is invalid?", "options": ["TypeError", "ValueError", "SyntaxError", "RuntimeError"], "answer": 2 },
+    { "text": "Which HTTP error do you get for a missing page?", "options": ["500", "403", "404", "401"], "answer": 2 },
+    { "text": "Which error means you called a method on the wrong type?", "options": ["TypeError", "KeyError", "IndexError", "ValueError"], "answer": 0 },
+    { "text": "Which error do you get when you try to convert 'abc' to an integer?", "options": ["TypeError", "ValueError", "SyntaxError", "NameError"], "answer": 1 },
+    { "text": "Which error means the server failed unexpectedly?", "options": ["400", "404", "500", "302"], "answer": 2 },
+    { "text": "Which error do you get for an undefined variable in JavaScript?", "options": ["TypeError", "ReferenceError", "SyntaxError", "RangeError"], "answer": 1 },
+    { "text": "Which error means a function was called with the wrong number of arguments?", "options": ["ValueError", "TypeError", "ArgumentError", "SyntaxError"], "answer": 1 },
+    { "text": "Which error do you get when a database query fails?", "options": ["SyntaxError", "OperationalError", "KeyError", "IndexError"], "answer": 1 },
+    { "text": "Which error means you tried to access a property of null?", "options": ["NullError", "TypeError", "ReferenceError", "SyntaxError"], "answer": 1 },
+    { "text": "Which status code means the resource moved permanently?", "options": ["301", "404", "500", "403"], "answer": 0 },
+    { "text": "Which error do you get when a package is not installed?", "options": ["ImportError", "ValueError", "TypeError", "KeyError"], "answer": 0 }
+  ]
+}

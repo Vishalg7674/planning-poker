@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Inventor of the practical light bulb.",
+      "options": [
+        "Nikola Tesla",
+        "Benjamin Franklin",
+        "Thomas Edison",
+        "Alexander Graham Bell"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "First human to walk on the Moon.",
+      "options": [
+        "Alan Shepard",
+        "Neil Armstrong",
+        "Buzz Aldrin",
+        "Yuri Gagarin"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Author of '1984'.",
+      "options": [
+        "H. G. Wells",
+        "Aldous Huxley",
+        "Ray Bradbury",
+        "George Orwell"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Frontman of Queen.",
+      "options": [
+        "Elton John",
+        "David Bowie",
+        "Mick Jagger",
+        "Freddie Mercury"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "CEO behind SpaceX and Tesla.",
+      "options": [
+        "Jeff Bezos",
+        "Mark Zuckerberg",
+        "Bill Gates",
+        "Elon Musk"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Boxer known as 'The Greatest'.",
+      "options": [
+        "Mike Tyson",
+        "Floyd Mayweather",
+        "Muhammad Ali",
+        "Joe Frazier"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Painter who famously cut off part of his ear.",
+      "options": [
+        "Pablo Picasso",
+        "Claude Monet",
+        "Vincent van Gogh",
+        "Rembrandt"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Physicist who developed the theory of relativity.",
+      "options": [
+        "Isaac Newton",
+        "Stephen Hawking",
+        "Albert Einstein",
+        "Niels Bohr"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The King of Pop.",
+      "options": [
+        "Madonna",
+        "Michael Jackson",
+        "Elvis Presley",
+        "Prince"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Starred as Jack in 'Titanic'.",
+      "options": [
+        "Johnny Depp",
+        "Leonardo DiCaprio",
+        "Brad Pitt",
+        "George Clooney"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Founded Amazon in his garage.",
+      "options": [
+        "Elon Musk",
+        "Larry Page",
+        "Jeff Bezos",
+        "Bill Gates"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Wrote 'Hamlet' and 'Romeo and Juliet'.",
+      "options": [
+        "Leo Tolstoy",
+        "Jane Austen",
+        "William Shakespeare",
+        "Charles Dickens"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "First American woman in space.",
+      "options": [
+        "Amelia Earhart",
+        "Valentina Tereshkova",
+        "Mae Jemison",
+        "Sally Ride"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Led the civil rights movement's 'I Have a Dream' speech.",
+      "options": [
+        "Rosa Parks",
+        "Martin Luther King Jr.",
+        "Malcolm X",
+        "Nelson Mandela"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Composer of 'Für Elise' and 'Ode to Joy'.",
+      "options": [
+        "Chopin",
+        "Bach",
+        "Beethoven",
+        "Mozart"
+      ],
+      "answer": 2
+    }
+  ]
+}

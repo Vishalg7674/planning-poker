@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "The one whose mascot is a snake and where indentation matters.",
+      "options": [
+        "Lua",
+        "Ruby",
+        "Go",
+        "Python"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The one with 'var x int' — the type comes after the name.",
+      "options": [
+        "Go",
+        "C",
+        "Rust",
+        "Swift"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The one with 'fn main()' and no garbage collector.",
+      "options": [
+        "C",
+        "Zig",
+        "Go",
+        "Rust"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The one whose logo is a steaming coffee cup.",
+      "options": [
+        "JavaScript",
+        "Java",
+        "Kotlin",
+        "CoffeeScript"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The one that runs natively in every browser.",
+      "options": [
+        "JavaScript",
+        "WASM",
+        "Dart",
+        "TypeScript"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The one with 'puts \"hello\"' and everything is an expression.",
+      "options": [
+        "Elixir",
+        "Python",
+        "Ruby",
+        "Perl"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The one with '$x' variables and a famous camel mascot.",
+      "options": [
+        "PHP",
+        "Perl",
+        "Bash",
+        "R"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The one whose name ends with a sharp symbol.",
+      "options": [
+        "F#",
+        "C++",
+        "Swift",
+        "C#"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The one that powers Excel macros.",
+      "options": [
+        "VBA",
+        "Lisp",
+        "R",
+        "Python"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The one built around 'SELECT' statements and tables.",
+      "options": [
+        "Cypher",
+        "GraphQL",
+        "SQL",
+        "XQuery"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The one with '@media' queries that style pages.",
+      "options": [
+        "SASS",
+        "HTML",
+        "CSS",
+        "LESS"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "The one with '#!/usr/bin/env' shebang lines at the top.",
+      "options": [
+        "Perl",
+        "Ruby",
+        "Make",
+        "Bash"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "The one with 'func main()' and goroutines for concurrency.",
+      "options": [
+        "Go",
+        "Clojure",
+        "Erlang",
+        "Elixir"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "The one whose files end in '.ts' and adds types to the browser language.",
+      "options": [
+        "CoffeeScript",
+        "TypeScript",
+        "Dart",
+        "Flow"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "The one with 'def' for functions and '@' decorators.",
+      "options": [
+        "Julia",
+        "R",
+        "Ruby",
+        "Python"
+      ],
+      "answer": 3
+    }
+  ]
+}

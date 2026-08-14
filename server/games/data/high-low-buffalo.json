@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "High: your best moment of the day. Low: your worst. Buffalo: something unexpected." },
+    { "text": "Share your high, low, and buffalo of the week in three short lines." },
+    { "text": "High: a win since yesterday. Low: a letdown. Buffalo: a surprise." },
+    { "text": "High: something that made you happy. Low: something that drained you. Buffalo: a plot twist." },
+    { "text": "High, low, and buffalo of your current project." },
+    { "text": "High: your proudest moment today. Low: the awkward one. Buffalo: the weird one." },
+    { "text": "High: a good decision. Low: a questionable one. Buffalo: the one you didn't see coming." },
+    { "text": "High: the highlight of your commute. Low: the traffic. Buffalo: what you saw on the way." },
+    { "text": "High: a nice message you got. Low: a task you dreaded. Buffalo: the unexpected interruption." },
+    { "text": "High: a new skill. Low: a regression. Buffalo: the bug that turned out to be a feature." },
+    { "text": "High: a great meeting. Low: a long one. Buffalo: the one that ran over by an hour." },
+    { "text": "High: your energy peak. Low: your slump. Buffalo: what snapped you out of it." }
+  ]
+}

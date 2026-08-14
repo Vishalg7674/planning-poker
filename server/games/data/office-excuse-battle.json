@@ -1,0 +1,17 @@
+{
+  "kind": "free",
+  "prompts": [
+    { "text": "The dog ate my ticket — upgrade this classic for a fully remote team." },
+    { "text": "Your excuse for being 'muted' during the whole all-hands." },
+    { "text": "Why your camera is off but your coffee cup is mysteriously visible." },
+    { "text": "The most believable excuse for ghosting the sprint retro." },
+    { "text": "Why the 'quick 5-minute fix' took all afternoon." },
+    { "text": "Your excuse for the 47 unread Slack messages." },
+    { "text": "Why you 'didn't see' the merge request notification." },
+    { "text": "The best excuse for napping through the afternoon demo." },
+    { "text": "Why your commits are all titled 'wip'." },
+    { "text": "Your excuse for wearing sweatpants to 'client presentation day'." },
+    { "text": "Why the deployment 'needed one more small change'." },
+    { "text": "Your excuse for being the only one not in the group photo." }
+  ]
+}

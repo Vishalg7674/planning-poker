@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
 /** The catalog card for a game — exact aria-label match avoids substring clashes. */
-function card(page: Page, name: string, status: 'live' | 'soon' = 'soon') {
-  return page.getByRole('link', { name: `${name} — ${status === 'live' ? 'Play now' : 'Coming soon'}`, exact: true });
+function card(page: Page, name: string) {
+  return page.getByRole('link', { name: `${name} — Play now`, exact: true });
 }
 
 test.describe('Homepage', () => {
@@ -18,8 +18,8 @@ test.describe('Homepage', () => {
     await page.goto('/');
     await expect(page.getByText('⭐ Featured')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Planning Poker' }).first()).toBeVisible();
-    // Two LIVE badges in the catalog: Planning Poker + Most Likely To.
-    await expect(page.getByText('LIVE', { exact: true })).toHaveCount(2);
+    // Every catalog game carries the LIVE badge.
+    await expect(page.getByText('LIVE', { exact: true })).toHaveCount(110);
   });
 
   test('renders all 110 game cards across the category sections', async ({ page }) => {
@@ -29,9 +29,10 @@ test.describe('Homepage', () => {
       await expect(page.getByRole('heading', { name: new RegExp(title) })).toBeVisible();
     }
     // Spot-check games from different categories.
-    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
+    await expect(card(page, 'Most Likely To')).toBeVisible();
     await expect(card(page, 'Fastest Finger')).toBeVisible();
     await expect(card(page, 'Draw & Guess')).toBeVisible();
+    // Trivia Battle went live with the engine rollout — expect the live badge.
     await expect(card(page, 'Trivia Battle')).toBeVisible();
   });
 
@@ -39,25 +40,25 @@ test.describe('Homepage', () => {
     await page.goto('/');
     const search = page.getByRole('searchbox', { name: 'Search games' });
     await search.fill('poker');
-    await expect(card(page, 'Planning Poker', 'live')).toBeVisible();
-    await expect(card(page, 'Most Likely To', 'live')).toBeHidden();
+    await expect(card(page, 'Planning Poker')).toBeVisible();
+    await expect(card(page, 'Most Likely To')).toBeHidden();
 
     await search.fill('zzzzzz');
     await expect(page.getByText('No games found.')).toBeVisible();
 
     await search.fill('');
-    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
+    await expect(card(page, 'Most Likely To')).toBeVisible();
   });
 
   test('category filter chips narrow the catalog', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Icebreakers', exact: true }).click();
-    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
-    await expect(card(page, 'Planning Poker', 'live')).toBeHidden();
-    await expect(card(page, 'Guess the Error')).toBeHidden();
+    await expect(card(page, 'Most Likely To')).toBeVisible();
+    await expect(card(page, 'Planning Poker')).toBeHidden();
+    await expect(card(page, 'Fastest Finger')).toBeHidden();
 
     await page.getByRole('button', { name: 'All', exact: true }).click();
-    await expect(card(page, 'Guess the Error')).toBeVisible();
+    await expect(card(page, 'Fastest Finger')).toBeVisible();
   });
 
   test('CTA "Create a Game" leads to the room creation flow', async ({ page }) => {
@@ -67,15 +68,15 @@ test.describe('Homepage', () => {
     await expect(page.getByRole('heading', { name: 'Create Room' })).toBeVisible();
   });
 
-  test('a coming-soon game opens its placeholder page and Back to Games works', async ({ page }) => {
+  test('a live game opens its real room page and Back to Games works', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: /Fastest Finger/ }).first().click();
     await expect(page).toHaveURL(/\/games\/fastest-finger$/);
+    // Fastest Finger is a live quiz — the shared GameRoom entry screen shows.
     await expect(page.getByRole('heading', { name: 'Fastest Finger' })).toBeVisible();
-    await expect(page.getByText("We're building this game!")).toBeVisible();
-    await expect(page.getByText('COMING SOON')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Start Game' })).toBeVisible();
 
-    await page.getByRole('link', { name: /Back to Games/ }).click();
+    await page.getByRole('link', { name: /Back to games/i }).click();
     await expect(page).toHaveURL(/\/games$/);
     await expect(page.getByRole('heading', { name: 'Explore Games' })).toBeVisible();
   });
@@ -84,7 +85,7 @@ test.describe('Homepage', () => {
     await page.goto('/games?cat=developer');
     await expect(page.getByRole('heading', { name: 'Explore Games' })).toBeVisible();
     await expect(card(page, 'Guess the Error')).toBeVisible();
-    await expect(card(page, 'Most Likely To', 'live')).toBeHidden();
+    await expect(card(page, 'Most Likely To')).toBeHidden();
   });
 
   test('mobile viewport: no horizontal overflow and cards are usable', async ({ browser }) => {
@@ -93,7 +94,7 @@ test.describe('Homepage', () => {
     try {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Break the ice.');
-    await expect(card(page, 'Most Likely To', 'live')).toBeVisible();
+    await expect(card(page, 'Most Likely To')).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
       expect(overflow).toBe(true);
       // Mobile nav hides the "Games" link but keeps the create CTA.

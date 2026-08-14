@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "What color do you get by mixing red and white?",
+      "options": [
+        "Gray",
+        "Orange",
+        "Pink",
+        "Purple"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "How many minutes in an hour?",
+      "options": [
+        "65",
+        "50",
+        "60",
+        "55"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "What is the first letter of the alphabet?",
+      "options": [
+        "Z",
+        "C",
+        "B",
+        "A"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which direction does the sun rise?",
+      "options": [
+        "West",
+        "North",
+        "South",
+        "East"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "How many players on a basketball team on court?",
+      "options": [
+        "5",
+        "8",
+        "6",
+        "7"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "What is 10 + 15?",
+      "options": [
+        "30",
+        "25",
+        "20",
+        "35"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Which animal is known as man's best friend?",
+      "options": [
+        "Parrot",
+        "Dog",
+        "Horse",
+        "Cat"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "What is the currency of the UK?",
+      "options": [
+        "Pound",
+        "Dollar",
+        "Franc",
+        "Euro"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "How many seasons are there?",
+      "options": [
+        "Three",
+        "Five",
+        "Two",
+        "Four"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "What is 9 × 9?",
+      "options": [
+        "99",
+        "72",
+        "90",
+        "81"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Which is the tallest animal?",
+      "options": [
+        "Camel",
+        "Hippo",
+        "Elephant",
+        "Giraffe"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "What is the opposite of 'yes'?",
+      "options": [
+        "Maybe",
+        "No",
+        "OK",
+        "Sure"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "How many letters are in the word 'keyboard'?",
+      "options": [
+        "Eight",
+        "Ten",
+        "Seven",
+        "Nine"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "What is the third day of the week?",
+      "options": [
+        "Wednesday",
+        "Tuesday",
+        "Thursday",
+        "Monday"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "How many months have 31 days?",
+      "options": [
+        "Five",
+        "Six",
+        "Eight",
+        "Seven"
+      ],
+      "answer": 3
+    }
+  ]
+}

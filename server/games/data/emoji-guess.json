@@ -1,0 +1,155 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    {
+      "text": "Decode: 🦁👑",
+      "options": [
+        "The Lion King",
+        "King Kong",
+        "Madagascar",
+        "Tarzan"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Decode: 🍕🐢🐢🐢🐢",
+      "options": [
+        "Kung Fu Panda",
+        "Teenage Mutant Ninja Turtles",
+        "Ratatouille",
+        "Finding Nemo"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Decode: 🧜‍♀️",
+      "options": [
+        "Frozen",
+        "The Little Mermaid",
+        "Moana",
+        "Tangled"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Decode: 🕷️🚶",
+      "options": [
+        "Spider-Man",
+        "Ant-Man",
+        "Batman",
+        "Iron Man"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Decode: ❄️👸",
+      "options": [
+        "Frozen",
+        "Cinderella",
+        "Snow White",
+        "Tangled"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Decode: 🚀🌌",
+      "options": [
+        "Star Wars",
+        "Interstellar",
+        "Apollo 13",
+        "Gravity"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Decode: 🍫🏭",
+      "options": [
+        "Charlie and the Chocolate Factory",
+        "Matilda",
+        "Hugo",
+        "Candyland"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Decode: 🐠🔍",
+      "options": [
+        "SpongeBob",
+        "Shark Tale",
+        "Moana",
+        "Finding Nemo"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Decode: 👻🚫",
+      "options": [
+        "The Conjuring",
+        "Casper",
+        "Beetlejuice",
+        "Ghostbusters"
+      ],
+      "answer": 3
+    },
+    {
+      "text": "Decode: 🤠👨‍🚀",
+      "options": [
+        "Monsters, Inc.",
+        "Toy Story",
+        "WALL-E",
+        "Up"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Decode: 🧙‍♂️💍",
+      "options": [
+        "Harry Potter",
+        "The Lord of the Rings",
+        "Narnia",
+        "The Hobbit"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Decode: 🦖🌴",
+      "options": [
+        "King Kong",
+        "Godzilla",
+        "Jurassic Park",
+        "Dinosaur"
+      ],
+      "answer": 2
+    },
+    {
+      "text": "Decode: 🚢❄️",
+      "options": [
+        "Titanic",
+        "Cast Away",
+        "Poseidon",
+        "Pirates of the Caribbean"
+      ],
+      "answer": 0
+    },
+    {
+      "text": "Decode: 🐭🍝",
+      "options": [
+        "Cinderella",
+        "Ratatouille",
+        "The Princess and the Frog",
+        "Lady and the Tramp"
+      ],
+      "answer": 1
+    },
+    {
+      "text": "Decode: 👓⚡",
+      "options": [
+        "John Wick",
+        "The Matrix",
+        "A Beautiful Mind",
+        "Harry Potter"
+      ],
+      "answer": 3
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "kind": "quiz",
+  "prompts": [
+    { "text": "What does 'HTML' stand for?", "options": ["HyperText Markup Language", "HighText Machine Language", "Hyperlink Text Mode Language", "Home Tool Markup Language"], "answer": 0 },
+    { "text": "Which language is primarily used for styling web pages?", "options": ["JavaScript", "HTML", "CSS", "SQL"], "answer": 2 },
+    { "text": "What is the time complexity of binary search?", "options": ["O(n)", "O(log n)", "O(n log n)", "O(1)"], "answer": 1 },
+    { "text": "Which data structure follows FIFO order?", "options": ["Stack", "Queue", "Tree", "Graph"], "answer": 1 },
+    { "text": "In Git, which command creates a new branch and switches to it?", "options": ["git branch new", "git switch -c new", "git checkout new", "git clone new"], "answer": 1 },
+    { "text": "What does 'API' stand for?", "options": ["Application Programming Interface", "Advanced Program Integration", "Automated Process Index", "Application Protocol Interchange"], "answer": 0 },
+    { "text": "Which of these is NOT a programming language?", "options": ["Python", "Java", "HTML", "Rust"], "answer": 2 },
+    { "text": "What is the result of '10 % 3' in most languages?", "options": ["3", "1", "0", "3.33"], "answer": 1 },
+    { "text": "Which HTTP method is used to update an existing resource?", "options": ["GET", "POST", "PUT", "DELETE"], "answer": 2 },
+    { "text": "What does 'DRY' stand for in software development?", "options": ["Don't Repeat Yourself", "Do Run Yesterday", "Don't Run Yours", "Develop Reliable Yields"], "answer": 0 },
+    { "text": "Which version control system was created by Linus Torvalds?", "options": ["SVN", "Mercurial", "Git", "CVS"], "answer": 2 },
+    { "text": "What is the output of 'typeof null' in JavaScript?", "options": ["'null'", "'undefined'", "'object'", "'number'"], "answer": 2 },
+    { "text": "Which database query language is used for relational databases?", "options": ["JSON", "SQL", "XML", "NoSQL"], "answer": 1 },
+    { "text": "What does '404' mean in web development?", "options": ["Server error", "Not Found", "Forbidden", "Bad Request"], "answer": 1 },
+    { "text": "Which of these is a compiled language?", "options": ["Python", "JavaScript", "C++", "Ruby"], "answer": 2 },
+    { "text": "What does 'UML' stand for?", "options": ["Unified Modeling Language", "Universal Markup Language", "User Module Logic", "Unified Machine Learning"], "answer": 0 },
+    { "text": "Which data structure is ideal for LIFO operations?", "options": ["Queue", "Stack", "Array", "Hash Map"], "answer": 1 },
+    { "text": "What is the purpose of a linter?", "options": ["Compile code", "Detect code issues", "Deploy code", "Optimize queries"], "answer": 1 }
+  ]
+}
