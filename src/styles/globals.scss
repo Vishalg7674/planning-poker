@@ -3,9 +3,10 @@
 @use 'styles/animations' as *;
 
 // ---------------------------------------------------------------------------
-// Theme tokens — CSS custom properties so light/dark/system is a token swap.
-// `data-theme` is set on <html> by the ThemeProvider. "system" resolves to
-// light/dark at runtime but keeps this token surface identical.
+// Theme tokens — CSS custom properties. Reveal is night-only by design: the
+// felt table, warm gold accent and ivory cards are tuned for dark surfaces,
+// and there is no light theme to switch to. `data-theme="dark"` is set
+// statically on <html> in the root layout.
 // ---------------------------------------------------------------------------
 
 :root,
@@ -59,56 +60,9 @@
   --header-bg: rgba(12, 31, 24, 0.82);
 }
 
-[data-theme='light'] {
-  color-scheme: light;
-
-  // Felt table (kept deep for contrast, but warmer/brighter)
-  --felt: #1d4636;
-  --felt-deep: #143325;
-  --felt-glow: rgba(107, 196, 156, 0.5);
-  --felt-line: rgba(10, 32, 24, 0.06);
-
-  --surface: #f4ecdb;
-  --surface-raised: #fbf6ea;
-  --surface-soft: #ece2cc;
-  --border: rgba(40, 58, 48, 0.14);
-  --border-strong: rgba(40, 58, 48, 0.26);
-
-  --card-hi: #fffaf0;
-  --card-lo: #e9dcbf;
-  --card-edge: rgba(96, 70, 28, 0.3);
-  --card-ink: #1d2332;
-  --card-ink-dim: #5c5f6b;
-  --card-suit: #8a6d2f;
-
-  --ink: #16241d;
-  --ink-dim: #4a5f53;
-  --ink-faint: #7a8d83;
-
-  --accent: #c88f1e;
-  --accent-bright: #e0a92f;
-  --accent-ink: #2a1c02;
-  --accent-rgb: 200, 143, 30;
-
-  --success: #2f9e63;
-  --success-rgb: 47, 158, 99;
-  --danger: #c94f4a;
-  --danger-rgb: 201, 79, 74;
-  --warning: #c88f1e;
-  --warning-rgb: 200, 143, 30;
-
-  --shadow-panel: 0 16px 36px -16px rgba(30, 50, 40, 0.3);
-  --shadow-raise: 0 24px 44px -16px rgba(30, 50, 40, 0.32);
-
-  --backdrop: rgba(20, 38, 30, 0.5);
-
-  --header-bg: rgba(244, 236, 219, 0.85);
-}
-
 // ---------------------------------------------------------------------------
 // Room accent presets — applied as `data-accent` on the room root so the
-// whole table re-skins (same token surface, different hue). Dark defaults,
-// light-theme overrides below.
+// whole table re-skins (same token surface, different hue).
 // ---------------------------------------------------------------------------
 
 [data-accent='gold'] {
@@ -137,34 +91,6 @@
   --accent-bright: #7ce0a8;
   --accent-ink: #05281a;
   --accent-rgb: 84, 211, 138;
-}
-
-[data-theme='light'] [data-accent='gold'] {
-  --accent: #c88f1e;
-  --accent-bright: #e0a92f;
-  --accent-ink: #2a1c02;
-  --accent-rgb: 200, 143, 30;
-}
-
-[data-theme='light'] [data-accent='purple'] {
-  --accent: #7c3aed;
-  --accent-bright: #8b5cf6;
-  --accent-ink: #ffffff;
-  --accent-rgb: 124, 58, 237;
-}
-
-[data-theme='light'] [data-accent='blue'] {
-  --accent: #1d6fd1;
-  --accent-bright: #3b82f6;
-  --accent-ink: #ffffff;
-  --accent-rgb: 29, 111, 209;
-}
-
-[data-theme='light'] [data-accent='green'] {
-  --accent: #1e8a52;
-  --accent-bright: #2fa866;
-  --accent-ink: #ffffff;
-  --accent-rgb: 30, 138, 82;
 }
 
 // ---------------------------------------------------------------------------

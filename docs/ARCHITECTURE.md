@@ -170,7 +170,7 @@ The full event reference lives in [API.md](API.md) and
   status, votes, timer, stats, lock flag, configuration. This is the source
   of truth for *rules*.
 - **Client state** (Redux): a projection of the last snapshot plus a little
-  local UI state (`myVote` optimistic lock, toasts, theme, presentation mode,
+  local UI state (`myVote` optimistic lock, toasts, presentation mode,
   connection status).
 - **Derived state**: `everyoneHasVoted` is computed server-side (it must
   ignore disconnected participants) and shipped in the snapshot; the client

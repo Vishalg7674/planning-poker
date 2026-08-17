@@ -3,10 +3,11 @@
 ## Product vision
 
 A **real-time multiplayer games platform for teams** — "Break the ice. Play
-together. No login required." One game is live today (**Planning Poker**, the
-featured game), backed by a catalog of **110 games across 9 categories**
-(icebreakers, speed, guessing, estimation, funny, developer, creative, word,
-competitive) that is positioned on the homepage but not yet implemented.
+together. No login required." The full catalog is live: **112 games across
+10 categories** (agile, icebreakers, speed, guessing, estimation, funny,
+developer, creative, word, competitive), including the featured **Planning
+Poker** game, two hosted agile ceremonies (**Team Health Check**, **Live
+Poll**) and every engine-backed game rendered through the shared `GameRoom`.
 
 Whatever the game, the core product philosophy stays identical: create a
 room, share a link (or a QR code), everyone plays together in real time — no
@@ -66,14 +67,14 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
   a "why teams love it" strip, the full **game catalog**, a visual
   **Play. Score. Compete.** roadmap teaser (non-functional), a how-it-works
   list, and a closing CTA.
-- The catalog renders from a single registry (`src/lib/games.ts`): **110
-  games in 9 categories**, each with icon, name, description, player count,
-  duration, status and route. The counter ("110 games · 0 logins") is
+- The catalog renders from a single registry (`src/lib/games.ts`): **112
+  games in 10 categories**, each with icon, name, description, player count,
+  duration, status and route. The counter ("112 games · 0 logins") is
   derived from the registry, never hard-coded.
 - **Search** filters cards instantly (name + description + category);
-  **category filter chips** (All + 9) narrow the catalog; empty results show
+  **category filter chips** (All + 10) narrow the catalog; empty results show
   "No games found.".
-- Every game has a route. Live games (Planning Poker) link to the real
+- Every game has a route. Planning Poker links to the real
   implementation (`/create`); the rest open a shared **Coming Soon**
   placeholder at `/games/<id>` with a Back to Games button. `/games` is a
   full catalog page, and `?cat=<id>` preselects a category.
@@ -264,5 +265,5 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
 - Custom deck editors, arbitrary timer values, custom accent themes.
 - Analytics dashboards or export of results.
 - Horizontal scaling / shared server state (see [DEPLOYMENT.md](DEPLOYMENT.md)).
-- The actual gameplay for the 109 catalog games beyond Planning Poker — they
-  are marketed on the homepage (status `coming-soon`) but not implemented.
+- Per-game scoring, lives and leaderboards beyond the current round-by-round
+  reveal flow (the homepage's podium remains a roadmap teaser).

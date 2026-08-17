@@ -10,7 +10,7 @@
 
 import type { Accent } from './types';
 
-export type GameKind = 'options' | 'teammate' | 'quiz' | 'estimate' | 'free';
+export type GameKind = 'options' | 'teammate' | 'quiz' | 'estimate' | 'free' | 'health' | 'poll';
 
 export interface GameConfig {
   id: string;
@@ -107,6 +107,28 @@ const KIND_DEFAULTS: Record<GameKind, Omit<GameConfig, 'id' | 'kind' | 'castEven
     sideNote: 'Answers stay hidden until the host reveals them.',
     waitingSub: 'The host will start the first round when everyone’s here.',
   },
+  health: {
+    startLabel: 'Start Health Check',
+    progressVerb: 'submitted',
+    everyoneDone: 'Everyone has submitted',
+    revealLabel: 'Reveal Results',
+    nextLabel: 'New Health Check',
+    whoTitle: 'Who rated what',
+    doneLabel: 'Submitted',
+    sideNote: 'Ratings stay hidden until the host reveals them.',
+    waitingSub: 'The host will start the health check when everyone’s here.',
+  },
+  poll: {
+    startLabel: 'Start Poll',
+    progressVerb: 'voted',
+    everyoneDone: 'Everyone has voted',
+    revealLabel: 'Reveal Results',
+    nextLabel: 'New Poll',
+    whoTitle: 'Who voted what',
+    doneLabel: 'Voted',
+    sideNote: 'Votes stay hidden until the host reveals them.',
+    waitingSub: 'The host will start the poll when everyone’s here.',
+  },
 };
 
 interface ConfigSeed {
@@ -135,6 +157,48 @@ interface ConfigSeed {
 }
 
 const SEEDS: ConfigSeed[] = [
+  // --- ❤️ Team Health Check & 🗳️ Live Poll (hosted activities) ----------
+  {
+    id: 'team-health',
+    kind: 'health',
+    castEvent: 'game:healthSubmit',
+    icon: '❤️',
+    accent: 'green',
+    title: 'Team Health Check',
+    tagline: 'Rate how the team is really doing — communication, delivery, morale and more.',
+    header: '❤️ Team Health Check',
+    promptLead: 'Rate each area',
+    startLabel: 'Start Health Check',
+    progressVerb: 'submitted',
+    everyoneDone: 'Everyone has submitted',
+    revealLabel: 'Reveal Results',
+    nextLabel: 'New Health Check',
+    whoTitle: 'Who rated what',
+    doneLabel: 'Submitted',
+    sideNote: 'Ratings stay hidden until the host reveals them — anonymity on by default.',
+    waitingSub: 'The host will start the health check when everyone’s here.',
+  },
+  {
+    id: 'live-poll',
+    kind: 'poll',
+    castEvent: 'game:pollVote',
+    icon: '🗳️',
+    accent: 'purple',
+    title: 'Live Poll',
+    tagline: 'Ask the room a question and watch the votes land — one vote, real-time results.',
+    header: '🗳️ Live Poll',
+    promptLead: 'Your question',
+    startLabel: 'Start Poll',
+    progressVerb: 'voted',
+    everyoneDone: 'Everyone has voted',
+    revealLabel: 'Reveal Results',
+    nextLabel: 'New Poll',
+    whoTitle: 'Who voted what',
+    doneLabel: 'Voted',
+    sideNote: 'Votes stay hidden until the host reveals them — anonymous by default.',
+    waitingSub: 'The host will start the poll when everyone’s here.',
+  },
+
   // --- 🧊 Icebreakers -----------------------------------------------------
   {
     id: 'most-likely-to',

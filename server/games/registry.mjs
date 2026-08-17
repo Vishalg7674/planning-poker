@@ -17,6 +17,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import { createGameModule } from './engine.mjs';
+import { createTeamHealthModule } from './teamHealth.mjs';
+import { createLivePollModule } from './livePoll.mjs';
 
 /** @type {Array<{ id: string, kind: string, castEvent: string, voteEvent?: string, vote?: boolean, file: string }>} */
 const GAME_CONFIGS = [
@@ -183,9 +185,20 @@ export const GAME_MODULES = Object.fromEntries(
   ]),
 );
 
+// Hosted activities that don't use the JSON prompt banks — the host builds
+// them at creation time (Team Health categories, Poll question/options). They
+// implement the exact same module contract, so the socket layer treats them
+// identically to the engine games.
+Object.assign(GAME_MODULES, {
+  'team-health': createTeamHealthModule(),
+  'live-poll': createLivePollModule(),
+});
+
 export const GAME_IDS = Object.keys(GAME_MODULES);
 
 /** The cast events → games map, used to wire generic socket handlers. */
 export const CAST_EVENTS = new Set(GAME_CONFIGS.flatMap((c) => (c.voteEvent ? [c.castEvent, c.voteEvent] : [c.castEvent])));
+CAST_EVENTS.add('game:healthSubmit');
+CAST_EVENTS.add('game:pollVote');
 
 export { GAME_KINDS, shuffle, promoteHostIfNeeded, hueFromString } from './engine.mjs';

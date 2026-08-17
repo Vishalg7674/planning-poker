@@ -29,7 +29,7 @@ describe('HomePage', () => {
     renderWithStore(<HomePage />, {});
     const stats = screen.getByLabelText('Games at a glance');
     expect(stats).toHaveTextContent(`${GAME_COUNT}`);
-    expect(stats).toHaveTextContent('9');
+    expect(stats).toHaveTextContent('10');
     expect(stats).toHaveTextContent('1');
     expect(stats).toHaveTextContent('0');
     expect(stats).toHaveTextContent('click to play');

@@ -465,6 +465,12 @@ describe('registry', () => {
     for (const id of GAME_IDS) {
       const mod = GAME_MODULES[id];
       expect(mod, id).toBeTruthy();
+      // Hosted activities (Team Health / Live Poll) are config-driven and
+      // intentionally carry no JSON prompt bank.
+      if (mod.kind === 'health' || mod.kind === 'poll') {
+        expect(mod.castEvent, id).toBeTruthy();
+        continue;
+      }
       expect(mod.PROMPTS.length, `${id} prompt bank`).toBeGreaterThan(0);
       expect(mod.castEvent, id).toBeTruthy();
     }
@@ -475,5 +481,12 @@ describe('registry', () => {
     expect(GAME_MODULES['would-you-rather'].kind).toBe('options');
     expect(GAME_MODULES['team-trivia'].kind).toBe('quiz');
     expect(GAME_MODULES['how-many'].kind).toBe('estimate');
+  });
+
+  it('registers the hosted activities (Team Health, Live Poll)', () => {
+    expect(GAME_MODULES['team-health'].kind).toBe('health');
+    expect(GAME_MODULES['team-health'].castEvents).toContain('game:healthSubmit');
+    expect(GAME_MODULES['live-poll'].kind).toBe('poll');
+    expect(GAME_MODULES['live-poll'].castEvents).toContain('game:pollVote');
   });
 });

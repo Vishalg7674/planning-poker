@@ -2,7 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { ConnectionStatus, Role } from '@/lib/types';
 import { connectionChanged, roomEnded, roomGone, snapshotReceived, timerUp, youRemoved } from '../actions';
 
-export type Theme = 'light' | 'dark' | 'system';
 export type ToastKind = 'info' | 'success' | 'warning' | 'error' | 'celebrate';
 
 export interface Toast {
@@ -15,7 +14,6 @@ export interface Toast {
 export type ModalId = 'endSession' | 'removeParticipant' | 'roundResult' | 'newRound';
 
 export interface UiState {
-  theme: Theme;
   connection: ConnectionStatus;
   /** My identity in the current room (from sessionStorage + join ack). */
   myParticipantId: string | null;
@@ -67,7 +65,6 @@ function writeAcknowledgedRound(roundKey: string | null): void {
 }
 
 const initialState: UiState = {
-  theme: 'system',
   connection: 'connecting',
   myParticipantId: null,
   myName: '',
@@ -93,9 +90,6 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setTheme: (state, action: { payload: Theme }) => {
-      state.theme = action.payload;
-    },
     setMyIdentity: (state, action: { payload: { participantId: string; name: string; role: Role } }) => {
       state.myParticipantId = action.payload.participantId;
       state.myName = action.payload.name;
@@ -190,7 +184,6 @@ const uiSlice = createSlice({
 });
 
 export const {
-  setTheme,
   setMyIdentity,
   clearMyIdentity,
   openModal,

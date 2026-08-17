@@ -19,10 +19,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0c1f18' },
-    { media: '(prefers-color-scheme: light)', color: '#1d4636' },
-  ],
+  // Reveal is night-only — the browser chrome matches the felt.
+  themeColor: '#0c1f18',
 };
 
 const FAVICON =
@@ -30,7 +28,7 @@ const FAVICON =
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" data-theme="dark" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <link rel="icon" href={FAVICON} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

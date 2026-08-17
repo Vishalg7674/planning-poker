@@ -17,7 +17,8 @@ export type CategoryId =
   | 'developer'
   | 'creative'
   | 'word'
-  | 'competitive';
+  | 'competitive'
+  | 'agile';
 
 export interface Game {
   id: string;
@@ -55,6 +56,7 @@ export const CATEGORIES: GameCategory[] = [
   { id: 'creative', name: 'Creative Games', short: 'Creative', icon: '✍️', description: 'Draw, write and improvise something new together.' },
   { id: 'word', name: 'Word Games', short: 'Word', icon: '🔤', description: 'Quick thinking, faster fingers, one letter at a time.' },
   { id: 'competitive', name: 'Competitive Games', short: 'Competitive', icon: '🏆', description: 'Battle it out, stack points and climb the leaderboard.' },
+  { id: 'agile', name: 'Agile Activities', short: 'Agile', icon: '🔄', description: 'Hosted ceremonies for the sprint — team health checks, live polls and quick decisions.' },
 ];
 
 export const CATEGORY_IDS: CategoryId[] = CATEGORIES.map((c) => c.id);
@@ -88,6 +90,30 @@ const liveGame = (
 });
 
 export const GAMES: Game[] = [
+  // --- 🔄 Agile Activities (hosted ceremonies) --------------------------------
+  {
+    id: 'team-health',
+    name: 'Team Health Check',
+    category: 'agile',
+    description: 'Rate communication, delivery, morale and more — spot team health trends before they bite.',
+    icon: '❤️',
+    status: 'live',
+    route: '/games/team-health',
+    players: '3–20 players',
+    duration: '5 min',
+  },
+  {
+    id: 'live-poll',
+    name: 'Live Poll',
+    category: 'agile',
+    description: 'Ask the room a question, collect votes in real time and reveal the split.',
+    icon: '🗳️',
+    status: 'live',
+    route: '/games/live-poll',
+    players: '3–20 players',
+    duration: '2 min',
+  },
+
   // --- 🧊 Icebreakers (1–15) -------------------------------------------------
   {
     id: 'most-likely-to',

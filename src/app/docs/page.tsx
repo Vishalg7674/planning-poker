@@ -47,7 +47,7 @@ export default function DocsPage() {
             <span className={styles.chip}>Next.js 15 + React 19</span>
             <span className={styles.chip}>Socket.io realtime</span>
             <span className={styles.chip}>No database</span>
-            <span className={styles.chip}>110 games · 9 categories</span>
+            <span className={styles.chip}>112 games · 10 categories</span>
           </div>
         </div>
       </header>
@@ -70,9 +70,9 @@ export default function DocsPage() {
             <SectionHead n="01" title="Overview" />
             <p>
               <strong>Reveal</strong> is a real-time multiplayer games platform for teams, retrospectives and
-              icebreakers. One game is live today — <strong>Planning Poker</strong> — with a catalog of{' '}
-              <strong>110 games across 9 categories</strong> queued up behind it. Every game follows the same
-              philosophy:
+              icebreakers. <strong>Planning Poker</strong>, two hosted agile ceremonies (<strong>Team Health
+              Check</strong> and <strong>Live Poll</strong>) and the engine-backed game catalog are all live —{' '}
+              <strong>112 games across 10 categories</strong>. Every game follows the same philosophy:
             </p>
             <ul className={styles.list}>
               <li>
@@ -185,8 +185,7 @@ export default function DocsPage() {
                   </td>
                   <td>
                     Scoped styles per component, a token layer in <Code>styles/_variables.scss</Code>, and CSS custom
-                    properties so <strong>light / dark / system</strong> theming and the four room accents are a token
-                    swap, not a rewrite.
+                    properties so the night-only theme and the four room accents are a token swap, not a rewrite.
                   </td>
                 </tr>
                 <tr>
@@ -244,7 +243,7 @@ export default function DocsPage() {
 │   │   │                     #   PresentationView, JoinForm, HostToolbar…
 │   │   ├── modals/           # EndSessionModal, NewRoundModal, RemoveParticipantModal, RoundResultModal
 │   │   ├── games/            # GameCatalog, GameCard, ComingSoonGame
-│   │   ├── providers.tsx     # Redux Provider + theme sync
+│   │   ├── providers.tsx     # Redux Provider
 │   │   └── RealtimeBridge.tsx# the ONLY socket consumer → dispatches Redux actions
 │   ├── lib/                  # decks, games registry, identity, socket, theme, cx, errors
 │   ├── store/                # RTK store + 5 slices + realtime actions
@@ -760,9 +759,9 @@ export default function DocsPage() {
             <SectionHead n="15" title="Games module" />
             <p>
               The entire game catalog is <strong>data, not JSX</strong>. <Code>src/lib/games.ts</Code> is a single
-              registry of <strong>110 games across 9 categories</strong> (Icebreakers, Speed, Guessing, Estimation,
-              Funny, Developer, Creative, Word, Competitive). Each game is a small entry: icon, name, description,
-              category, players, duration, status (<Code>live</Code> / <Code>coming-soon</Code>) and a route.
+              registry of <strong>112 games across 10 categories</strong> (Agile, Icebreakers, Speed, Guessing,
+              Estimation, Funny, Developer, Creative, Word, Competitive). Each game is a small entry: icon, name,
+              description, category, players, duration, status and a route.
             </p>
             <ul className={styles.list}>
               <li>
@@ -771,16 +770,18 @@ export default function DocsPage() {
                 <Code>?cat=</Code> from the URL.
               </li>
               <li>
-                <strong>Planning Poker</strong> is the only live game; its card links straight to the real
-                implementation (<Code>/create</Code>).
+                <strong>Planning Poker</strong> has its own dedicated page at <Code>/create</Code>.
               </li>
               <li>
-                <strong>Every other game</strong> opens a shared <em>Coming Soon</em> placeholder at{' '}
-                <Code>/games/[id]</Code>. Live games automatically redirect to their real route.
+                <strong>Every engine-backed game</strong> renders through one shared <Code>GameRoom</Code> component at{' '}
+                <Code>/games/[id]</Code>, driven by its client config (<Code>src/lib/gameConfig.ts</Code>), the server
+                registry (<Code>server/games/registry.mjs</Code>) and the JSON prompt banks
+                (<Code>server/games/data/</Code>). Team Health and Live Poll are hosted activities configured by the
+                host at creation time.
               </li>
               <li>
-                <strong>Shipping a new game</strong> = implement it, flip <Code>{`status: 'coming-soon'`}</Code> →{' '}
-                <Code>{`'live'`}</Code> and point <Code>route</Code> at its page. Nothing else changes.
+                <strong>Shipping a new game</strong> = add a prompt bank + registry row + client config entry, and add
+                it to the catalog. Nothing else changes.
               </li>
             </ul>
           </section>

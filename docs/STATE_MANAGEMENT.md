@@ -95,7 +95,6 @@ devtools enabled outside production.
 - **State**:
   ```ts
   {
-    theme: 'dark' | 'light' | 'system';
     connection: 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
     myParticipantId: string | null;
     myName: string;
@@ -108,9 +107,9 @@ devtools enabled outside production.
     presentation: boolean;           // host-only big-screen presentation mode
   }
   ```
-- **Actions**: `setTheme`, `setMyIdentity`, `clearMyIdentity`, `openModal`,
+- **Actions**: `setMyIdentity`, `clearMyIdentity`, `openModal`,
   `closeModal`, `pushToast`, `dismissToast`, `triggerCelebration`,
-  `setPresentation`.
+  `setPresentation`. (There is no theme state — the app is night-only.)
 - **Extra reducers (socket)**: `connectionChanged`, `timerUp` (adds a
   "Time's up!" toast), `roomGone` (stores message, unjoins), `roomEnded`
   (toast), `youRemoved` (clears identity), `snapshotReceived` (syncs my

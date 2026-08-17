@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // Reveal design tokens (SCSS layer)
-// Theme colors live as CSS custom properties in globals.scss so that
-// light/dark/system is a token swap, not a rewrite.
+// Theme colors live as CSS custom properties in globals.scss — a single
+// night-only token surface that the room accents re-skin.
 // ---------------------------------------------------------------------------
 
 // Breakpoints

@@ -36,7 +36,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
 | ------------------------ | --------------------------------------------------- |
 | `/`                      | Games-platform homepage: hero, featured Planning Poker, full game catalog, roadmap podium, how-it-works, CTA |
 | `/games`                 | Full catalog page (reuses `GameCatalog`); optional `?cat=<category>` preselects a filter |
-| `/games/[gameId]`        | Dynamic game page — `live` games `redirect()` to their real route; `coming-soon` games render the shared placeholder; unknown ids 404 |
+| `/games/[gameId]`        | Dynamic game page — engine-backed games render through the shared `GameRoom`; `/games/planning-poker` redirects to `/create`; unknown ids 404 |
 | `/create`                | Room creation form: name (required), team name, room title, deck picker, accent picker → navigates to `/r/<CODE>` |
 | `/r/[roomCode]`          | The room: waiting → voting → ended → revealed → waiting (next story via `room:newRound`), plus the participant side panel |
 | `/r/[roomCode]/screen`   | Read-only projector view (joins the socket as `role: 'screen'`) |
@@ -44,12 +44,15 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
 ### Components (`src/components`)
 
 - Games (`src/components/games`): `GameCard` (one catalog card — the whole
-  card is the link; LIVE / COMING SOON badges), `GameCatalog` (search input
-  + category filter chips + per-category grids + empty state), `ComingSoonGame`
-  (the shared placeholder body for unimplemented games).
+  card is the link), `GameCatalog` (search input + category filter chips +
+  per-category grids + empty state).
+- Game room (`src/components/game`): `GameRoom` — the shared UI for every
+  engine-backed game: create/join/rejoin screens, waiting room, per-kind
+  voting panels (teammate / options / quiz / estimate / free / health / poll),
+  results panels, players sidebar and the host activity switcher.
 - Primitives: `Button`, `Field`/`Input`/`Textarea`/`Select`, `Modal`, `Avatar`
-  (auto initials), `Wordmark`, `ThemeToggle`, `ConnectionPill`, `Toasts`,
-  `Celebration`, `DistributionChart`, `RoomQR` (local QR of the invite URL).
+  (auto initials), `ConnectionPill`, `Toasts`, `Celebration`,
+  `DistributionChart`, `RoomQR` (local QR of the invite URL).
 - Room (`src/components/room`): `Deck` (the voting cards; dense layout for
   large decks), `StartPanel` (waiting room: config summary, QR, copy/share
   invite, timer + reveal-mode pickers, lock/unlock, presentation toggle,
@@ -61,8 +64,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
   `useShortcuts` (Space = reveal, 1–9 = vote).
 - Modals (`src/components/modals`): `EndSessionModal`, `NewRoundModal`
   (confirm the next story), `RemoveParticipantModal`.
-- `providers.tsx` — Redux `Provider` + theme sync; `RealtimeBridge.tsx` — the
-  socket → Redux bridge.
+- `providers.tsx` — Redux `Provider`; `RealtimeBridge.tsx` — the socket →
+  Redux bridge for Planning Poker state (engine games drive their own page).
 
 ### Hooks
 
@@ -85,7 +88,9 @@ See [STATE_MANAGEMENT.md](STATE_MANAGEMENT.md). Five slices: `room`,
   re-skins the whole table.
 - All component styles are CSS Modules (`*.module.scss`) with
   `@use 'styles/variables'` (via `sassOptions.includePaths: ['src']`).
-- Dark/light theming via a `data-theme` attribute on `<html>`.
+- **Night/Dark only** — there is no light theme and no theme switcher;
+  `data-theme="dark"` is set statically on `<html>` and every token in
+  `globals.scss` is tuned for the dark felt.
 - Motion respects `prefers-reduced-motion`.
 
 ## Backend / realtime architecture
@@ -131,38 +136,55 @@ a future custom deck is a one-line change.
 The server's `computeStats` treats `½` as `0.5`; non-numeric decks get
 `numeric: false` and null numeric stats.
 
-## Game catalog
+## Game catalog & engine
 
-The catalog is **one centralized registry**, `src/lib/games.ts` — 110 games
-across 9 categories (`CATEGORIES`), each game a plain data entry:
+The catalog is **one centralized registry**, `src/lib/games.ts` — 112 games
+across 10 categories (`CATEGORIES`), each game a plain data entry:
 
 ```ts
 {
   id: string;           // kebab-case slug, also the /games/<id> route
   name: string;
-  category: CategoryId; // icebreakers | speed | guessing | estimation | funny | developer | creative | word | competitive
+  category: CategoryId; // agile | icebreakers | speed | guessing | estimation | funny | developer | creative | word | competitive
   description: string;
   icon: string;         // emoji
-  status: 'live' | 'coming-soon';
-  route: string;        // live → real route (/create for planning-poker); coming-soon → /games/<id>
+  status: 'live';       // every catalog game is live
+  route: string;        // real route (/games/<id>, or /create for planning-poker)
   players: string;      // display string, e.g. '3–20 players'
   duration: string;     // display string, e.g. '5 min'
 }
 ```
 
-- **Planning Poker** is the only `live` game and points at `/create` — the
-  existing room-creation flow. The `/games/planning-poker` URL `redirect()`s
-  there.
+- **Planning Poker** points at `/create` — its own room-creation flow. The
+  `/games/planning-poker` URL `redirect()`s there.
+- **Every other game** renders through the shared `GameRoom` component at
+  `/games/[gameId]`, driven by three pieces:
+  - `src/lib/gameConfig.ts` — client config: game kind (options / teammate /
+    quiz / estimate / free / health / poll), socket cast event, accent, copy;
+  - `server/games/registry.mjs` — server registry: game kind + cast events,
+    backed by JSON prompt banks in `server/games/data/`;
+  - `server/games/engine.mjs` — the generic game engine (one implementation,
+    every game): startPrompt → cast → reveal lifecycle, privacy-aware
+    snapshots, per-kind stats.
+- **Team Health Check** (`server/games/teamHealth.mjs`) and **Live Poll**
+  (`server/games/livePoll.mjs`) are hosted agile activities — the host
+  configures them at creation time (categories / question + options), and
+  they implement the same module contract as the engine games.
+- **One room → many activities**: `room:switchGame` swaps a room between
+  Planning Poker / Team Health / Live Poll in place — same code, URL and
+  participants; every client follows via `room:activityChanged`.
 - `GameCatalog` is the single rendering component (homepage + `/games`),
   with instant search (name + description + category) and category filter
   chips; both homepage and `/games?cat=<id>` preselects work.
-- Shipping a new game = implement it, then flip `status: 'coming-soon'` to
-  `'live'` and set `route` — the homepage, catalog and routes adapt with no
-  further changes.
-- Tests: `tests/unit/lib/games.test.ts` (registry integrity: 110 games, 9
+- Shipping a new engine game = add a JSON prompt bank + a registry row + a
+  client config entry, then add it to the catalog. `scripts/check-games.mjs`
+  verifies catalog ↔ registry ↔ prompt-bank consistency in CI.
+- Tests: `tests/unit/lib/games.test.ts` (registry integrity: 112 games, 10
   categories, unique ids/names, per-category counts), `GameCard`,
-  `GameCatalog` (search / filter / empty state / View-all links), and the
-  `homepage.spec.ts` Playwright suite.
+  `GameCatalog` (search / filter / empty state / View-all links),
+  `tests/unit/server/gameEngine.test.ts` + `activities.test.ts`, the
+  `scripts/e2e-games.mjs` socket suite, and the `agile-activities.spec.ts`
+  Playwright suite.
 
 ## Data models
 
@@ -283,9 +305,11 @@ Full reference with failure cases: [API.md](API.md).
   `bad_value`, `revealed`, `not_all_voted`, `already_revealed`,
   `not_started`, `bad_timer`, `bad_reveal_mode`, `room_locked`,
   `cannot_remove`, `no_participant`.
-- Client-side, `emitAck` rejects after 8 s if the server never answers
-  ("Server did not respond"), and forms show inline errors; the room pages
-  surface a "room is gone" screen when a room no longer exists.
+- Client-side, `emitAck` **never rejects**: if the server is unreachable or
+  fails to ack within 8 s it resolves to `{ ok: false, error: 'unreachable' |
+  'timeout' }`, which the UI surfaces as a friendly message — no unhandled
+  promise errors. Forms show inline errors; the room pages surface a
+  "room is gone" screen when a room no longer exists.
 
 ## Validation
 

@@ -15,7 +15,6 @@ import reducer, {
   pushToast,
   setMyIdentity,
   setPresentation,
-  setTheme,
   triggerCelebration,
 } from '@/store/slices/uiSlice';
 import { makeParticipant, makeSnapshot } from '../../helpers/fixtures';
@@ -115,10 +114,6 @@ describe('uiSlice', () => {
 
   it('triggerCelebration increments the tick', () => {
     expect(reducer(undefined, triggerCelebration()).celebrationTick).toBe(1);
-  });
-
-  it('setTheme stores the theme', () => {
-    expect(reducer(undefined, setTheme('light')).theme).toBe('light');
   });
 
   it('setPresentation toggles the big-screen mode', () => {

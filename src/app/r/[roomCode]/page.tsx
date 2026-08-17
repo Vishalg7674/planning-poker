@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
-import ThemeToggle from '@/components/ThemeToggle';
 import ConnectionPill from '@/components/ConnectionPill';
 import Button from '@/components/Button';
 import JoinForm from '@/components/room/JoinForm';
@@ -26,8 +25,9 @@ import PresentationView from '@/components/room/PresentationView';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { setMyIdentity, pushToast, closeModal } from '@/store/slices/uiSlice';
 import { snapshotReceived, roomGone } from '@/store/actions';
-import { emitAck, isRejoinPending, setRejoinPending } from '@/lib/socket';
-import { loadIdentity, clearIdentity } from '@/lib/identity';
+import { emitAck, getSocket, isRejoinPending, setRejoinPending } from '@/lib/socket';
+import { friendlyError } from '@/lib/errors';
+import { loadIdentity, saveIdentity, clearIdentity } from '@/lib/identity';
 import type { Participant } from '@/lib/types';
 import styles from './room.module.scss';
 
@@ -45,8 +45,19 @@ export default function RoomPage() {
   const locked = useAppSelector((s) => s.room.locked);
   const phase = useAppSelector((s) => s.voting.phase);
   const isHost = useAppSelector((s) => s.room.hostId === s.ui.myParticipantId);
+  const myPid = useAppSelector((s) => s.ui.myParticipantId);
+  const myName = useAppSelector((s) => s.ui.myName);
   const presentation = useAppSelector((s) => s.ui.presentation);
   const modals = useAppSelector((s) => s.ui.modals);
+
+  // Refs mirror the identity so the activity-switch listener (a socket
+  // callback that can't close over fresh state) can read it.
+  const myPidRef = useRef<string | null>(null);
+  const myNameRef = useRef<string>(myName);
+  useEffect(() => {
+    myPidRef.current = myPid;
+    myNameRef.current = myName;
+  }, [myPid, myName]);
 
   const wasJoined = useRef(false);
   if (joined) wasJoined.current = true;
@@ -56,10 +67,42 @@ export default function RoomPage() {
 
   useRoomShortcuts();
 
+  // One room → many activities: the host switched the room to an engine game
+  // (Team Health, Live Poll, …). Follow everyone to the new activity's route,
+  // carrying our participant id so nobody re-joins as a stranger.
+  useEffect(() => {
+    const socket = getSocket();
+    const onActivityChanged = (payload: any) => {
+      const target = payload?.game;
+      const c = String(payload?.code || '').toUpperCase();
+      if (!target || !c) return;
+      if (target === 'planning-poker') return; // already here
+      const params = new URLSearchParams({ room: c });
+      if (myPidRef.current) params.set('pid', myPidRef.current);
+      if (myNameRef.current) params.set('name', myNameRef.current);
+      // Hard navigation is deliberate: the target game page must boot fresh to
+      // adopt the pid identity before joining the room.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign(`/games/${target}?${params.toString()}`);
+    };
+    socket.on('room:activityChanged', onActivityChanged);
+    return () => {
+      socket.off('room:activityChanged', onActivityChanged);
+    };
+  }, []);
+
   // Cold load: if this tab has an identity, try to rejoin the in-memory room.
   useEffect(() => {
     if (joined || rejoinAttempted.current) return;
-    const identity = loadIdentity();
+    // Activity switch into this room: we arrive with our participant id
+    // already seated — adopt it so the rejoin below takes us straight back.
+    const pid = new URLSearchParams(window.location.search).get('pid');
+    const nameParam = new URLSearchParams(window.location.search).get('name');
+    let identity = loadIdentity();
+    if (pid && !identity?.participantId) {
+      saveIdentity({ participantId: pid, name: nameParam || 'Guest', role: 'voter' });
+      identity = loadIdentity();
+    }
     if (!identity?.participantId) return;
     // The bridge may already be rejoining after a socket reconnect — only one
     // room:rejoin may be in flight at a time. When the bridge owns the rejoin
@@ -105,6 +148,17 @@ export default function RoomPage() {
       })
       .finally(() => setRejoinPending(false));
   }, [joined, code, dispatch]);
+
+  // One room → many activities: switch this room to a hosted activity in
+  // place (host-only). The room code, URL and participants are preserved;
+  // everyone follows via room:activityChanged.
+  const switchActivity = (game: string) => {
+    emitAck<{ ok: boolean; error?: string }>('room:switchGame', { game }).then((res) => {
+      if (!res?.ok) {
+        dispatch(pushToast({ kind: 'error', title: 'Could not switch', message: friendlyError(res?.error, 'The activity could not be switched.') }));
+      }
+    });
+  };
 
   const copyLink = () => {
     navigator.clipboard?.writeText(window.location.href).then(
@@ -202,6 +256,19 @@ export default function RoomPage() {
         </div>
         <div className={styles.headerRight}>
           {isHost && (
+            <div className={styles.switchRow} title="One room, many activities — the code stays the same.">
+              <button type="button" className={`${styles.switchBtn} ${styles.switchBtnActive}`} disabled>
+                🃏 Poker
+              </button>
+              <button type="button" className={styles.switchBtn} onClick={() => switchActivity('team-health')}>
+                ❤️ Health
+              </button>
+              <button type="button" className={styles.switchBtn} onClick={() => switchActivity('live-poll')}>
+                🗳️ Poll
+              </button>
+            </div>
+          )}
+          {isHost && (
             <button
               type="button"
               className={styles.projectBtn}
@@ -212,7 +279,6 @@ export default function RoomPage() {
             </button>
           )}
           <ConnectionPill />
-          <ThemeToggle />
         </div>
       </header>
 

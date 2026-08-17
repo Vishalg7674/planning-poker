@@ -11,17 +11,17 @@ import {
 } from '@/lib/games';
 
 describe('game registry', () => {
-  it('contains 110 games across 9 categories', () => {
-    expect(CATEGORIES).toHaveLength(9);
-    expect(GAME_COUNT).toBe(110);
-    expect(GAMES).toHaveLength(110);
+  it('contains 112 games across 10 categories', () => {
+    expect(CATEGORIES).toHaveLength(10);
+    expect(GAME_COUNT).toBe(112);
+    expect(GAMES).toHaveLength(112);
   });
 
   it('ships every game live — no coming-soon placeholders remain', () => {
     for (const g of GAMES) {
       expect(g.status, g.id).toBe('live');
     }
-    expect(LIVE_GAMES).toHaveLength(110);
+    expect(LIVE_GAMES).toHaveLength(112);
   });
 
   it('has the exact expected per-category distribution', () => {
@@ -35,6 +35,7 @@ describe('game registry', () => {
       creative: 12,
       word: 13,
       competitive: 10,
+      agile: 2,
     };
     for (const [id, expected] of Object.entries(counts)) {
       expect(gamesByCategory(id as (typeof CATEGORY_IDS)[number]), `${id} count`).toHaveLength(expected);
@@ -59,7 +60,7 @@ describe('game registry', () => {
       expect(g.players, g.id).toMatch(/\d/);
       expect(g.duration, g.id).toMatch(/\d/);
       expect(g.category, g.id).toBeTruthy();
-      expect(['live', 'coming-soon']).toContain(g.status);
+      expect(g.status, g.id).toBe('live');
       expect(g.route, g.id).toMatch(/^\//);
     }
   });

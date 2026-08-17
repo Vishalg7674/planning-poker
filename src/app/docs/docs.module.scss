@@ -257,11 +257,6 @@
   overflow-x: auto;
   box-shadow: var(--shadow-panel);
   white-space: pre;
-
-  // keep readable in light theme too
-  :global([data-theme='light']) & {
-    background: #16281f;
-  }
 }
 
 // ---------------------------------------------------------------------------

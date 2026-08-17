@@ -39,7 +39,10 @@ for (const id of liveCatalog) {
 for (const id of GAME_IDS) {
   if (!catalogIds.has(id)) problems.push(`registry game "${id}" is missing from the catalog`);
   const mod = GAME_MODULES[id];
-  if (!mod || !Array.isArray(mod.PROMPTS) || mod.PROMPTS.length === 0) {
+  // Hosted activities (Team Health / Live Poll) are config-driven — the host
+  // builds them at creation time, so they intentionally carry no prompt bank.
+  const promptless = mod && (mod.kind === 'health' || mod.kind === 'poll');
+  if (!mod || (!promptless && (!Array.isArray(mod.PROMPTS) || mod.PROMPTS.length === 0))) {
     problems.push(`registry game "${id}" has no prompts loaded`);
   }
 }

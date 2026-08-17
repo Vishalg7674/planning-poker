@@ -46,7 +46,7 @@ src/
 │   │                     # PresentationView, ParticipantsPanel, TimerBadge, JoinForm
 │   ├── modals/           # EndSessionModal, RemoveParticipantModal
 │   └── RoomQR.tsx        # local QR of the invite URL (qrcode.react, no external service)
-├── lib/                  # cx, decks (central deck config), identity, socket, theme, types
+├── lib/                  # cx, decks (central deck config), identity, socket, game config, types
 ├── store/                # Redux store + 5 slices; actions.ts bridges sockets → redux
 └── styles/               # SCSS tokens/mixins/animations (CSS Modules), accent presets
 server/

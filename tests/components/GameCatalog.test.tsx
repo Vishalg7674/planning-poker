@@ -53,7 +53,7 @@ describe('GameCatalog', () => {
   it('renders per-category "View all" links when requested', () => {
     render(<GameCatalog showCategoryLinks />);
     const viewAll = screen.getAllByRole('link', { name: /View all/ });
-    expect(viewAll).toHaveLength(9);
+    expect(viewAll).toHaveLength(10);
     expect(viewAll[0]).toHaveAttribute('href', '/games?cat=icebreakers');
   });
 

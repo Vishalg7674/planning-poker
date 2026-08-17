@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
-import ThemeToggle from '@/components/ThemeToggle';
 import Button from '@/components/Button';
 import GameCatalog from '@/components/games/GameCatalog';
 import { CATEGORY_IDS, GAME_COUNT, type CategoryId } from '@/lib/games';
@@ -26,7 +25,6 @@ export default async function GamesPage({ searchParams }: GamesPageProps) {
         <Wordmark size="sm" />
         <span className={styles.tag}>{GAME_COUNT} games · 0 logins</span>
         <div className={styles.headerActions}>
-          <ThemeToggle />
           <Link href="/create">
             <Button variant="primary" size="sm">
               Create a room

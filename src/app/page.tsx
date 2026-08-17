@@ -8,7 +8,6 @@ import * as yup from 'yup';
 import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
 import Button from '@/components/Button';
-import ThemeToggle from '@/components/ThemeToggle';
 import GameCatalog from '@/components/games/GameCatalog';
 import { CATEGORIES, GAME_COUNT } from '@/lib/games';
 import styles from './page.module.scss';
@@ -78,7 +77,6 @@ export default function HomePage() {
         </nav>
         <span className={styles.tag}>{GAME_COUNT} games · 0 logins</span>
         <div className={styles.headerActions}>
-          <ThemeToggle />
           <Link href="/create">
             <Button variant="primary" size="sm">
               Create a room

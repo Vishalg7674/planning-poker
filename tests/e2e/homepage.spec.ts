@@ -19,19 +19,21 @@ test.describe('Homepage', () => {
     await expect(page.getByText('⭐ Featured')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Planning Poker' }).first()).toBeVisible();
     // Every catalog game carries the LIVE badge.
-    await expect(page.getByText('LIVE', { exact: true })).toHaveCount(110);
+    await expect(page.getByText('LIVE', { exact: true })).toHaveCount(112);
   });
 
-  test('renders all 110 game cards across the category sections', async ({ page }) => {
+  test('renders all 112 game cards across the category sections', async ({ page }) => {
     await page.goto('/');
     // All category sections are present.
-    for (const title of ['Retrospective & Team Icebreakers', 'Fast Reaction & Speed', 'Guessing Games', 'Estimation Games', 'Funny & Social', 'Developer Games', 'Creative Games', 'Word Games', 'Competitive Games']) {
+    for (const title of ['Retrospective & Team Icebreakers', 'Fast Reaction & Speed', 'Guessing Games', 'Estimation Games', 'Funny & Social', 'Developer Games', 'Creative Games', 'Word Games', 'Competitive Games', 'Agile Activities']) {
       await expect(page.getByRole('heading', { name: new RegExp(title) })).toBeVisible();
     }
     // Spot-check games from different categories.
     await expect(card(page, 'Most Likely To')).toBeVisible();
     await expect(card(page, 'Fastest Finger')).toBeVisible();
     await expect(card(page, 'Draw & Guess')).toBeVisible();
+    await expect(card(page, 'Team Health Check')).toBeVisible();
+    await expect(card(page, 'Live Poll')).toBeVisible();
     // Trivia Battle went live with the engine rollout — expect the live badge.
     await expect(card(page, 'Trivia Battle')).toBeVisible();
   });

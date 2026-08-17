@@ -23,6 +23,10 @@ const MESSAGES: Record<string, string> = {
   rate_limited: 'You’re moving a little fast — take a breath and try again in a moment.',
   too_long: 'That answer is too long — keep it under 240 characters.',
   room_full: 'This room is full — the host can remove someone or you can start your own game.',
+  // Client-side network failures (emitAck never rejects — these resolve as
+  // `{ ok: false, error }` and land here like any server error code).
+  unreachable: 'Can’t reach the realtime server — it may still be starting up. Try again in a moment.',
+  timeout: 'The server didn’t respond — check your connection and try again.',
 };
 
 /** Translate a server error code; unknown codes fall back to `fallback`. */

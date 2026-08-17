@@ -124,7 +124,7 @@ const createLimiter = createWindowLimiter(CREATE_LIMIT, 60_000); // per IP
 const joinLimiter = createWindowLimiter(JOIN_LIMIT, 60_000); // per IP
 const voteLimiter = makeSocketLimiter(VOTE_LIMIT, 1000); // per socket
 /** Events that cast a vote — the only ones a socket can spam meaningfully. */
-const VOTE_EVENTS = new Set(['vote:cast', 'vote:skip', 'game:pick', 'game:choose', 'game:answer', 'game:guess', 'game:submit']);
+const VOTE_EVENTS = new Set(['vote:cast', 'vote:skip', 'game:pick', 'game:choose', 'game:answer', 'game:guess', 'game:submit', 'game:healthSubmit', 'game:pollVote']);
 /** Live socket count per IP (connection cap). */
 const connectionsPerIp = new Map(); // ip -> count
 
@@ -252,6 +252,9 @@ io.on('connection', (socket) => {
             hostName: payload?.hostName,
             teamName: payload?.teamName,
             roomTitle: payload?.roomTitle,
+            // Team Health / Live Poll: the host's configuration rides along
+            // at creation (categories, question, options, privacy toggles).
+            config: payload?.config,
             hasCode: (code) => rooms.has(code),
           })
         : createRoom({
@@ -429,6 +432,46 @@ io.on('connection', (socket) => {
     if (!res.ok) return ackRes(ack, res);
     ackRes(ack, { ok: true });
     emitSnapshot(room);
+  });
+
+  // -------------------------------------------------------------------------
+  // One room → many activities: the host swaps the room's activity (Planning
+  // Poker, Team Health, Live Poll, any shipped game) in place. The room code,
+  // URL, participants and host are preserved untouched — only the activity
+  // state resets. Every client is told to follow via `room:activityChanged`.
+  // -------------------------------------------------------------------------
+  socket.on('room:switchGame', (payload, ack) => {
+    const room = roomFor(socket);
+    if (!room) return ackRes(ack, { ok: false, error: 'not_host' });
+    if (room.hostId !== socket.data.participantId) return ackRes(ack, { ok: false, error: 'not_host' });
+    const target = String(payload?.game || '');
+    // Already on that activity — makes the action idempotent against double-clicks.
+    if (target === room.game || (target === 'planning-poker' && !room.game)) {
+      return ackRes(ack, { ok: false, error: 'in_progress' });
+    }
+    if (target !== 'planning-poker' && !GAME_MODULES[target]) {
+      return ackRes(ack, { ok: false, error: 'not_found' });
+    }
+    // Preserve the room's identity; rebuild only the activity state.
+    const { code, hostId, teamName, roomTitle, createdAt, locked, participants, emptySince } = room;
+    const fresh =
+      target === 'planning-poker'
+        ? createRoom({ hostName: 'Host' })
+        : GAME_MODULES[target].create({ hostName: 'Host', config: payload?.config });
+    fresh.code = code;
+    fresh.hostId = hostId;
+    fresh.teamName = teamName;
+    fresh.roomTitle = roomTitle;
+    fresh.createdAt = createdAt;
+    fresh.locked = locked;
+    fresh.participants = participants;
+    fresh.emptySince = emptySince;
+    fresh.roundId = 0;
+    rooms.set(code, fresh);
+    logger.info({ code, from: room.game || 'planning-poker', to: target }, 'activity switched');
+    io.to(code).emit('room:activityChanged', { game: target, code });
+    ackRes(ack, { ok: true });
+    emitSnapshot(fresh);
   });
 
   // -------------------------------------------------------------------------

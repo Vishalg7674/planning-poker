@@ -52,3 +52,14 @@
 .label {
   line-height: 1;
 }
+
+.retry {
+  cursor: pointer;
+  @include focus-ring;
+  @include motion((border-color, background-color, color), $dur-fast);
+
+  &:hover {
+    border-color: rgba(var(--danger-rgb), 0.6);
+    background: rgba(var(--danger-rgb), 0.14);
+  }
+}

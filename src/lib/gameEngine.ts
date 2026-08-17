@@ -22,6 +22,71 @@ export interface GameParticipant {
   hue: number;
 }
 
+export type HealthStatus = 'healthy' | 'attention' | 'critical';
+
+/** Host-configured Team Health settings (public — the room needs them to render). */
+export interface HealthConfig {
+  title: string;
+  categories: string[];
+  scale: 5 | 10;
+  anonymous: boolean;
+}
+
+/** Host-configured Live Poll settings (public — the room needs them to render). */
+export interface PollConfig {
+  question: string;
+  options: string[];
+  type: 'single' | 'multiple' | 'yesno';
+  anonymous: boolean;
+  hideResults: boolean;
+}
+
+export type ActivityConfig = HealthConfig | PollConfig;
+
+export interface HealthCategoryStats {
+  name: string;
+  average: number;
+  count: number;
+  status: HealthStatus;
+}
+
+export interface HealthStats {
+  roundId: number;
+  title: string;
+  scale: number;
+  categories: HealthCategoryStats[];
+  overall: number;
+  overallStatus: HealthStatus;
+  submitted: number;
+  anonymous: boolean;
+  breakdown: { participantId: string; ratings: Record<string, number> }[];
+  trend: number | null;
+  previous: number | null;
+}
+
+export interface PollCount {
+  option: number;
+  count: number;
+  percent: number;
+}
+
+export interface PollStats {
+  roundId: number;
+  question: string;
+  counts: PollCount[];
+  totalVotes: number;
+  totalSelections: number;
+  winner: number | 'tie';
+  topCount: number;
+  anonymous: boolean;
+}
+
+/** Aggregate live counts for an open poll (hideResults = OFF) — anonymity-safe. */
+export interface PollLiveCounts {
+  counts: number[];
+  total: number;
+}
+
 /** Kind-specific prompt shapes. Quiz/estimate answers only appear at reveal. */
 export type GamePrompt =
   | string // teammate: "…show up early to a meeting?"
@@ -107,7 +172,7 @@ export interface FreeVoteStats {
 
 export type FreeStats = FreeSubmitStats | FreeVoteStats;
 
-export type GameStats = TeammateStats | OptionsStats | QuizStats | EstimateStats | FreeStats;
+export type GameStats = TeammateStats | OptionsStats | QuizStats | EstimateStats | FreeStats | HealthStats | PollStats;
 
 /** Privacy-aware game state broadcast to clients after every mutation. */
 export interface GameSnapshot {
@@ -133,6 +198,12 @@ export interface GameSnapshot {
   phase?: 'submit' | 'vote';
   /** `free` games only: participantId → text — public once revealed. */
   submissions?: Record<string, string>;
+  /** Team Health / Live Poll only: the host's activity configuration. */
+  config?: ActivityConfig;
+  /** Team Health / Live Poll only: summary history across past rounds. */
+  history?: unknown[];
+  /** Live Poll only: aggregate live counts when hideResults is OFF. */
+  liveCounts?: PollLiveCounts | null;
 }
 
 export interface GameIdentity {

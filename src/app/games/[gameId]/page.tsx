@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
-import ThemeToggle from '@/components/ThemeToggle';
 import ComingSoonGame from '@/components/games/ComingSoonGame';
 import GameRoom from '@/components/game/GameRoom';
 import { getGame, getCategory } from '@/lib/games';
@@ -44,7 +43,6 @@ export default async function GamePage({ params }: GamePageProps) {
       <header className={styles.header}>
         <Wordmark size="sm" />
         <div className={styles.headerActions}>
-          <ThemeToggle />
           <Link href="/games" className={styles.gamesLink}>
             All games
           </Link>

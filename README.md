@@ -3,98 +3,99 @@
 **Break the ice. Play together. No login required.**
 
 Reveal is a real-time multiplayer games platform for teams, retrospectives,
-icebreakers and everything in between. One game is live today — **Planning
-Poker** — with a catalog of **110 games across 9 categories** queued up behind
-it. Every game follows the same philosophy: create a room, share the link,
-and play together with zero signup.
+icebreakers and everything in between — **112 games across 10 categories, all
+live**. The catalog spans icebreakers, speed games, guessing, estimation,
+funny/social, developer, creative, word and competitive games, plus two
+hosted agile ceremonies (Team Health Check and Live Poll). Every game follows
+the same philosophy: create a room, share the link, and play together with
+zero signup.
 
 Rooms live **only in server memory**. No database, no accounts, no history.
 When the room empties (or the server restarts), it vanishes — by design.
+
+The app is **Night/Dark Mode only** — there is no light theme and no theme
+switcher.
 
 ---
 
 ## Core flow
 
 ```
-Host creates room (name, team, title, deck, accent)
-  →  shares the link / QR code
+Host creates a game room (name, optional team name)
+  →  shares the link (room code stays the same)
   →  participants join with just a name
       ↓
-Host starts voting (optional timer: Off / 10s / 15s / 30s)
+Host starts the first round / prompt / question / poll
       ↓
-Everyone votes exactly once — the vote locks the instant it lands
+Everyone answers exactly once — the answer locks the instant it lands
       ↓
-Host sees who voted / who is still thinking (values stay hidden)
+Host sees who answered / who is still thinking (values stay hidden)
       ↓
-Reveal unlocks when everyone has voted (or the timer ends the round)
+Reveal unlocks when everyone has answered
       ↓
-Everyone sees every vote + average / median / mode / range / consensus
+Everyone sees every answer + the round's statistics / winner
       ↓
-Host presses + New Story → the next round begins in the SAME room
-      (same link, same people — votes, results and the reveal reset)
+Host starts the next round — in the SAME room, same link, same people
 ```
 
-## Game catalog
+Planning Poker (the original game) lives at `/create` and follows the same
+flow with decks, an optional synchronized timer and consensus statistics.
+
+## Game catalog & engine
 
 - The homepage and `/games` render entirely from one centralized registry,
-  [`src/lib/games.ts`](src/lib/games.ts) — 110 games across 9 categories
-  (Icebreakers, Speed, Guessing, Estimation, Funny, Developer, Creative, Word,
-  Competitive).
+  [`src/lib/games.ts`](src/lib/games.ts) — 112 games across 10 categories.
 - Each game is a small data entry: icon, name, description, category, player
-  count, duration, status (`live` / `coming-soon`) and route. No hard-coded
-  cards in JSX.
-- **Planning Poker** is the only `live` game; its card links straight to the
-  real implementation (`/create`). Every other game opens a shared
-  `Coming Soon` placeholder at `/games/<id>`.
+  count, duration and route.
+- **Every engine-backed game** renders through one shared `GameRoom`
+  component at `/games/[gameId]`, driven by:
+  - the client config in [`src/lib/gameConfig.ts`](src/lib/gameConfig.ts)
+    (which voting UI, socket events and copy each game uses),
+  - the server registry in [`server/games/registry.mjs`](server/games/registry.mjs)
+    (game kind + socket events),
+  - the JSON prompt banks in [`server/games/data/`](server/games/data/)
+    (questions / prompts / answers).
+- **Team Health Check** and **Live Poll** are hosted agile activities — the
+  host builds them at creation time (categories to rate, or the poll question
+  and options) and the room plays through the same lifecycle.
+- **One room → many activities**: the host can switch the room between
+  Planning Poker, Team Health and Live Poll in place — the room code, URL,
+  participants and host are preserved; everyone follows automatically.
+- **Planning Poker** has its own dedicated page at `/create` (decks,
+  timer presets, reveal modes, consensus stats).
 - The catalog has instant **search** and **category filter chips**, plus
-  per-category "View all" links. A game becomes playable by flipping
-  `status: 'coming-soon'` to `'live'` — no homepage changes needed.
+  per-category "View all" links.
 
 ## Features
 
-- **Game catalog** — search + category filters over 110 games, grouped into
-  9 category sections, responsive grid (4 → 2 → 1 cards per row).
-- **Room customization** — host sets their name, an optional team name and
-  room title, picks one of **five decks** (Fibonacci, Modified Fibonacci,
-  Sequential, T-Shirt, Powers of 2) and an **accent color** (gold / purple /
-  blue / green) that re-skins the whole table.
-- **Multiple stories per room** — after a round is revealed the host starts
-  the next story in the same room (same URL, same participants); votes,
-  results and the reveal reset for everyone in real time. No revote *within*
-  a round, no history.
-- **Permanent vote lock, enforced on the server** — a second `vote:cast` from
-  the same participant is rejected, period.
-- **Private until the reveal** — before the host reveals, nobody (not even the
-  host) sees vote values, only *Voted / Thinking* status.
-- **Live presence** — Joined → Thinking → Voted, plus Disconnected and a
-  subtle "Reconnected" toast, with an animated thinking indicator and a live
-  participant count.
-- **Optional synchronized timer** — Off by default; 10s / 15s / 30s presets
-  only. The server owns the countdown and ends the round for everyone.
-- **Reveal rules** — timer off: reveal unlocks the moment *everyone* has
-  voted; timer on: reveal unlocks when the timer ends the round (or earlier,
-  if everyone votes first).
-- **Smart statistics** — average, median, most-selected, **highest, lowest,
-  range**, vote distribution and voter count, computed from submitted votes
-  only (non-voters are excluded from the math but shown as *Didn't vote*).
-  T-Shirt rounds get mode + distribution instead of a meaningless numeric
-  average.
-- **Consensus verdict** — a deterministic server-computed level (full /
-  strong / moderate / large) with a "worth discussing?" prompt on large
-  disagreements, and a confetti celebration on full consensus.
-- **Host controls** — start, reveal, **+ New Story** (next round in the same
-  room, with an optional story id/title/description), **remove a
+- **Game catalog** — search + category filters over 112 games, grouped into
+  10 category sections, responsive grid (4 → 2 → 1 cards per row).
+- **Room customization** — host sets their name, an optional team name, and
+  (for the hosted activities) the full activity configuration.
+- **Multiple rounds per room** — after a round is revealed the host starts
+  the next round in the same room (same URL, same participants); answers and
+  results reset for everyone in real time. No revote *within* a round, no
+  history.
+- **Permanent answer lock, enforced on the server** — a second vote from the
+  same participant is rejected, period.
+- **Private until the reveal** — before the host reveals, nobody (not even
+  the host) sees answer values, only *Answered / Thinking* status.
+- **Live presence** — Joined → Thinking → Answered, plus Disconnected, with
+  a subtle "Reconnected" toast.
+- **Host controls** — start, reveal, **next round**, **remove a
   participant**, **lock/unlock the room** (new joiners refused while locked),
-  **presentation mode** for TV/projector, and end the session. Every control
-  is validated server-side.
+  **switch activity**, and end the session. Every control is validated
+  server-side.
 - **QR + sharing** — the lobby shows a locally-generated QR code of the room
-  URL (no external service), a copy-invite button with a friendly message,
-  and native Web Share on supported devices.
+  URL (no external service) and a copy-invite button.
 - **No accounts** — an identity is a name in sessionStorage for one tab.
 - **Big-screen mode** — `/r/<CODE>/screen` is a read-only projection of the
-  table (join as a `screen`, not a participant), and hosts can also toggle an
-  in-room **presentation view**.
+  Planning Poker table (join as a `screen`, not a participant).
 - **Ephemeral rooms** — rooms expire 10 minutes after the last person leaves.
+- **Resilient realtime** — if the socket server is unreachable the UI shows
+  *Connecting / Reconnecting / Server offline — Retry* instead of crashing;
+  acknowledgements never produce unhandled promise errors, and a reconnect
+  restores your seat without reloading the game.
 
 ## Tech stack
 
@@ -105,7 +106,7 @@ Host presses + New Story → the next round begins in the SAME room
 | State     | Redux Toolkit 2 + react-redux 9               |
 | Realtime  | Socket.io 4 (client + in-memory server)       |
 | Forms     | react-hook-form + yup                         |
-| Styling   | SCSS modules (sass)                           |
+| Styling   | SCSS modules (sass), night-only design tokens |
 | QR        | qrcode.react (local SVG generation)           |
 | Testing   | Vitest (unit/components), Playwright (E2E)    |
 | Linting   | ESLint 9 (eslint-config-next)                 |
@@ -115,26 +116,27 @@ Host presses + New Story → the next round begins in the SAME room
 ```
 ├── src/
 │   ├── app/                  # Next.js routes: /, /games, /games/[gameId], /create, /r/[roomCode], /r/[roomCode]/screen
-│   ├── components/           # UI components (Button, Modal, Avatar, RoomQR, Toasts, …)
-│   │   ├── games/            # GameCard, GameCatalog, ComingSoonGame (homepage catalog)
+│   ├── components/
+│   │   ├── game/             # GameRoom — the shared engine-game UI (create/join/play/results)
+│   │   ├── games/            # GameCard, GameCatalog (homepage + /games catalog)
 │   │   ├── room/             # Deck, StartPanel, RevealBar, EndedPanel, ResultsPanel,
-│   │   │                     # PresentationView, ParticipantsPanel, …
-│   │   ├── modals/           # EndSessionModal, RemoveParticipantModal
-│   │   ├── providers.tsx     # Redux provider + theme sync
-│   │   └── RealtimeBridge.tsx# socket → Redux bridge (the only socket consumer)
-│   ├── lib/                  # cx, decks, games (registry), identity, socket, theme, types
+│   │   │                     # PresentationView, ParticipantsPanel, … (Planning Poker)
+│   │   ├── modals/           # EndSessionModal, RemoveParticipantModal, RoundResultModal, NewRoundModal
+│   │   ├── providers.tsx     # Redux Provider
+│   │   └── RealtimeBridge.tsx# socket → Redux bridge (Planning Poker state)
+│   ├── lib/                  # cx, decks, games (catalog), gameConfig (client registry),
+│   │                         # gameEngine (types), identity, socket, types
 │   ├── store/                # Redux store + 5 slices (room, participants, voting, timer, ui)
-│   │   └── actions.ts        # realtime → redux actions
 │   └── styles/               # global SCSS, tokens, mixins, animations, accent presets
 ├── server/
-│   ├── index.mjs             # Socket.io wiring, timers, room expiry
-│   └── room.mjs              # pure room-state logic (unit-tested)
-├── scripts/e2e.mjs           # socket-level E2E suite (121 checks)
-├── tests/
-│   ├── unit/                 # Vitest: lib, Redux slices, server room logic
-│   ├── components/           # Vitest + Testing Library
-│   ├── e2e/                  # Playwright specs + helpers
-│   └── helpers/              # store/fixture builders for tests
+│   ├── index.mjs             # Socket.io wiring, rate limiting, room expiry
+│   ├── room.mjs              # pure Planning Poker room logic (unit-tested)
+│   └── games/                # engine.mjs (generic game engine), registry.mjs,
+│                             # teamHealth.mjs, livePoll.mjs, data/*.json (prompt banks)
+├── scripts/e2e.mjs           # socket-level E2E (Planning Poker, 150 checks)
+├── scripts/e2e-games.mjs     # socket-level E2E (engine games + hosted activities, 126 checks)
+├── scripts/check-games.mjs   # catalog ↔ registry ↔ prompt-bank consistency gate
+├── tests/                    # unit, components, e2e (Playwright), helpers
 ├── docs/                     # architecture, PRD, API, testing, deployment, …
 ├── vitest.config.ts
 ├── playwright.config.ts
@@ -150,8 +152,13 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000, create a room, and open the share link in a second
-tab (or another device on your network — see env vars below).
+Open http://localhost:3000, pick a game, create a room, and open the share
+link in a second tab (or another device on your network — see env vars
+below).
+
+> The realtime server **must be running** for rooms to work. `npm run dev`
+> starts both processes together; if you run the Next app alone, the UI will
+> show *Server offline* rather than crashing.
 
 ### Running the pieces separately
 
@@ -175,17 +182,32 @@ See [`.env.example`](.env.example) — copy it to `.env.local` and adjust:
 For other devices on your LAN to join, set `NEXT_PUBLIC_SOCKET_URL` (and
 `SOCKET_ORIGIN`) to your machine's LAN IP instead of `localhost`.
 
+## Theme
+
+Reveal ships **Night/Dark Mode only**. The dark felt, warm gold accent and
+ivory card surfaces are the single theme — there is no light mode, no theme
+toggle and no OS-preference switching. `data-theme="dark"` is set statically
+on `<html>` in `src/app/layout.tsx`, and all design tokens live in
+`src/styles/globals.scss`.
+
 ## Testing
 
 ```bash
 npm test                  # unit + component tests (Vitest, jsdom)
 npm run test:watch        # Vitest in watch mode
 npm run test:coverage     # Vitest with coverage report
-npm run test:realtime     # socket-level E2E suite against a live server
+npm run test:realtime     # socket-level E2E — Planning Poker (needs the RT server running)
 npm run test:e2e          # Playwright browser E2E (starts its own servers)
 npm run test:e2e:headed   # Playwright headed, to watch it run
 npm run test:e2e:ui       # Playwright UI mode
 npm run test:all          # coverage + Playwright
+```
+
+Additional gates:
+
+```bash
+node scripts/check-games.mjs   # catalog ↔ registry ↔ prompt banks consistency
+node scripts/e2e-games.mjs     # socket-level E2E for engine games + hosted activities
 ```
 
 See [docs/TESTING.md](docs/TESTING.md) for details.

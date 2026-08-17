@@ -61,7 +61,7 @@ the wire by the realtime suite.
 ### Setup (`tests/setup.ts`)
 
 - Imports `@testing-library/jest-dom/vitest` (matchers like `toBeInTheDocument`).
-- Polyfills jsdom gaps the app uses: `matchMedia` (theme), `requestAnimationFrame`
+- Polyfills jsdom gaps the app uses: `requestAnimationFrame`
   (DistributionChart), `navigator.clipboard` (copy invite link).
 - Auto-runs Testing Library `cleanup()` after every test.
 
@@ -94,7 +94,7 @@ Coverage is a *guide*, not a gate. The project aims for strong coverage of:
   stats, consensus, deck fallbacks, room lock).
 - `src/components/room/*` — Deck, StartPanel, RevealBar, EndedPanel,
   ParticipantsPanel, ResultsPanel, PresentationView, JoinForm.
-- `src/lib/*` — cx, decks, identity, theme, stats helpers.
+- `src/lib/*` — cx, decks, identity, game config, socket, errors.
 
 Don't chase 100% in presentational components or modal chrome; prioritize
 behavior that would hurt users if it regressed.
@@ -106,7 +106,7 @@ tests/
 ├── setup.ts                 # jest-dom + polyfills + auto-cleanup
 ├── helpers/                 # store.tsx, fixtures.ts, types.ts
 ├── unit/
-│   ├── lib/                 # cx, decks, identity, theme
+│   ├── lib/                 # cx, decks, identity, games, socket helpers
 │   ├── server/room.test.ts  # the entire server state machine + rules
 │   └── store/               # roomSlice, participantsSlice, votingSlice, timerSlice, uiSlice
 ├── components/              # Field, Button, DistributionChart, Deck, StartPanel,
