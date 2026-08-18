@@ -85,27 +85,6 @@ describe('StartPanel', () => {
     await waitFor(() => expect(emitAckMock).toHaveBeenCalledWith('voting:start', {}));
   });
 
-  it('sends the story details along with voting:start', async () => {
-    const user = userEvent.setup();
-    renderWithStore(<StartPanel />, { preloaded: preload() });
-    await user.type(screen.getByLabelText('Story ID (optional)'), 'PROJ-143');
-    await user.type(screen.getByLabelText('Story Title'), 'User Profile');
-    await user.type(screen.getByLabelText('Description (optional)'), 'As a user…');
-    await user.click(screen.getByRole('button', { name: 'Start Voting' }));
-    await waitFor(() =>
-      expect(emitAckMock).toHaveBeenCalledWith('voting:start', {
-        story: { id: 'PROJ-143', title: 'User Profile', description: 'As a user…' },
-      }),
-    );
-  });
-
-  it('never shows the story form to participants', () => {
-    renderWithStore(<StartPanel />, { preloaded: preload({ host: false }) });
-    expect(screen.queryByLabelText('Story ID (optional)')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Story Title')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('Description (optional)')).not.toBeInTheDocument();
-  });
-
   it('shows a locked notice to participants', () => {
     renderWithStore(<StartPanel />, { preloaded: preload({ host: false, locked: true }) });
     expect(screen.getByText('Waiting for the host…')).toBeInTheDocument();

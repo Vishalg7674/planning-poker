@@ -8,7 +8,6 @@ import { friendlyError } from '@/lib/errors';
 import { emitAck } from '@/lib/socket';
 import Button from '@/components/Button';
 import RoomQR from '@/components/RoomQR';
-import { Field, Input, Textarea } from '@/components/Field';
 import { getDeckById } from '@/lib/decks';
 import styles from './StartPanel.module.scss';
 import { cx } from '@/lib/cx';
@@ -42,15 +41,8 @@ export default function StartPanel() {
   const roomTitle = useAppSelector((s) => s.room.roomTitle);
   const locked = useAppSelector((s) => s.room.locked);
   const code = useAppSelector((s) => s.room.code);
-  // The round after this one — startVoting increments roundId, so the label
-  // below is accurate before the button is pressed.
-  const roundId = useAppSelector((s) => s.voting.roundId);
   const [saving, setSaving] = useState(false);
   const [starting, setStarting] = useState(false);
-  // Story form (host-only, local until Start Voting commits it to the round).
-  const [storyId, setStoryId] = useState('');
-  const [storyTitle, setStoryTitle] = useState('');
-  const [storyDescription, setStoryDescription] = useState('');
 
   // Build the invite URL from the room code instead of location.href: during
   // client-side navigation the address bar may not have settled yet, which
@@ -121,7 +113,7 @@ export default function StartPanel() {
   const start = () => {
     if (starting) return;
     setStarting(true);
-    requestStart(dispatch, { id: storyId, title: storyTitle, description: storyDescription }).finally(() => setStarting(false));
+    requestStart(dispatch).finally(() => setStarting(false));
   };
 
   return (
@@ -225,45 +217,6 @@ export default function StartPanel() {
               📺 Presentation Mode
             </Button>
           </div>
-{/* Do not uncomment this */}
-          {/* <div className={styles.story}>
-            <span className={styles.storyEyebrow}>Story</span>
-            <div className={styles.storyFields}>
-              <Field label="Story ID (optional)" htmlFor="storyId">
-                <Input
-                  id="storyId"
-                  className={styles.storyIdInput}
-                  value={storyId}
-                  onChange={(e) => setStoryId(e.target.value)}
-                  placeholder="PROJ-143"
-                  maxLength={32}
-                />
-              </Field>
-              <Field label="Story Title" htmlFor="storyTitle">
-                <Input
-                  id="storyTitle"
-                  value={storyTitle}
-                  onChange={(e) => setStoryTitle(e.target.value)}
-                  placeholder="User Profile"
-                  maxLength={80}
-                />
-              </Field>
-              <Field label="Description (optional)" htmlFor="storyDescription">
-                <Textarea
-                  id="storyDescription"
-                  value={storyDescription}
-                  onChange={(e) => setStoryDescription(e.target.value)}
-                  placeholder="As a user, I want to…"
-                  rows={2}
-                  maxLength={200}
-                />
-              </Field>
-            </div>
-            <p className={styles.storyNote}>
-              Optional — skip it and this round is labelled “Round {roundId + 1}”.
-            </p>
-          </div> */}
-
           <Button variant="gold" size="lg" onClick={start} disabled={starting}>
             {starting ? 'Starting…' : 'Start Voting'}
           </Button>

@@ -1,7 +1,7 @@
 # Testing Guide — Reveal
 
 Reveal is tested with **Vitest** (unit + component tests, jsdom). There is no
-Playwright / browser E2E suite.
+browser E2E suite — all behavior is covered at the unit and component level.
 
 | Level                  | Runner | What it covers                                | Command    |
 | ---------------------- | ------ | --------------------------------------------- | ---------- |
