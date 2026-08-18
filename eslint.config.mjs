@@ -9,16 +9,7 @@ import nextTs from 'eslint-config-next/typescript';
  * usual ignores. `npm run lint` runs `eslint .`; `next build` also lints.
  */
 const eslintConfig = defineConfig([
-  globalIgnores([
-    '.next/**',
-    '.next-e2e/**',
-    'node_modules/**',
-    'out/**',
-    'build/**',
-    'coverage/**',
-    'playwright-report/**',
-    'test-results/**',
-  ]),
+  globalIgnores(['.next/**', 'node_modules/**', 'out/**', 'build/**', 'coverage/**']),
   ...nextVitals,
   ...nextTs,
   {

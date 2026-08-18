@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import HomePage from '@/app/page';
 import { renderWithStore } from '../helpers/store';
-import { GAME_COUNT } from '@/lib/games';
 
 const { pushMock } = vi.hoisted(() => ({ pushMock: vi.fn() }));
 
@@ -15,68 +14,52 @@ beforeEach(() => {
 });
 
 describe('HomePage', () => {
-  it('shows the new platform positioning', () => {
+  it('shows the planning poker positioning', () => {
     renderWithStore(<HomePage />, {});
     const hero = screen.getByRole('heading', { level: 1 });
-    expect(hero).toHaveTextContent('Break the ice.');
-    expect(hero).toHaveTextContent('Play together.');
+    expect(hero).toHaveTextContent('Estimate together.');
+    expect(hero).toHaveTextContent('Reveal together.');
     expect(screen.getByText(/no login required/)).toBeInTheDocument();
     expect(screen.getByText('✓ No signup')).toBeInTheDocument();
-    expect(screen.getByText(`${GAME_COUNT} games · 0 logins`)).toBeInTheDocument();
+    expect(screen.getByText('Planning Poker · no signup')).toBeInTheDocument();
   });
 
-  it('shows the registry-derived game counter', () => {
+  it('shows the planning poker quick stats', () => {
     renderWithStore(<HomePage />, {});
-    const stats = screen.getByLabelText('Games at a glance');
-    expect(stats).toHaveTextContent(`${GAME_COUNT}`);
-    expect(stats).toHaveTextContent('10');
+    const stats = screen.getByLabelText('Planning poker at a glance');
+    expect(stats).toHaveTextContent('5');
+    expect(stats).toHaveTextContent('10–30s');
     expect(stats).toHaveTextContent('1');
     expect(stats).toHaveTextContent('0');
+    expect(stats).toHaveTextContent('decks');
+    expect(stats).toHaveTextContent('voting timer');
     expect(stats).toHaveTextContent('click to play');
     expect(stats).toHaveTextContent('logins required');
   });
 
-  it('offers Create a Game and Explore Games CTAs', () => {
+  it('offers the create-room CTA', () => {
     renderWithStore(<HomePage />, {});
-    const createGame = screen.getAllByRole('link', { name: 'Create a Game' });
-    expect(createGame.length).toBeGreaterThan(0);
-    for (const link of createGame) expect(link).toHaveAttribute('href', '/create');
+    const createRoom = screen.getAllByRole('link', { name: 'Create a Room' });
+    expect(createRoom.length).toBeGreaterThan(0);
+    for (const link of createRoom) expect(link).toHaveAttribute('href', '/create');
     expect(screen.getByRole('link', { name: 'Create a room' })).toHaveAttribute('href', '/create');
-    // Explore Games scrolls to the catalog.
-    const explore = screen.getAllByRole('link', { name: 'Explore Games' });
-    expect(explore.length).toBeGreaterThan(0);
-    for (const link of explore) expect(link).toHaveAttribute('href', '#games');
   });
 
   it('features Planning Poker prominently', () => {
     renderWithStore(<HomePage />, {});
-    expect(screen.getByText('⭐ Featured')).toBeInTheDocument();
+    expect(screen.getByText('⭐ Planning Poker')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Planning Poker' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Play Planning Poker' })).toHaveAttribute('href', '/create');
   });
 
-  it('renders the full game catalog with search and categories', async () => {
-    const user = userEvent.setup();
+  it('shows the why-teams and how-it-works steps', () => {
     renderWithStore(<HomePage />, {});
-    const heading = screen.getByRole('heading', { name: 'Something for every meeting' });
-    expect(heading).toBeInTheDocument();
-    // All 110 cards render on the homepage.
-    expect(screen.getAllByRole('link', { name: /Play now|Coming soon/ })).toHaveLength(GAME_COUNT);
-
-    await user.type(screen.getByRole('searchbox', { name: 'Search games' }), 'trivia');
-    await waitFor(() => expect(screen.getByText(/matching “trivia”/)).toBeInTheDocument());
-    expect(screen.getByText('Trivia Battle')).toBeInTheDocument();
-    expect(screen.queryByText('Most Likely To')).not.toBeInTheDocument();
-  });
-
-  it('shows the roadmap podium and how-it-works steps', () => {
-    renderWithStore(<HomePage />, {});
-    expect(screen.getByRole('heading', { name: '🏆 Play. Score. Compete.' })).toBeInTheDocument();
-    expect(screen.getByText('Vishal')).toBeInTheDocument();
-    expect(screen.getByText('🥇')).toBeInTheDocument();
-    expect(screen.getByText('420 pts')).toBeInTheDocument();
-    expect(screen.getByText('Pick a game')).toBeInTheDocument();
-    expect(screen.getByText('See the leaderboard')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sprint planning, without the chaos' })).toBeInTheDocument();
+    expect(screen.getByText('Votes stay private')).toBeInTheDocument();
+    // The CTA button and the how-it-works step both say “Create a room”.
+    expect(screen.getAllByText('Create a room').length).toBeGreaterThan(0);
+    expect(screen.getByText('Reveal together')).toBeInTheDocument();
+    expect(screen.getByText('Next story')).toBeInTheDocument();
   });
 
   it('keeps the join-by-code form working', async () => {
@@ -97,9 +80,9 @@ describe('HomePage', () => {
     expect(pushMock).not.toHaveBeenCalled();
   });
 
-  it('renders the footer with the new positioning', () => {
+  it('renders the footer with the planning poker positioning', () => {
     renderWithStore(<HomePage />, {});
-    expect(screen.getByText(/Real-time games for teams, retrospectives and icebreakers/)).toBeInTheDocument();
+    expect(screen.getByText(/Real-time Planning Poker for agile teams/)).toBeInTheDocument();
     expect(screen.getByText('© 2026 Reveal')).toBeInTheDocument();
   });
 });

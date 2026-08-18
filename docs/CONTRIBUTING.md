@@ -9,8 +9,7 @@ doesn't belong here.**
 
 ## 1. Local setup
 
-Requirements: **Node.js 22+** and npm. Chrome is used by the Playwright E2E
-suite (`channel: 'chrome'`).
+Requirements: **Node.js 22+** and npm.
 
 ```bash
 npm install
@@ -46,14 +45,14 @@ src/
 │   │                     # PresentationView, ParticipantsPanel, TimerBadge, JoinForm
 │   ├── modals/           # EndSessionModal, RemoveParticipantModal
 │   └── RoomQR.tsx        # local QR of the invite URL (qrcode.react, no external service)
-├── lib/                  # cx, decks (central deck config), identity, socket, game config, types
+├── lib/                  # cx, decks (central deck config), identity, socket, errors, types
 ├── store/                # Redux store + 5 slices; actions.ts bridges sockets → redux
 └── styles/               # SCSS tokens/mixins/animations (CSS Modules), accent presets
 server/
 ├── index.mjs             # Socket.io wiring, timers, room expiry (no business rules)
 └── room.mjs              # PURE room-state logic — the server rules, unit-tested
-scripts/e2e.mjs           # socket-level protocol suite (~150 checks)
-tests/                    # Vitest (unit + components) and Playwright (e2e)
+
+tests/                    # Vitest (unit + components)
 docs/                     # architecture, PRD, API, testing, deployment, …
 ```
 
@@ -110,25 +109,21 @@ npm run lint            # ESLint 9 flat config (eslint-config-next)
 npx tsc --noEmit        # typecheck
 npm test                # Vitest — unit + component (jsdom)
 npm run test:coverage   # Vitest + coverage report
-npm run test:realtime   # socket protocol suite (start server first: SOCKET_PORT=… npm run dev:rt)
-npm run test:e2e        # Playwright browser E2E (starts its own servers on :3100/:3211)
 npm run build           # final gate: lint + typecheck + production build
 ```
 
 ### Rules of thumb
 
-- **Server rule changed?** Extend `tests/unit/server/room.test.ts` and add a
-  check to `scripts/e2e.mjs` so the wire contract is proven too.
+- **Server rule changed?** Extend `tests/unit/server/room.test.ts`.
 - **Deck or statistics changed?** Extend `tests/unit/lib/decks.test.ts` and
   the stats/consensus tests in `tests/unit/server/room.test.ts`.
 - **Reducer/action changed?** Extend the slice's test in `tests/unit/store/`.
 - **Component behavior changed?** Extend the matching test in
   `tests/components/` (React Testing Library + user-event).
-- **User-facing flow changed?** Extend or add a Playwright spec in
-  `tests/e2e/` — use separate browser contexts per user, and prefer exact
-  selectors (`getByRole(..., { exact: true })`) to avoid substring traps.
-- **Client-only UI change?** Vitest + jsdom is enough; don't add an E2E spec
-  for cosmetic tweaks.
+- **User-facing flow changed?** Extend the matching component test in
+  `tests/components/` — prefer exact roles/text (`getByRole(..., { exact:
+  true })`) to avoid substring traps.
+- **Client-only UI change?** Vitest + jsdom is enough for cosmetic tweaks.
 
 Never leave a failing test, and don't weaken an assertion to make it pass.
 
@@ -146,7 +141,6 @@ Never leave a failing test, and don't weaken an assertion to make it pass.
   - [ ] `npm run lint` clean
   - [ ] `npx tsc --noEmit` clean
   - [ ] `npm test` green
-  - [ ] `npm run test:e2e` green (if flow touched)
   - [ ] `npm run build` green
 
 ---
@@ -170,9 +164,6 @@ Reviewers check the *rules*, not the prose:
 
 | Symptom                              | Fix                                             |
 | ------------------------------------ | ----------------------------------------------- |
-| E2E ports busy                       | `:3100` / `:3211` are reserved for Playwright; free them or stop the dev stack |
-| Playwright "Target page crashed"     | Playwright uses system Chrome (`channel: 'chrome'`); install Chrome or switch to bundled Chromium |
 | Typecheck fails after editing `*.mjs`| Keep JSDoc typedefs in `server/room.mjs` accurate; the checks flow from them |
 | A deck change doesn't render         | Update `src/lib/decks.ts` AND `server/room.mjs` `KNOWN_DECKS`/`NUMERIC_DECKS` together |
 | `.next` corruption after a route move| Stop dev servers, `rm -rf .next`, restart (`next dev` rebuilds) |
-| Tests flaky on slow machines         | E2E runs single-worker by design; raise `expect.timeout` in `playwright.config.ts` if needed |

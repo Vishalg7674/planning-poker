@@ -202,7 +202,7 @@ from participants in the UI are still enforced server-side.
 Vote **values** are stored server-side in `room.votes` but only included in a
 snapshot when `status === 'revealed'`. Before that, snapshots expose only
 `votedIds` — who has voted, never what. This is enforced in `buildSnapshot`
-and covered by both the unit tests and the Playwright `vote-privacy` spec.
+and covered by the unit tests (`tests/unit/server/room.test.ts`).
 
 ## Presence
 
@@ -241,6 +241,3 @@ lock because the server state is authoritative.
   is a separate read-only projection that joins as `role: 'screen'`.
 - The QR code is generated **locally** with `qrcode.react` (SVG, no external
   service) and encodes the room URL built from the room code.
-- `scripts/e2e.mjs` is a socket-level E2E suite (~150 checks) that exercises
-  the real server protocol without a browser; Playwright covers the UI on
-  top.

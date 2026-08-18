@@ -21,8 +21,6 @@ const MESSAGES: Record<string, string> = {
   no_participant: 'That participant is no longer here.',
   cannot_remove: 'The host cannot be removed.',
   rate_limited: 'You’re moving a little fast — take a breath and try again in a moment.',
-  too_long: 'That answer is too long — keep it under 240 characters.',
-  room_full: 'This room is full — the host can remove someone or you can start your own game.',
   // Client-side network failures (emitAck never rejects — these resolve as
   // `{ ok: false, error }` and land here like any server error code).
   unreachable: 'Can’t reach the realtime server — it may still be starting up. Try again in a moment.',

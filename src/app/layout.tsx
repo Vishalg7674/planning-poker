@@ -5,13 +5,13 @@ import Toasts from '@/components/Toasts';
 import '@/styles/globals.scss';
 
 export const metadata: Metadata = {
-  title: 'Reveal — Fun Multiplayer Games for Teams',
+  title: 'Reveal — Real-time Planning Poker for Teams',
   description:
-    'Play fun real-time multiplayer games with your team, friends, and coworkers. Perfect for retrospectives, icebreakers, team meetings, quizzes, and more. No login required.',
+    'Private Planning Poker for agile teams: create a room, share one link, vote in private and reveal together. Real-time, no login required.',
   applicationName: 'Reveal',
   openGraph: {
-    title: 'Reveal — Break the Ice. Play Together.',
-    description: 'Real-time multiplayer games for teams, retrospectives and icebreakers. No signup required.',
+    title: 'Reveal — Estimate Together. Reveal Together.',
+    description: 'Real-time Planning Poker for teams. No signup required.',
     type: 'website',
   },
 };

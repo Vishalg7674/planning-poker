@@ -2,17 +2,11 @@
 
 ## Product vision
 
-A **real-time multiplayer games platform for teams** — "Break the ice. Play
-together. No login required." The full catalog is live: **112 games across
-10 categories** (agile, icebreakers, speed, guessing, estimation, funny,
-developer, creative, word, competitive), including the featured **Planning
-Poker** game, two hosted agile ceremonies (**Team Health Check**, **Live
-Poll**) and every engine-backed game rendered through the shared `GameRoom`.
-
-Whatever the game, the core product philosophy stays identical: create a
-room, share a link (or a QR code), everyone plays together in real time — no
-accounts, no database, no history. Rooms exist in memory and vanish when
-they empty.
+A **real-time Planning Poker app for agile teams** — "Estimate together.
+Reveal together. No login required." One product, one flow: create a room,
+share a link (or a QR code), the whole team votes in private, and the host
+reveals the cards together — no accounts, no database, no history. Rooms
+exist in memory and vanish when they empty.
 
 ## Problem statement
 
@@ -22,8 +16,6 @@ by stories, dashboards and histories — and the temptation to change votes
 after seeing others'. Reveal removes everything except the round: one room,
 one vote each, private until the reveal, final the moment it lands — with
 just enough configuration (deck, timer, accent) to feel like *your* table.
-The broader platform extends the same "zero friction" promise to other
-realtime team games.
 
 ## Target users
 
@@ -61,25 +53,13 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
 
 ## Functional requirements
 
-### Homepage & game catalog
-- The homepage presents the platform: hero ("Break the ice. Play together."
-  + Create a Game / Explore Games CTAs), a **featured Planning Poker** card,
-  a "why teams love it" strip, the full **game catalog**, a visual
-  **Play. Score. Compete.** roadmap teaser (non-functional), a how-it-works
-  list, and a closing CTA.
-- The catalog renders from a single registry (`src/lib/games.ts`): **112
-  games in 10 categories**, each with icon, name, description, player count,
-  duration, status and route. The counter ("112 games · 0 logins") is
-  derived from the registry, never hard-coded.
-- **Search** filters cards instantly (name + description + category);
-  **category filter chips** (All + 10) narrow the catalog; empty results show
-  "No games found.".
-- Every game has a route. Planning Poker links to the real
-  implementation (`/create`); the rest open a shared **Coming Soon**
-  placeholder at `/games/<id>` with a Back to Games button. `/games` is a
-  full catalog page, and `?cat=<id>` preselects a category.
-- Card grid is responsive: 3–4 per row on desktop, 2 on tablet, 1 on mobile,
-  with hover lift and keyboard focus — no horizontal page overflow.
+### Homepage
+- The homepage presents Planning Poker: a hero ("Estimate together. Reveal
+  together." + a **Create a Room** CTA and a join-by-code form), a
+  **featured Planning Poker** card, a "why teams love it" strip, quick stats
+  (decks, timer, no login), a how-it-works list, and a closing CTA.
+- Every CTA routes to `/create` (the room-creation flow). No catalog, no
+  search, no category filters — the product is one game.
 
 ### Room creation & lobby customization
 - The host enters their name (required) plus an optional **team name** and
@@ -265,5 +245,3 @@ Participant: Open link → Enter name → Join → See the team → Wait for hos
 - Custom deck editors, arbitrary timer values, custom accent themes.
 - Analytics dashboards or export of results.
 - Horizontal scaling / shared server state (see [DEPLOYMENT.md](DEPLOYMENT.md)).
-- Per-game scoring, lives and leaderboards beyond the current round-by-round
-  reveal flow (the homepage's podium remains a roadmap teaser).

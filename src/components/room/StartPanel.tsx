@@ -225,8 +225,8 @@ export default function StartPanel() {
               📺 Presentation Mode
             </Button>
           </div>
-
-          <div className={styles.story}>
+{/* Do not uncomment this */}
+          {/* <div className={styles.story}>
             <span className={styles.storyEyebrow}>Story</span>
             <div className={styles.storyFields}>
               <Field label="Story ID (optional)" htmlFor="storyId">
@@ -262,7 +262,7 @@ export default function StartPanel() {
             <p className={styles.storyNote}>
               Optional — skip it and this round is labelled “Round {roundId + 1}”.
             </p>
-          </div>
+          </div> */}
 
           <Button variant="gold" size="lg" onClick={start} disabled={starting}>
             {starting ? 'Starting…' : 'Start Voting'}

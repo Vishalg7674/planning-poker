@@ -1,19 +1,15 @@
 # Testing Guide — Reveal
 
-Reveal is tested at three levels. Each level is a separate suite with its own
-runner, so you can run exactly the layer you are working on.
+Reveal is tested with **Vitest** (unit + component tests, jsdom). There is no
+Playwright / browser E2E suite.
 
-| Level                    | Runner     | What it covers                                      | Command             |
-| ------------------------ | ---------- | --------------------------------------------------- | ------------------- |
-| Unit + component tests   | Vitest     | Pure logic (lib, server room rules) and UI behavior | `npm test`          |
-| Realtime protocol tests  | Node script| Server-authoritative rules over real sockets        | `npm run test:realtime` |
-| Browser E2E              | Playwright | The whole app in a real browser, multi-user         | `npm run test:e2e`  |
+| Level                  | Runner | What it covers                                | Command    |
+| ---------------------- | ------ | --------------------------------------------- | ---------- |
+| Unit + component tests | Vitest | Pure logic (lib, server room rules) and UI behavior | `npm test` |
 
 ```
 Unit Tests        → every rule, reducer, and pure function in isolation
 Component Tests   → user-visible behavior of critical UI (jsdom)
-Realtime tests    → the socket contract, multi-client, against a live server
-E2E Tests         → the real Next.js app + realtime server in Chrome
 ```
 
 ---
@@ -28,18 +24,10 @@ E2E Tests         → the real Next.js app + realtime server in Chrome
   and assert on roles, text, and aria attributes — never on class names. SCSS
   modules are **not** processed by Vitest (`css: false`), so component tests
   are fast and independent of sass.
-- **Realtime tests** (`scripts/e2e.mjs`) connect several real
-  `socket.io-client` sockets to a running `server/index.mjs` and exercise the
-  full protocol (121 checks) including privacy, the server-side vote lock,
-  room lock/unlock, deck validation, and accent/reveal-mode settings.
-- **E2E tests** (Playwright) drive the real Next.js app in Chrome with
-  separate browser contexts per user. They verify what a user actually sees,
-  not internal state.
 
-Nothing in the test stack mocks the Socket.io server for unit/component
-tests: components that talk to the socket use a stubbed socket module, while
-the server's rules are covered directly against `server/room.mjs` and over
-the wire by the realtime suite.
+Components that talk to the socket use a stubbed socket module
+(`vi.mock('@/lib/socket')`), while the server's rules are covered directly
+against the pure `server/room.mjs` functions.
 
 ---
 
@@ -72,8 +60,7 @@ the wire by the realtime suite.
   renders a component inside a Redux `Provider`. This mirrors the wiring in
   `src/store/index.ts`.
 - `tests/helpers/fixtures.ts` — `makeParticipant()` and `makeSnapshot()`
-  builders for realistic, privacy-aware snapshots (with the extended
-  settings shape and the new deck ids).
+  builders for realistic, privacy-aware snapshots.
 - `tests/helpers/types.ts` — test-side type helpers.
 
 ### Running
@@ -94,7 +81,7 @@ Coverage is a *guide*, not a gate. The project aims for strong coverage of:
   stats, consensus, deck fallbacks, room lock).
 - `src/components/room/*` — Deck, StartPanel, RevealBar, EndedPanel,
   ParticipantsPanel, ResultsPanel, PresentationView, JoinForm.
-- `src/lib/*` — cx, decks, identity, game config, socket, errors.
+- `src/lib/*` — cx, decks, identity, socket, errors, roomActions.
 
 Don't chase 100% in presentational components or modal chrome; prioritize
 behavior that would hurt users if it regressed.
@@ -106,138 +93,18 @@ tests/
 ├── setup.ts                 # jest-dom + polyfills + auto-cleanup
 ├── helpers/                 # store.tsx, fixtures.ts, types.ts
 ├── unit/
-│   ├── lib/                 # cx, decks, identity, games, socket helpers
+│   ├── lib/                 # cx, decks, identity, roomActions, errors, socket helpers
 │   ├── server/room.test.ts  # the entire server state machine + rules
 │   └── store/               # roomSlice, participantsSlice, votingSlice, timerSlice, uiSlice
-├── components/              # Field, Button, DistributionChart, Deck, StartPanel,
-│                            # RevealBar, EndedPanel, ParticipantsPanel,
-│                            # ResultsPanel, PresentationView, JoinForm,
-│                            # RoomQR, CreatePage
-└── e2e/                     # Playwright specs (see below; excluded from Vitest)
+└── components/              # Field, Button, DistributionChart, Deck, StartPanel,
+                             # RevealBar, EndedPanel, ParticipantsPanel,
+                             # ResultsPanel, PresentationView, JoinForm,
+                             # RoomQR, CreatePage, HomePage
 ```
 
 ---
 
-## 3. Realtime protocol tests (`npm run test:realtime`)
-
-`scripts/e2e.mjs` is a headless multi-client suite (121 checks) that connects
-host, voter, observer, and screen sockets to a **live** `server/index.mjs`
-and verifies the wire contract end to end:
-
-- Room creation with customization: team name, room title, deck, accent and
-  reveal mode validated against the allow-lists; unknown values fall back to
-  defaults.
-- Deck validation (5 decks, defaults to Fibonacci); timer validation (only
-  Off/10/15/30; non-host rejected); reveal-mode validation.
-- Voting closed before start; start flips `WAITING → VOTING`.
-- **Vote lock**: first vote accepted, second rejected (`already_voted`).
-- **Privacy**: `votedIds` visible pre-reveal, `votes` empty, `stats` null.
-- Reveal gating: `not_all_voted` while someone is thinking; reveal from
-  `VOTING` once everyone voted; reveal rejected for non-host.
-- Timer expiry flips `VOTING → ENDED`; late votes rejected; reveal then allowed.
-- **Room lock**: `room:lock` then a brand-new join is rejected
-  (`room_locked`); the existing participant can still rejoin; `room:unlock`
-  re-opens the door.
-- Stats for non-numeric decks (T-Shirt: `numeric: false`, null numeric stats,
-  mode + counts) and consensus levels (full / strong / moderate / large).
-- `room:end` wipes memory; removed participants get `you:removed`; screen
-  (`role: 'screen'`) sockets watch without seating and cannot vote.
-- Disconnected non-voters don't deadlock `everyoneHasVoted`.
-
-Run it against a server on a custom port:
-
-```bash
-SOCKET_PORT=3211 node server/index.mjs &   # one terminal
-E2E_URL=http://localhost:3211 npm run test:realtime   # another
-```
-
-(The Playwright web server does not reuse this — it starts its own copy.)
-
----
-
-## 4. Playwright E2E
-
-### Configuration (`playwright.config.ts`)
-
-| Setting          | Value                                                        |
-| ---------------- | ------------------------------------------------------------ |
-| `testDir`        | `tests/e2e`                                                  |
-| Browser          | Chromium via the system Chrome (`channel: 'chrome'`) — no bundled download needed |
-| `baseURL`        | `http://localhost:3100`                                      |
-| Timeout          | 60 s per test, 10 s per expectation                          |
-| Parallelism      | `fullyParallel: false`, `workers: 1` (countdown/reveal assertions stay deterministic) |
-| Artifacts        | `trace: retain-on-failure`, screenshot on failure only       |
-| Retries          | 2 on CI, 0 locally                                           |
-
-`webServer` starts **two** processes before the suite and stops them after:
-
-1. The realtime server on **:3211** (`SOCKET_PORT=3211`).
-2. Next.js dev on **:3100**, pointed at that realtime server
-   (`NEXT_PUBLIC_SOCKET_URL=http://localhost:3211`) and built into an
-   isolated `NEXT_DIST_DIR=.next-e2e` so it never corrupts the `.next` cache
-   of a concurrently running `npm run dev`.
-
-Ports deliberately avoid the developer's default stack (Next :3000 +
-realtime :3001).
-
-### Multi-user modeling
-
-Each user is a **separate browser context** (like a separate browser tab with
-its own sessionStorage identity). `tests/e2e/helpers.ts` provides small
-reusable steps:
-
-```ts
-const host = await newContext(browser);          // fresh identity
-await createRoom(host, 'Vishal');                // host creates + sees invite screen
-await joinRoom(participant, roomUrl, 'Rahul');   // participant joins by link
-await startVoting(host);
-await submitVote(participant, '8');
-await revealVotes(host);
-```
-
-### Specs
-
-| Spec                          | Verifies                                                                 |
-| ----------------------------- | ------------------------------------------------------------------------ |
-| `create-room.spec.ts`         | Create → invite screen: room code, copy-invite, host listed               |
-| `join-room.spec.ts`           | Second context joins by URL; both sides see each other                    |
-| `lobby-customization.spec.ts` | Host sets team name / room title / deck / accent; everyone sees the configuration |
-| `decks.spec.ts`               | Each of the five decks renders its cards correctly                        |
-| `presence.spec.ts`            | Joined / Thinking / Voted / Disconnected presence updates live for everyone |
-| `room-lock.spec.ts`           | Locked room rejects a new joiner; existing members stay; unlock lets joiners in |
-| `qr-invite.spec.ts`           | QR + copy-invite render and encode the actual room URL                    |
-| `voting-flow.spec.ts`         | Full journey: start → vote → reveal → results + stats                     |
-| `vote-lock.spec.ts`           | Vote 8 → second pick 13 fails → still 8 (UI *and* server)                |
-| `vote-privacy.spec.ts`        | Host sees "Voted" but never the value before reveal                       |
-| `everyone-voted.spec.ts`      | `1 / 2 voted` → reveal disabled → `2 / 2 voted` → reveal enabled          |
-| `timer.spec.ts`               | 10s / 15s / 30s: countdown runs, expiry stops voting, reveal unlocks      |
-| `results.spec.ts`             | Revealed values, "Didn't vote", average/median/mode/highest/lowest/range/distribution |
-| `presentation.spec.ts`        | Host enters presentation mode, drives the round from the big view, reveals |
-| `permissions.spec.ts`         | Participants never see host controls; host-only start/reveal              |
-
-### Running
-
-```bash
-npm run test:e2e            # headless (starts its own servers)
-npm run test:e2e:headed     # watch it run in Chrome
-npm run test:e2e:ui         # Playwright UI mode (debug / step through)
-npx playwright test tests/e2e/timer.spec.ts   # one spec
-```
-
-### Debugging failures
-
-- `trace: retain-on-failure` writes a trace per failing test under
-  `test-results/` — open it with `npx playwright show-trace <path>`.
-- Screenshots and an error-context snapshot land in `test-results/` on failure.
-- With `workers: 1` and sequential flows, flakiness is usually a selector
-  matching too broadly — prefer `getByRole(..., { exact: true })` and
-  `getByText(..., { exact: true })` (e.g. `Vote 8` also matches `Vote 89`,
-  and a stat label like "Highest" can match both the stats row and the
-  highlight tag).
-
----
-
-## 5. Critical scenarios (the rules that must never break)
+## 3. Critical scenarios (the rules that must never break)
 
 1. **Vote lock** — one vote per participant, forever. Server rejects the
    second `vote:cast`; the UI shows the locked card and disables the rest.
@@ -263,7 +130,7 @@ npx playwright test tests/e2e/timer.spec.ts   # one spec
 
 ---
 
-## 6. CI recommendations
+## 4. CI recommendations
 
 A minimal CI pipeline runs, in order:
 
@@ -272,18 +139,5 @@ npm ci
 npm run lint
 npx tsc --noEmit
 npm test                 # unit + component (fast, jsdom)
-npm run test:coverage    # and gate on a coverage floor if you like
-npm run test:realtime    # needs a server on :3001 or set E2E_URL
-npm run test:e2e         # Playwright; set CI=1 to enable retries
 npm run build
 ```
-
-Notes for CI:
-
-- Playwright uses the system Chrome via `channel: 'chrome'`. On a bare CI
-  runner either pre-install Chrome or switch the project to the bundled
-  Chromium: `npx playwright install --with-deps chromium` and drop the
-  `channel` from `playwright.config.ts`.
-- Run the three suites in separate jobs if the runner is shared — the
-  Playwright suite already isolates its own ports (:3100 / :3211).
-- `workers: 1` keeps the countdown assertions deterministic on slow runners.

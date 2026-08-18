@@ -58,6 +58,16 @@ describe('makeSocketLimiter', () => {
     expect(lim(a, 0)).toBe(false);
     expect(lim(b, 0)).toBe(true);
   });
+
+  // Regression: the socket layer calls the limiter directly as a function
+  // (voteLimiter(socket)). It is NOT an object with an .allow method — a
+  // previous commit called voteLimiter.allow(socket), which threw a TypeError
+  // on every vote:cast/vote:skip and crashed the whole realtime server.
+  it('is a plain callable — the server must call it as voteLimiter(socket)', () => {
+    const lim = makeSocketLimiter(10, 1000);
+    expect(typeof lim).toBe('function');
+    expect('allow' in lim).toBe(false); // an object API would be a bug — it must be called directly
+  });
 });
 
 describe('clientIp', () => {

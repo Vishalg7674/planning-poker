@@ -9,8 +9,6 @@ import { defineConfig } from 'vitest/config';
  * - SCSS is not processed by default (`css: false`) — components are asserted
  *   via roles / text / aria attributes, not class names, so tests stay fast
  *   and never depend on sass compilation.
- * - Playwright specs live in `tests/e2e/**` and are intentionally excluded
- *   from Vitest's file matching (they run under `npm run test:e2e`).
  */
 export default defineConfig({
   plugins: [react()],

@@ -303,7 +303,7 @@
 }
 
 // ---------------------------------------------------------------------------
-// Game counter stats
+// Quick stats
 // ---------------------------------------------------------------------------
 
 .stats {
@@ -344,7 +344,7 @@
 }
 
 // ---------------------------------------------------------------------------
-// Featured game (Planning Poker)
+// Featured section (Planning Poker)
 // ---------------------------------------------------------------------------
 
 .featuredCard {
@@ -522,79 +522,6 @@
 .featureIcon {
   font-size: 26px;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
-}
-
-// ---------------------------------------------------------------------------
-// Game catalog
-// ---------------------------------------------------------------------------
-
-.catalog {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-5;
-}
-
-// ---------------------------------------------------------------------------
-// Podium (roadmap teaser)
-// ---------------------------------------------------------------------------
-
-.podium {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-5;
-}
-
-.podiumBox {
-  @include panel;
-  padding: $sp-6;
-  background: var(--surface-soft);
-  display: flex;
-  flex-direction: column;
-  gap: $sp-3;
-}
-
-.podiumRow {
-  display: grid;
-  grid-template-columns: 44px 110px 1fr 70px;
-  align-items: center;
-  gap: $sp-3;
-
-  @include media($bp-xs) {
-    grid-template-columns: 36px 80px 1fr 54px;
-    gap: $sp-2;
-  }
-}
-
-.podiumMedal {
-  font-size: 26px;
-  text-align: center;
-}
-
-.podiumName {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.podiumBar {
-  height: 14px;
-  border-radius: $r-pill;
-  background:
-    linear-gradient(90deg, var(--accent-bright), var(--accent)) 0 0 / var(--fill) 100% no-repeat,
-    rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border);
-}
-
-.podiumPts {
-  @include mono;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink-dim);
-  text-align: right;
-}
-
-.podiumNote {
-  color: var(--ink-faint);
-  font-size: 12.5px;
 }
 
 // ---------------------------------------------------------------------------

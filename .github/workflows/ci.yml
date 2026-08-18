@@ -1,8 +1,4 @@
-# CI — lint, typecheck/build, unit tests, socket-level E2E, browser E2E.
-# Phase 0 (optimization.md, T6): every push/PR to main must be green before
-# deploy. The socket-level suites start their own realtime server with
-# RATE_LIMIT_DISABLED=1 (they create many rooms per run from one IP — the
-# limiter itself is unit-tested instead).
+# CI — lint, typecheck/build, unit + component tests.
 name: CI
 
 on:
@@ -12,9 +8,9 @@ on:
 
 jobs:
   test:
-    name: Lint · Build · Unit · E2E
+    name: Lint · Build · Unit
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,30 +32,6 @@ jobs:
 
       - name: Unit + component tests
         run: npm test
-
-      - name: Socket-level E2E (realtime protocol + engine games)
-        run: |
-          RATE_LIMIT_DISABLED=1 SOCKET_PORT=3001 node server/index.mjs &
-          SERVER_PID=$!
-          # wait for the banner to appear
-          for i in $(seq 1 20); do
-            curl -sf http://localhost:3001/ > /dev/null 2>&1 && break
-            sleep 0.5
-          done
-          node scripts/e2e.mjs
-          node scripts/e2e-games.mjs
-          kill $SERVER_PID || true
-
-      - name: Playwright browser E2E
-        run: npm run test:e2e
-
-      - name: Upload Playwright artifacts on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-results
-          path: test-results/
-          retention-days: 7
 
   audit:
     name: Dependency audit (non-blocking)

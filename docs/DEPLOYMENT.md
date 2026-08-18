@@ -21,7 +21,7 @@ endpoints are required.
 | `SOCKET_PORT`           | realtime server    | `3001`                    | if not default   |
 | `SOCKET_ORIGIN`         | realtime server    | `http://localhost:3000`   | ✅ set to app origin(s) |
 | `NEXT_PUBLIC_SOCKET_URL`| browser client     | `http://localhost:3001`   | ✅ set to the realtime server's public URL |
-| `NEXT_DIST_DIR`         | Next build         | `.next`                   | only for e2e isolation |
+| `NEXT_DIST_DIR`         | Next build         | `.next`                   | optional (isolated build output) |
 
 - The realtime server also honors `PORT` when `SOCKET_PORT` is unset — Render
   and Railway inject a random `PORT` into the environment.

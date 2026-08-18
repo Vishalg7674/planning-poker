@@ -13,7 +13,6 @@
 | QR codes           | `qrcode.react` `^4.2.0` (local SVG generation — no external service) |
 | Dev / build        | Node.js 22, npm 11, `concurrently` for `npm run dev` |
 | Unit/component tests | Vitest (latest), jsdom, React Testing Library, `@testing-library/jest-dom`, `@testing-library/user-event`, `@vitest/coverage-v8` |
-| E2E tests          | `@playwright/test` (Chromium via the system Chrome channel) |
 | Linting            | ESLint 9 flat config + `eslint-config-next` (`core-web-vitals`, `typescript`) |
 
 Path alias: `@/*` → `./src/*` (TypeScript `paths` + Vitest `resolve.alias`).
@@ -34,22 +33,13 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
 
 | Route                    | Purpose                                             |
 | ------------------------ | --------------------------------------------------- |
-| `/`                      | Games-platform homepage: hero, featured Planning Poker, full game catalog, roadmap podium, how-it-works, CTA |
-| `/games`                 | Full catalog page (reuses `GameCatalog`); optional `?cat=<category>` preselects a filter |
-| `/games/[gameId]`        | Dynamic game page — engine-backed games render through the shared `GameRoom`; `/games/planning-poker` redirects to `/create`; unknown ids 404 |
+| `/`                      | Planning Poker homepage: hero, featured Planning Poker, quick stats, how-it-works, CTA |
 | `/create`                | Room creation form: name (required), team name, room title, deck picker, accent picker → navigates to `/r/<CODE>` |
 | `/r/[roomCode]`          | The room: waiting → voting → ended → revealed → waiting (next story via `room:newRound`), plus the participant side panel |
 | `/r/[roomCode]/screen`   | Read-only projector view (joins the socket as `role: 'screen'`) |
 
 ### Components (`src/components`)
 
-- Games (`src/components/games`): `GameCard` (one catalog card — the whole
-  card is the link), `GameCatalog` (search input + category filter chips +
-  per-category grids + empty state).
-- Game room (`src/components/game`): `GameRoom` — the shared UI for every
-  engine-backed game: create/join/rejoin screens, waiting room, per-kind
-  voting panels (teammate / options / quiz / estimate / free / health / poll),
-  results panels, players sidebar and the host activity switcher.
 - Primitives: `Button`, `Field`/`Input`/`Textarea`/`Select`, `Modal`, `Avatar`
   (auto initials), `ConnectionPill`, `Toasts`, `Celebration`,
   `DistributionChart`, `RoomQR` (local QR of the invite URL).
@@ -65,7 +55,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the diagram and lifecycle.
 - Modals (`src/components/modals`): `EndSessionModal`, `NewRoundModal`
   (confirm the next story), `RemoveParticipantModal`.
 - `providers.tsx` — Redux `Provider`; `RealtimeBridge.tsx` — the socket →
-  Redux bridge for Planning Poker state (engine games drive their own page).
+  Redux bridge for room state.
 
 ### Hooks
 
@@ -135,56 +125,6 @@ a future custom deck is a one-line change.
 
 The server's `computeStats` treats `½` as `0.5`; non-numeric decks get
 `numeric: false` and null numeric stats.
-
-## Game catalog & engine
-
-The catalog is **one centralized registry**, `src/lib/games.ts` — 112 games
-across 10 categories (`CATEGORIES`), each game a plain data entry:
-
-```ts
-{
-  id: string;           // kebab-case slug, also the /games/<id> route
-  name: string;
-  category: CategoryId; // agile | icebreakers | speed | guessing | estimation | funny | developer | creative | word | competitive
-  description: string;
-  icon: string;         // emoji
-  status: 'live';       // every catalog game is live
-  route: string;        // real route (/games/<id>, or /create for planning-poker)
-  players: string;      // display string, e.g. '3–20 players'
-  duration: string;     // display string, e.g. '5 min'
-}
-```
-
-- **Planning Poker** points at `/create` — its own room-creation flow. The
-  `/games/planning-poker` URL `redirect()`s there.
-- **Every other game** renders through the shared `GameRoom` component at
-  `/games/[gameId]`, driven by three pieces:
-  - `src/lib/gameConfig.ts` — client config: game kind (options / teammate /
-    quiz / estimate / free / health / poll), socket cast event, accent, copy;
-  - `server/games/registry.mjs` — server registry: game kind + cast events,
-    backed by JSON prompt banks in `server/games/data/`;
-  - `server/games/engine.mjs` — the generic game engine (one implementation,
-    every game): startPrompt → cast → reveal lifecycle, privacy-aware
-    snapshots, per-kind stats.
-- **Team Health Check** (`server/games/teamHealth.mjs`) and **Live Poll**
-  (`server/games/livePoll.mjs`) are hosted agile activities — the host
-  configures them at creation time (categories / question + options), and
-  they implement the same module contract as the engine games.
-- **One room → many activities**: `room:switchGame` swaps a room between
-  Planning Poker / Team Health / Live Poll in place — same code, URL and
-  participants; every client follows via `room:activityChanged`.
-- `GameCatalog` is the single rendering component (homepage + `/games`),
-  with instant search (name + description + category) and category filter
-  chips; both homepage and `/games?cat=<id>` preselects work.
-- Shipping a new engine game = add a JSON prompt bank + a registry row + a
-  client config entry, then add it to the catalog. `scripts/check-games.mjs`
-  verifies catalog ↔ registry ↔ prompt-bank consistency in CI.
-- Tests: `tests/unit/lib/games.test.ts` (registry integrity: 112 games, 10
-  categories, unique ids/names, per-category counts), `GameCard`,
-  `GameCatalog` (search / filter / empty state / View-all links),
-  `tests/unit/server/gameEngine.test.ts` + `activities.test.ts`, the
-  `scripts/e2e-games.mjs` socket suite, and the `agile-activities.spec.ts`
-  Playwright suite.
 
 ## Data models
 

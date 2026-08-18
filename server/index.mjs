@@ -24,7 +24,7 @@
  * from it. Vote *values* never leave the server until the room is REVEALED —
  * the snapshot only exposes who has voted (`votedIds`) beforehand.
  *
- * Ops surfaces (see docs/system-design.md §13 + optimization.md Phase 0):
+ * Ops surfaces:
  *   - Rate limiting   — in-memory fixed-window buckets (server/rateLimit.mjs):
  *                       room:create 5/min/IP, room:join 30/min/IP, vote
  *                       events 10/s/socket, max 20 sockets/IP. Disable with
@@ -58,19 +58,10 @@ import {
   removeParticipant,
   disconnectParticipant,
 } from './room.mjs';
-import { GAME_MODULES, CAST_EVENTS } from './games/registry.mjs';
 import { createWindowLimiter, makeSocketLimiter, clientIp } from './rateLimit.mjs';
 
-/**
- * Every engine-backed game is a drop-in here: each module exports create,
- * startPrompt, cast (the vote action), reveal, committed, setLocked,
- * removeParticipant, disconnectParticipant and buildGameSnapshot, plus the
- * `castEvent` it listens on. The socket layer stays fully generic.
- */
-const GAME_IDS = new Set(Object.keys(GAME_MODULES));
-
 // Render / Railway inject a random PORT into the environment; SOCKET_PORT
-// (local dev, playwright) wins when both are set.
+// (local dev) wins when both are set.
 const PORT = Number(process.env.SOCKET_PORT || process.env.PORT || 3001);
 const ORIGIN = process.env.SOCKET_ORIGIN || 'http://localhost:3000';
 
@@ -124,7 +115,7 @@ const createLimiter = createWindowLimiter(CREATE_LIMIT, 60_000); // per IP
 const joinLimiter = createWindowLimiter(JOIN_LIMIT, 60_000); // per IP
 const voteLimiter = makeSocketLimiter(VOTE_LIMIT, 1000); // per socket
 /** Events that cast a vote — the only ones a socket can spam meaningfully. */
-const VOTE_EVENTS = new Set(['vote:cast', 'vote:skip', 'game:pick', 'game:choose', 'game:answer', 'game:guess', 'game:submit', 'game:healthSubmit', 'game:pollVote']);
+const VOTE_EVENTS = new Set(['vote:cast', 'vote:skip']);
 /** Live socket count per IP (connection cap). */
 const connectionsPerIp = new Map(); // ip -> count
 
@@ -176,16 +167,10 @@ io.use((socket, next) => {
 });
 
 function emitSnapshot(room) {
-  const snapshot = snapshotFor(room);
+  const snapshot = buildSnapshot(room);
   snapshotsTotal.inc();
   broadcastBytes.inc(Buffer.byteLength(JSON.stringify(snapshot)));
   io.to(room.code).emit('snapshot', snapshot);
-}
-
-/** Build the room's snapshot using the right game's serializer. */
-function snapshotFor(room) {
-  const mod = GAME_MODULES[room.game];
-  return mod ? mod.buildGameSnapshot(room) : buildSnapshot(room);
 }
 
 /** Ack + record rejections for the error-rate metric. `res` is {ok, ...}. */
@@ -202,8 +187,7 @@ function ackRes(ack, res) {
 const timerSweep = setInterval(() => {
   const now = Date.now();
   for (const room of rooms.values()) {
-    // Planning poker only — the games have no countdown.
-    if (!GAME_IDS.has(room.game) && room.status === 'voting' && room.timer && room.timer.endsAt <= now) {
+    if (room.status === 'voting' && room.timer && room.timer.endsAt <= now) {
       room.status = 'ended';
       emitSnapshot(room);
     }
@@ -220,57 +204,47 @@ io.on('connection', (socket) => {
 
   // Per-packet guard: count every event for metrics, then apply the buckets.
   // Dropped packets still get a `rate_limited` ack so clients see a message
-  // instead of a silent hang.
+  // instead of a silent hang. The whole body is guarded: a throwing limiter
+  // must reject that one packet — never take down the process (room state
+  // lives only in memory, so a crash would end every session).
   socket.use(([event, , ack], next) => {
-    eventsTotal.inc({ event });
-    if (RATE_LIMIT_DISABLED) return next();
-    let limited = false;
-    if (event === 'room:create') limited = !createLimiter.allow(clientIp(socket));
-    else if (event === 'room:join') limited = !joinLimiter.allow(clientIp(socket));
-    else if (VOTE_EVENTS.has(event)) limited = !voteLimiter.allow(socket);
-    if (limited) {
-      rateLimitedEvents.inc({ event });
-      logger.warn({ event, ip: clientIp(socket), socketId: socket.id }, 'rate limited');
-      if (typeof ack === 'function') ack({ ok: false, error: 'rate_limited' });
-      return; // drop the packet — the handler never runs
-    }
     try {
+      eventsTotal.inc({ event });
+      if (RATE_LIMIT_DISABLED) return next();
+      let limited = false;
+      if (event === 'room:create') limited = !createLimiter.allow(clientIp(socket));
+      else if (event === 'room:join') limited = !joinLimiter.allow(clientIp(socket));
+      else if (VOTE_EVENTS.has(event)) limited = !voteLimiter(socket); // makeSocketLimiter returns a callable, not an object
+      if (limited) {
+        rateLimitedEvents.inc({ event });
+        logger.warn({ event, ip: clientIp(socket), socketId: socket.id }, 'rate limited');
+        if (typeof ack === 'function') ack({ ok: false, error: 'rate_limited' });
+        return; // drop the packet — the handler never runs
+      }
       next();
     } catch (e) {
-      // Central safety net: a throwing handler must never take down the
-      // process (room state stays memory-only and every room would vanish).
       Sentry.captureException(e);
-      logger.error({ event, err: e, socketId: socket.id }, 'socket handler threw');
+      logger.error({ event, err: e, socketId: socket.id }, 'socket middleware threw');
+      if (typeof ack === 'function') ack({ ok: false, error: 'internal_error' });
     }
   });
 
   socket.on('room:create', (payload, ack) => {
     try {
-      const gameMod = GAME_MODULES[payload?.game];
-      const room = gameMod
-        ? gameMod.create({
-            hostName: payload?.hostName,
-            teamName: payload?.teamName,
-            roomTitle: payload?.roomTitle,
-            // Team Health / Live Poll: the host's configuration rides along
-            // at creation (categories, question, options, privacy toggles).
-            config: payload?.config,
-            hasCode: (code) => rooms.has(code),
-          })
-        : createRoom({
-            hostName: payload?.hostName,
-            teamName: payload?.teamName,
-            roomTitle: payload?.roomTitle,
-            deckId: payload?.deckId,
-            accent: payload?.accent,
-            revealMode: payload?.revealMode,
-            hasCode: (code) => rooms.has(code),
-          });
+      const room = createRoom({
+        hostName: payload?.hostName,
+        teamName: payload?.teamName,
+        roomTitle: payload?.roomTitle,
+        deckId: payload?.deckId,
+        accent: payload?.accent,
+        revealMode: payload?.revealMode,
+        hasCode: (code) => rooms.has(code),
+      });
       rooms.set(room.code, room);
       socket.join(room.code);
       socket.data.roomCode = room.code;
       socket.data.participantId = room.hostId;
-      logger.info({ code: room.code, game: room.game || 'planning-poker' }, 'room created');
+      logger.info({ code: room.code }, 'room created');
       ackRes(ack, { ok: true, code: room.code, participantId: room.hostId });
       emitSnapshot(room);
     } catch (e) {
@@ -293,7 +267,7 @@ io.on('connection', (socket) => {
       socket.join(room.code);
       socket.data.roomCode = room.code;
       socket.data.participantId = null;
-      ackRes(ack, { ok: true, participantId: null, screen: true, snapshot: snapshotFor(room) });
+      ackRes(ack, { ok: true, participantId: null, screen: true, snapshot: buildSnapshot(room) });
       emitSnapshot(room);
       return;
     }
@@ -310,8 +284,7 @@ io.on('connection', (socket) => {
       participant = room.participants.get(id);
       participant.name = (name || participant.name).slice(0, 32);
       participant.role = participant.role === 'facilitator' ? 'facilitator' : 'voter';
-      const committed = gameModuleFor(room)?.committed?.(room, participant.id) ?? room.votes?.[participant.id];
-      participant.status = committed ? 'voted' : 'connected';
+      participant.status = room.votes?.[participant.id] !== undefined ? 'voted' : 'connected';
     } else {
       participant = addParticipant(room, { name, role: 'voter', id });
     }
@@ -319,7 +292,7 @@ io.on('connection', (socket) => {
     socket.data.roomCode = room.code;
     socket.data.participantId = participant.id;
     room.emptySince = null;
-    ackRes(ack, { ok: true, participantId: participant.id, snapshot: snapshotFor(room) });
+    ackRes(ack, { ok: true, participantId: participant.id, snapshot: buildSnapshot(room) });
     emitSnapshot(room);
   });
 
@@ -331,24 +304,20 @@ io.on('connection', (socket) => {
     const participant = room.participants.get(participantId);
     if (!participant) return ackRes(ack, { ok: false, error: 'unknown_participant' });
     participant.name = (name || participant.name).slice(0, 32);
-    const committed = gameModuleFor(room)?.committed?.(room, participant.id) ?? room.votes?.[participant.id];
-    participant.status = committed ? 'voted' : 'connected';
+    participant.status = room.votes?.[participant.id] !== undefined ? 'voted' : 'connected';
     socket.join(room.code);
     socket.data.roomCode = room.code;
     socket.data.participantId = participantId;
     room.emptySince = null;
-    ackRes(ack, { ok: true, participantId, snapshot: snapshotFor(room) });
+    ackRes(ack, { ok: true, participantId, snapshot: buildSnapshot(room) });
     emitSnapshot(room);
   });
 
-  /** Verify the socket is inside a room and it's the facilitator for host-only actions. */
+  /** Verify the socket is inside a room and it's a seated participant. */
   const roomFor = (socket) => {
     const room = rooms.get(socket.data.roomCode);
     return room && socket.data.participantId && room.participants.has(socket.data.participantId) ? room : null;
   };
-
-  /** The game module backing a room, if it's a shipped game. */
-  const gameModuleFor = (room) => GAME_MODULES[room.game];
 
   // -------------------------------------------------------------------------
   // Start — only the host, and only while the room is still WAITING.
@@ -371,60 +340,6 @@ io.on('connection', (socket) => {
   // code, host, participants, settings — is preserved. Server-side guards
   // make it idempotent: a second call while WAITING/VOTING is rejected.
   // -------------------------------------------------------------------------
-  // -------------------------------------------------------------------------
-  // Shipped games (Most Likely To, Would You Rather) — same transport as
-  // planning poker, their own events: startPrompt (host, from WAITING or
-  // REVEALED), the per-game cast action, and reveal (host, once everyone has
-  // voted).
-  // -------------------------------------------------------------------------
-  socket.on('game:startPrompt', (_payload, ack) => {
-    const room = roomFor(socket);
-    const mod = room && gameModuleFor(room);
-    if (!mod) return ackRes(ack, { ok: false, error: 'not_found' });
-    const res = mod.startPrompt(room, socket.data.participantId);
-    if (!res.ok) return ackRes(ack, res);
-    ackRes(ack, { ok: true });
-    emitSnapshot(room);
-  });
-
-  // Cast a vote — one generic handler per game cast event (pick/choose/
-  // answer/guess/submit). The room's module declares which events it listens
-  // on (a `free` game accepts both its submit event and its vote event), so a
-  // client can never vote on the wrong game's channel.
-  for (const castEvent of CAST_EVENTS) {
-    socket.on(castEvent, (payload, ack) => {
-      const room = roomFor(socket);
-      const mod = room && gameModuleFor(room);
-      if (!mod || !mod.castEvents?.includes(castEvent)) return ackRes(ack, { ok: false, error: 'not_found' });
-      const res = mod.cast(room, socket.data.participantId, payload?.value);
-      if (!res.ok) return ackRes(ack, res);
-      ackRes(ack, { ok: true });
-      emitSnapshot(room);
-    });
-  }
-
-  socket.on('game:reveal', (_payload, ack) => {
-    const room = roomFor(socket);
-    const mod = room && gameModuleFor(room);
-    if (!mod) return ackRes(ack, { ok: false, error: 'not_found' });
-    const res = mod.reveal(room, socket.data.participantId);
-    if (!res.ok) return ackRes(ack, res);
-    ackRes(ack, { ok: true });
-    emitSnapshot(room);
-  });
-
-  // `free` games: the host opens the vote phase once the submissions have
-  // been revealed (host-only, from REVEALED submit-phase).
-  socket.on('game:startVote', (_payload, ack) => {
-    const room = roomFor(socket);
-    const mod = room && gameModuleFor(room);
-    if (!mod || mod.kind !== 'free') return ackRes(ack, { ok: false, error: 'not_found' });
-    const res = mod.startVote(room, socket.data.participantId);
-    if (!res.ok) return ackRes(ack, res);
-    ackRes(ack, { ok: true });
-    emitSnapshot(room);
-  });
-
   socket.on('room:newRound', (_payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ackRes(ack, { ok: false, error: 'not_host' });
@@ -432,46 +347,6 @@ io.on('connection', (socket) => {
     if (!res.ok) return ackRes(ack, res);
     ackRes(ack, { ok: true });
     emitSnapshot(room);
-  });
-
-  // -------------------------------------------------------------------------
-  // One room → many activities: the host swaps the room's activity (Planning
-  // Poker, Team Health, Live Poll, any shipped game) in place. The room code,
-  // URL, participants and host are preserved untouched — only the activity
-  // state resets. Every client is told to follow via `room:activityChanged`.
-  // -------------------------------------------------------------------------
-  socket.on('room:switchGame', (payload, ack) => {
-    const room = roomFor(socket);
-    if (!room) return ackRes(ack, { ok: false, error: 'not_host' });
-    if (room.hostId !== socket.data.participantId) return ackRes(ack, { ok: false, error: 'not_host' });
-    const target = String(payload?.game || '');
-    // Already on that activity — makes the action idempotent against double-clicks.
-    if (target === room.game || (target === 'planning-poker' && !room.game)) {
-      return ackRes(ack, { ok: false, error: 'in_progress' });
-    }
-    if (target !== 'planning-poker' && !GAME_MODULES[target]) {
-      return ackRes(ack, { ok: false, error: 'not_found' });
-    }
-    // Preserve the room's identity; rebuild only the activity state.
-    const { code, hostId, teamName, roomTitle, createdAt, locked, participants, emptySince } = room;
-    const fresh =
-      target === 'planning-poker'
-        ? createRoom({ hostName: 'Host' })
-        : GAME_MODULES[target].create({ hostName: 'Host', config: payload?.config });
-    fresh.code = code;
-    fresh.hostId = hostId;
-    fresh.teamName = teamName;
-    fresh.roomTitle = roomTitle;
-    fresh.createdAt = createdAt;
-    fresh.locked = locked;
-    fresh.participants = participants;
-    fresh.emptySince = emptySince;
-    fresh.roundId = 0;
-    rooms.set(code, fresh);
-    logger.info({ code, from: room.game || 'planning-poker', to: target }, 'activity switched');
-    io.to(code).emit('room:activityChanged', { game: target, code });
-    ackRes(ack, { ok: true });
-    emitSnapshot(fresh);
   });
 
   // -------------------------------------------------------------------------
@@ -537,11 +412,10 @@ io.on('connection', (socket) => {
   });
 
   // Host-only: lock / unlock the room against new joiners (any phase).
-  socket.on('room:lock', (payload, ack) => {
+  socket.on('room:lock', (_payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ackRes(ack, { ok: false, error: 'not_host' });
-    const mod = gameModuleFor(room);
-    const res = mod ? mod.setLocked(room, socket.data.participantId, true) : setLocked(room, socket.data.participantId, true);
+    const res = setLocked(room, socket.data.participantId, true);
     if (!res.ok) return ackRes(ack, res);
     ackRes(ack, { ok: true });
     emitSnapshot(room);
@@ -550,8 +424,7 @@ io.on('connection', (socket) => {
   socket.on('room:unlock', (_payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ackRes(ack, { ok: false, error: 'not_host' });
-    const mod = gameModuleFor(room);
-    const res = mod ? mod.setLocked(room, socket.data.participantId, false) : setLocked(room, socket.data.participantId, false);
+    const res = setLocked(room, socket.data.participantId, false);
     if (!res.ok) return ackRes(ack, res);
     ackRes(ack, { ok: true });
     emitSnapshot(room);
@@ -560,10 +433,7 @@ io.on('connection', (socket) => {
   socket.on('participant:remove', (payload, ack) => {
     const room = roomFor(socket);
     if (!room) return ackRes(ack, { ok: false, error: 'not_host' });
-    const mod = gameModuleFor(room);
-    const res = mod
-      ? mod.removeParticipant(room, socket.data.participantId, payload?.participantId)
-      : removeParticipant(room, socket.data.participantId, payload?.participantId);
+    const res = removeParticipant(room, socket.data.participantId, payload?.participantId);
     if (!res.ok) return ackRes(ack, res);
     // Tell that exact socket it's gone, if it's still connected.
     for (const s of io.sockets.sockets.values()) {
@@ -593,9 +463,7 @@ io.on('connection', (socket) => {
     if (!roomCode) return;
     const room = rooms.get(roomCode);
     if (!room) return;
-    const mod = gameModuleFor(room);
-    if (mod) mod.disconnectParticipant(room, participantId);
-    else disconnectParticipant(room, participantId);
+    disconnectParticipant(room, participantId);
     emitSnapshot(room);
   });
 });
@@ -632,10 +500,11 @@ const metricsSweep = setInterval(() => {
 // ---------------------------------------------------------------------------
 
 let shuttingDown = false;
-function shutdown(signal) {
+function shutdown(signal, exitCode = 0) {
   if (shuttingDown) return;
   shuttingDown = true;
-  logger.info({ signal }, 'shutting down — rooms are memory-only and will be lost');
+  logger.info({ signal }, 'shutdown requested');
+  logger.info('closing connections and releasing the port');
   clearInterval(timerSweep);
   clearInterval(expirySweep);
   clearInterval(metricsSweep);
@@ -646,11 +515,11 @@ function shutdown(signal) {
     } catch {
       // already closed by io.close() in some versions — fine either way
     }
-    logger.info('shutdown complete');
-    process.exit(0);
+    logger.info('shutdown complete — port released');
+    process.exit(exitCode);
   });
   // Hard stop if sockets refuse to drain (keeps the event loop free).
-  setTimeout(() => process.exit(1), 5000).unref();
+  setTimeout(() => process.exit(exitCode), 5000).unref();
 }
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
@@ -662,8 +531,36 @@ process.on('unhandledRejection', (reason) => {
 });
 process.on('uncaughtException', (err) => {
   Sentry.captureException(err);
-  logger.fatal({ err }, 'uncaught exception — shutting down gracefully');
-  shutdown('uncaughtException');
+  // A fatal error must not be hidden: rooms are told they ended, then the
+  // process exits non-zero so process managers / CI see the failure.
+  logger.fatal({ err }, 'uncaught exception — shutting down');
+  shutdown('uncaughtException', 1);
+});
+
+// ---------------------------------------------------------------------------
+// Startup errors — a port conflict must fail fast with a clear, actionable
+// message (no raw stack trace in the terminal), while any other startup error
+// keeps its full detail in the pino logs. Without this listener the EADDRINUSE
+// error event would escalate into the uncaughtException handler, which treats
+// it as a graceful shutdown and exits 0 — silently masking the failure.
+// ---------------------------------------------------------------------------
+
+httpServer.on('error', (err) => {
+  if (err?.code === 'EADDRINUSE') {
+    console.error('\n[rt] Realtime server could not start.');
+    console.error(`[rt] Port ${PORT} is already in use.`);
+    console.error('[rt] Possible causes:');
+    console.error('  - Another realtime server is already running (npm run rt, a second npm run dev, or a leftover process)');
+    console.error('  - A previous development process did not shut down cleanly (Ctrl+C in some IDE terminals can orphan the child on Windows)');
+    console.error('  - The development scripts started the realtime server twice');
+    console.error(`[rt] Stop the process holding port ${PORT}, then run again. On Windows:`);
+    console.error('      netstat -ano | findstr :3001');
+    console.error('      taskkill /PID <pid> /F');
+    console.error('[rt] Or run on another port:  SOCKET_PORT=3002 npm run dev');
+    process.exit(1);
+  }
+  logger.error({ err }, 'realtime http server error');
+  process.exit(1);
 });
 
 httpServer.listen(PORT, () => {

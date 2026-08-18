@@ -8,8 +8,6 @@ import * as yup from 'yup';
 import Link from 'next/link';
 import Wordmark from '@/components/Wordmark';
 import Button from '@/components/Button';
-import GameCatalog from '@/components/games/GameCatalog';
-import { CATEGORIES, GAME_COUNT } from '@/lib/games';
 import styles from './page.module.scss';
 
 const joinSchema = yup.object({
@@ -30,27 +28,20 @@ const FAN = [
 ] as const;
 
 const WHY = [
-  { icon: '⚡', title: 'Quick to start', body: 'No onboarding, no tutorial. Pick a game, share a link, go.' },
-  { icon: '🔗', title: 'One shareable link', body: 'Everyone joins from a single URL — no invites, no accounts.' },
-  { icon: '👥', title: 'Truly multiplayer', body: 'Real-time rooms where the whole team plays together.' },
-  { icon: '🔐', title: 'No signup', body: 'Your identity is just a name in a room. No email, no history.' },
-  { icon: '🏆', title: 'Scoring on the way', body: 'Points, leaderboards and bragging rights are coming.' },
+  { icon: '⚡', title: 'Quick to start', body: 'Create a room, share one link, and your team joins with just a name.' },
+  { icon: '🔗', title: 'One shareable link', body: 'Everyone joins from a single URL or QR code — no invites, no accounts.' },
+  { icon: '👥', title: 'Truly multiplayer', body: 'Real-time voting rooms where every player’s card syncs instantly.' },
+  { icon: '🔐', title: 'Votes stay private', body: 'Nobody — not even the host — sees a value until the reveal.' },
+  { icon: '🗂️', title: 'Many stories, one room', body: 'Estimate story after story in the same room; votes reset for every round.' },
 ] as const;
 
 const STEPS = [
-  { icon: '🎮', label: 'Pick a game' },
   { icon: '🃏', label: 'Create a room' },
   { icon: '🔗', label: 'Share the link' },
   { icon: '👥', label: 'Everyone joins' },
-  { icon: '🎲', label: 'Play together' },
-  { icon: '⭐', label: 'Earn points' },
-  { icon: '🏆', label: 'See the leaderboard' },
-] as const;
-
-const PODIUM = [
-  { medal: '🥇', name: 'Vishal', pts: 420 },
-  { medal: '🥈', name: 'Rahul', pts: 360 },
-  { medal: '🥉', name: 'Priya', pts: 300 },
+  { icon: '🗳️', label: 'Vote in private' },
+  { icon: '🎉', label: 'Reveal together' },
+  { icon: '🗂️', label: 'Next story' },
 ] as const;
 
 export default function HomePage() {
@@ -72,10 +63,9 @@ export default function HomePage() {
       <header className={styles.header}>
         <Wordmark />
         <nav className={styles.nav} aria-label="Primary">
-          <Link href="/games">Games</Link>
           <Link href="#how-it-works">How it works</Link>
         </nav>
-        <span className={styles.tag}>{GAME_COUNT} games · 0 logins</span>
+        <span className={styles.tag}>Planning Poker · no signup</span>
         <div className={styles.headerActions}>
           <Link href="/create">
             <Button variant="primary" size="sm">
@@ -89,34 +79,29 @@ export default function HomePage() {
         {/* ------------------------------------------------------------- Hero */}
         <section className={styles.hero}>
           <div className={styles.copy}>
-            <p className={styles.eyebrow}>Real-time team games</p>
+            <p className={styles.eyebrow}>Real-time sprint planning</p>
             <h1 className={styles.h1}>
-              Break the ice.
+              Estimate together.
               <br />
-              <em>Play together.</em>
+              <em>Reveal together.</em>
             </h1>
             <p className={styles.pitch}>
-              Fun, fast, real-time multiplayer games for retrospectives, team meetings, icebreakers and everything in
-              between. Create a room, share one link, and play together — <strong>no login required</strong>.
+              Private votes, one shared reveal, and statistics that settle the debate. Create a room, share one link,
+              and your team estimates stories in real time — <strong>no login required</strong>.
             </p>
 
             <div className={styles.ctaRow}>
               <Link href="/create" className={styles.ctaLink}>
                 <Button variant="gold" size="lg" className={styles.ctaPrimary}>
-                  Create a Game
+                  Create a Room
                 </Button>
               </Link>
-              <a href="#games" className={styles.ctaLink}>
-                <Button variant="outline" size="lg" className={styles.ctaPrimary}>
-                  Explore Games
-                </Button>
-              </a>
             </div>
 
             <div className={styles.trust}>
               <span>✓ No signup</span>
-              <span>✓ Share one link</span>
-              <span>✓ Play together</span>
+              <span>✓ Votes stay private</span>
+              <span>✓ One link to play</span>
             </div>
           </div>
 
@@ -134,22 +119,20 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
-              <div className={styles.feltLabel}>
-                {GAME_COUNT}+ games · no login · just play
-              </div>
+              <div className={styles.feltLabel}>planning poker · no login · just play</div>
             </div>
           </div>
         </section>
 
-        {/* -------------------------------------------------- Game counter */}
-        <section className={styles.stats} aria-label="Games at a glance">
+        {/* -------------------------------------------------- Quick stats */}
+        <section className={styles.stats} aria-label="Planning poker at a glance">
           <div className={styles.stat}>
-            <span className={styles.statValue}>{GAME_COUNT}</span>
-            <span className={styles.statLabel}>games</span>
+            <span className={styles.statValue}>5</span>
+            <span className={styles.statLabel}>decks</span>
           </div>
           <div className={styles.stat}>
-            <span className={styles.statValue}>{CATEGORIES.length}</span>
-            <span className={styles.statLabel}>categories</span>
+            <span className={styles.statValue}>10–30s</span>
+            <span className={styles.statLabel}>voting timer</span>
           </div>
           <div className={styles.stat}>
             <span className={styles.statValue}>1</span>
@@ -164,7 +147,7 @@ export default function HomePage() {
         {/* --------------------------------------------------------- Featured */}
         <section className={styles.featured} aria-labelledby="featured-heading">
           <div className={styles.featuredCard}>
-            <div className={styles.featuredBadge}>⭐ Featured</div>
+            <div className={styles.featuredBadge}>⭐ Planning Poker</div>
             <div className={styles.featuredIcon} aria-hidden="true">
               🃏
             </div>
@@ -210,7 +193,7 @@ export default function HomePage() {
           <div className={styles.sectionHead}>
             <p className={styles.eyebrow}>Why teams love it</p>
             <h2 id="why-heading" className={styles.sectionTitle}>
-              Meetings were never this fun
+              Sprint planning, without the chaos
             </h2>
           </div>
           <div className={styles.featureGrid}>
@@ -224,48 +207,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ------------------------------------------------------ Game catalog */}
-        <section className={styles.catalog} id="games" aria-labelledby="games-heading">
-          <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>Explore Games</p>
-            <h2 id="games-heading" className={styles.sectionTitle}>
-              Something for every meeting
-            </h2>
-            <p className={styles.sectionSub}>Pick a game and start playing with your team.</p>
-          </div>
-          <GameCatalog showCategoryLinks />
-        </section>
-
-        {/* ---------------------------------------------- Play. Score. Compete. */}
-        <section className={styles.podium} aria-labelledby="podium-heading">
-          <div className={styles.sectionHead}>
-            <p className={styles.eyebrow}>Coming soon</p>
-            <h2 id="podium-heading" className={styles.sectionTitle}>
-              🏆 Play. Score. Compete.
-            </h2>
-            <p className={styles.sectionSub}>Earn points across games and see who tops the leaderboard.</p>
-          </div>
-          <div className={styles.podiumBox}>
-            {PODIUM.map((p) => (
-              <div key={p.medal} className={styles.podiumRow}>
-                <span className={styles.podiumMedal} aria-hidden="true">
-                  {p.medal}
-                </span>
-                <span className={styles.podiumName}>{p.name}</span>
-                <span className={styles.podiumBar} style={{ '--fill': `${(p.pts / 420) * 100}%` } as React.CSSProperties} />
-                <span className={styles.podiumPts}>{p.pts} pts</span>
-              </div>
-            ))}
-          </div>
-          <p className={styles.podiumNote}>This is the roadmap, not the game — scoring ships with future games.</p>
-        </section>
-
         {/* ------------------------------------------------------- How it works */}
         <section className={styles.how} id="how-it-works" aria-labelledby="how-heading">
           <div className={styles.sectionHead}>
             <p className={styles.eyebrow}>How it works</p>
             <h2 id="how-heading" className={styles.sectionTitle}>
-              From link to laughs in a minute
+              From link to reveal in a minute
             </h2>
           </div>
           <ol className={styles.steps}>
@@ -284,18 +231,13 @@ export default function HomePage() {
         {/* -------------------------------------------------------------- CTA */}
         <section className={styles.cta} aria-labelledby="cta-heading">
           <h2 id="cta-heading" className={styles.ctaTitle}>
-            Ready to break the ice?
+            Ready to estimate?
           </h2>
-          <p className={styles.ctaSub}>Pick a game, share the link, and see your team light up.</p>
+          <p className={styles.ctaSub}>Create a room, share the link, and see the whole team align.</p>
           <div className={styles.ctaRow}>
-            <a href="#games" className={styles.ctaLink}>
-              <Button variant="gold" size="lg" className={styles.ctaPrimary}>
-                Explore Games
-              </Button>
-            </a>
             <Link href="/create" className={styles.ctaLink}>
-              <Button variant="outline" size="lg" className={styles.ctaPrimary}>
-                Create a Game
+              <Button variant="gold" size="lg" className={styles.ctaPrimary}>
+                Create a Room
               </Button>
             </Link>
           </div>
@@ -305,11 +247,10 @@ export default function HomePage() {
       <footer className={styles.footer}>
         <Wordmark size="sm" />
         <p>
-          Real-time games for teams, retrospectives and icebreakers. No login, no signup — just play. Rooms live in
-          server memory and vanish when everyone leaves.
+          Real-time Planning Poker for agile teams. No login, no signup — just play. Rooms live in server memory and
+          vanish when everyone leaves.
         </p>
         <nav className={styles.footerNav} aria-label="Footer">
-          <Link href="/games">Games</Link>
           <Link href="/create">Planning Poker</Link>
           <Link href="#how-it-works">How it works</Link>
         </nav>

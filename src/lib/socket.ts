@@ -8,7 +8,7 @@ import { io, type Socket } from 'socket.io-client';
  * back.
  *
  * The socket is a module-level singleton on purpose: navigating between rooms
- * and games reuses the same connection, so there is never more than one socket
+ * reuses the same connection, so there is never more than one socket
  * (no duplicate connections, no stale channels). It is only torn down by
  * `closeSocket()` (currently unused by the app) or a page unload.
  */

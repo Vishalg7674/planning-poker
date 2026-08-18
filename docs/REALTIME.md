@@ -187,6 +187,6 @@ handlers call and the unit tests target directly:
 
 The client's job is presentation: it optimistically shows the lock, ticks the
 shared countdown, and renders snapshots. If a client misbehaves, the server
-rejects it — that is why the [socket E2E suite](../scripts/e2e.mjs) asserts
-rejections (`already_voted`, `not_host`, `not_all_voted`, `room_locked`,
-`in_progress`, …) straight from the ack payloads.
+rejects it — the rejection codes (`already_voted`, `not_host`,
+`not_all_voted`, `room_locked`, `in_progress`, …) are returned straight
+from the ack payloads and asserted by `tests/unit/server/room.test.ts`.
